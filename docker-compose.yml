@@ -1,0 +1,45 @@
+version: '3.8' # Specify the Docker Compose file format version
+
+services:
+  web:
+    # Replace 'your-github-username/your-repo-name' with the actual image path from GHCR.
+    # Users will need to update this to their own image after building with GitHub Actions.
+    image: ghcr.io/your-github-username/your-repo-name:latest
+    container_name: dyad-app-web # A friendly name for the container
+
+    # Allows for port change: Maps container port 3000 (where Next.js runs)
+    # to host port 3000. Users can change the host port (e.g., "8080:3000").
+    ports:
+      - "3000:3000"
+
+    # Maps a directory to keep the SQLite DB file (for persistence).
+    # This creates a named volume for persistent data storage,
+    # or you can map a host path (e.g., "./data:/app/data").
+    volumes:
+      - dyad_db_data:/app/data # Maps named volume 'dyad_db_data' to /app/data inside the container
+      # Ensure your DATABASE_URL in .env points to this path, e.g., "file:/app/data/dev.db"
+
+    # Optionally sets environment variables.
+    # These override any ENVs set in the Dockerfile.
+    environment:
+      NODE_ENV: production
+      # Set the DATABASE_URL to reflect the volume mapping
+      DATABASE_URL: "file:/app/data/dev.db" # This path should match where your app expects the DB file
+
+      # External API URLs (matching the ones in next.config.ts)
+      # Users will need to uncomment and set these values
+      # EXTERNAL_API_URL_SERVICE1: "https://api.your-primary-service.com"
+      # EXTERNAL_API_URL_SERVICE2: "https://api.your-payment-gateway.com"
+      # WEATHER_API_URL: "https://api.your-weather-provider.com/v1"
+
+    # Restart policy for the container
+    restart: unless-stopped
+
+    # If you have other services (like a separate database server, which is less common for SQLite),
+    # you would define them here.
+
+# Define the named volumes used by the services
+volumes:
+  dyad_db_data:
+    # Driver can be local (default), or other options like 'azure_file', 'gcp_gcs_fuse' etc.
+    # For local development, 'local' is sufficient.
