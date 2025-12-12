@@ -128,26 +128,51 @@ tr:hover td {
 }
 
 /* Buttons & Inputs */
-.form-control {
-    background: #0f0f15;
+.form-control,
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
+    border-radius: 8px;
     color: white;
-    transition: border-color 0.2s;
 }
 
 .form-control:focus {
     border-color: var(--accent-primary);
+    outline: none;
     box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
+.form-group {
+    margin-bottom: 15px;
+}
+
+.inline-form {
+    display: flex;
+    gap: 10px;
+}
+
 .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    text-decoration: none;
 }
 
 .btn-primary {
-    background: var(--accent-primary);
     background: var(--gradient-primary);
+    color: white;
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
@@ -167,70 +192,15 @@ tr:hover td {
     border-color: var(--text-secondary);
 }
 
-/* Badges */
-.badge {
-    display: inline-block;
-    padding: 0.25em 0.6em;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 99px;
-    text-transform: uppercase;
-}
-
-.badge-active {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-}
-
-.badge-inactive {
-    background: rgba(244, 63, 94, 0.15);
-    color: #fb7185;
-}
-
-.badge-warning {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
-}
-
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 0.9rem;
-    text-decoration: none;
-}
-
-.btn-primary {
-    background: var(--gradient-primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.btn-secondary:hover {
-    border-color: var(--accent-primary);
-}
-
 .btn-outline {
     background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
 
 .btn-ghost {
@@ -243,6 +213,16 @@ tr:hover td {
     color: var(--text-primary);
 }
 
+.btn-success {
+    background: var(--accent-success);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--accent-danger);
+    color: white;
+}
+
 .btn-sm {
     padding: 6px 12px;
     font-size: 0.8rem;
@@ -252,32 +232,19 @@ tr:hover td {
     width: 100%;
 }
 
-/* Forms */
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-control,
-input[type="text"],
-input[type="password"],
-textarea,
-select {
-    width: 100%;
-    padding: 12px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px;
     border-radius: 8px;
-    color: white;
+    transition: all 0.2s;
 }
 
-.form-control:focus {
-    border-color: var(--accent-primary);
-    outline: none;
-}
-
-.inline-form {
-    display: flex;
-    gap: 10px;
+.icon-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* File Upload Area */
@@ -301,24 +268,14 @@ select {
     width: 40px;
     height: 40px;
     color: var(--accent-primary);
-    margin-bottom: 15px;
     display: block;
     margin: 0 auto 10px;
 }
 
-/* Lawyer List */
-.lawyer-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border-color);
-}
-
+/* Badges - Consolidated */
 .badge {
+    display: inline-flex;
+    align-items: center;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
@@ -333,6 +290,98 @@ select {
 .badge-inactive {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-muted);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-warning);
+}
+
+.badge-error,
+.badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--accent-danger);
+}
+
+.badge-outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* Header & Navigation */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4) 0;
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-links a {
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-links a.active {
+    color: var(--accent-primary);
+    background: rgba(139, 92, 246, 0.1);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: var(--space-6) 0;
+    margin-top: var(--space-8);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Lawyer List */
+.lawyer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s;
+}
+
+.lawyer-item:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-card-hover);
 }
 
 /* ==========================================

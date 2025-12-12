@@ -170,19 +170,6 @@ function openReviewModal(itemId) {
     const data = item.analysisData;
     const candidates = item.candidates || [];
 
-    let suggestionsHtml = '';
-    if (candidates.length > 0) {
-        suggestionsHtml = `
-            <div style="margin-top:10px; margin-bottom:15px; background:rgba(6, 182, 212, 0.1); border:1px solid rgba(6, 182, 212, 0.3); border-radius:8px; padding:10px;">
-                <h4 style="font-size:0.8rem; color:var(--accent-secondary); margin-bottom:8px; display:flex; align-items:center; gap:5px;"><i data-lucide="sparkles"></i> Benzer Dosyalar</h4>
-                ${candidates.map(c => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; margin-bottom:5px;">
-                        <div><div style="font-weight:600; font-size:0.9rem;">${c.registration_number}</div><div style="font-size:0.75rem; opacity:0.8;">${c.court_name} | ${c.court_case_number}</div></div>
-                        <button onclick="linkToSpecificCase('${c.id}', '${c.registration_number}')" class="btn btn-sm btn-secondary">Bağla</button>
-                    </div>`).join('')}
-            </div>`;
-    }
-
     const content = `
         <div class="review-grid">
             <div class="review-section">
@@ -201,17 +188,18 @@ function openReviewModal(itemId) {
         </div>
         <div class="review-summary"><label>Özet</label><textarea id="review-summary" class="form-control" rows="2">${data.summary || data.subject || ''}</textarea></div>
         <div class="review-manual-link mt-4" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-            <div style="margin-top:10px; margin-bottom:15px; background:rgba(6, 182, 212, 0.1); border:1px solid rgba(6, 182, 212, 0.3); border-radius:8px; padding:10px; display:${candidates.length > 0 ? 'block' : 'none'};">
+            ${candidates.length > 0 ? `
+            <div style="margin-bottom:15px; background:rgba(6, 182, 212, 0.1); border:1px solid rgba(6, 182, 212, 0.3); border-radius:8px; padding:10px;">
                 <h4 style="font-size:0.8rem; color:var(--accent-secondary); margin-bottom:8px; display:flex; align-items:center; gap:5px;"><i data-lucide="sparkles"></i> Benzer Dosyalar</h4>
                 ${candidates.map(c => `
                     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; margin-bottom:5px;">
                         <div>
-                            <div style="font-weight:600; font-size:0.9rem; color:#fff;">${c.registration_number || 'No Info'}</div>
-                            <div style="font-size:0.75rem; opacity:0.8; color:#ccc;">${c.court_name || ''} | ${c.court_case_number || ''}</div>
+                            <div style="font-weight:600; font-size:0.9rem; color:#fff;">${escapeHtml(c.registration_number || 'N/A')}</div>
+                            <div style="font-size:0.75rem; opacity:0.8; color:#ccc;">${escapeHtml(c.court_name || '')} | ${escapeHtml(c.court_case_number || '')}</div>
                         </div>
-                        <button onclick="linkToSpecificCase('${c.id}', '${c.registration_number}')" class="btn btn-sm btn-secondary" style="font-size:0.7rem;">Bağla</button>
+                        <button onclick="linkToSpecificCase('${c.id}', '${escapeHtml(c.registration_number)}')" class="btn btn-sm btn-secondary" style="font-size:0.7rem;">Bağla</button>
                     </div>`).join('')}
-            </div>
+            </div>` : ''}
             <div class="flex gap-2" style="display:flex; gap:10px; margin-top:5px;">
                 <input type="text" id="manual-case-id" placeholder="Manuel Dosya No (2024/0001)" class="form-control">
                 <button onclick="linkToExistingCase()" class="btn btn-secondary">Bağla</button>
