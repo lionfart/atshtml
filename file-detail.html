@@ -86,14 +86,42 @@
                         <div class="tab-content active" id="tab-details">
                             <div class="card-content">
                                 <form id="file-details-form">
-                                    <div class="form-group">
-                                        <label for="edit-plaintiff">Davacı</label>
-                                        <input type="text" id="edit-plaintiff" required>
+                                    <div class="grid-2-col"
+                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                        <div class="form-group">
+                                            <label for="edit-plaintiff">Davacı</label>
+                                            <input type="text" id="edit-plaintiff" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-defendant">Davalı</label>
+                                            <input type="text" id="edit-defendant">
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="edit-reg-number">Dosya No</label>
-                                        <input type="text" id="edit-reg-number">
+
+                                    <div class="grid-2-col"
+                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                        <div class="form-group">
+                                            <label for="edit-court">Mahkeme</label>
+                                            <input type="text" id="edit-court">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-amount">Dava Değeri</label>
+                                            <input type="text" id="edit-amount">
+                                        </div>
                                     </div>
+
+                                    <div class="grid-2-col"
+                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                        <div class="form-group">
+                                            <label for="edit-reg-number">Esas No</label>
+                                            <input type="text" id="edit-reg-number">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-decision-number">Karar No</label>
+                                            <input type="text" id="edit-decision-number" placeholder="Örn: 2024/55 K.">
+                                        </div>
+                                    </div>
+
                                     <div class="form-group">
                                         <label for="edit-subject">Dava Konusu</label>
                                         <textarea id="edit-subject" rows="4" style="resize: vertical;"></textarea>

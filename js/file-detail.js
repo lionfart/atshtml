@@ -48,7 +48,12 @@ async function loadFileDetails() {
 
         // Update form fields
         document.getElementById('edit-plaintiff').value = currentFile.plaintiff || '';
-        document.getElementById('edit-reg-number').value = currentFile.registration_number || '';
+        document.getElementById('edit-defendant').value = currentFile.defendant || '';
+        document.getElementById('edit-court').value = currentFile.court_name || '';
+        document.getElementById('edit-amount').value = currentFile.claim_amount || '';
+        document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
+        document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
+        document.getElementById('edit-subject').value = currentFile.subject || '';
         document.getElementById('edit-subject').value = currentFile.subject || '';
 
         // Update status card
@@ -63,6 +68,54 @@ async function loadFileDetails() {
         console.error('Failed to load file details:', error);
         showToast('Dosya yüklenemedi: ' + error.message, 'error');
     }
+}
+
+// ... status card ...
+
+// Setup Form Listener
+function setupDetailsForm() {
+    const form = document.getElementById('file-details-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('save-details-btn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Kaydediliyor...';
+
+        try {
+            const updates = {
+                plaintiff: document.getElementById('edit-plaintiff').value,
+                defendant: document.getElementById('edit-defendant').value,
+                court_name: document.getElementById('edit-court').value,
+                claim_amount: document.getElementById('edit-amount').value,
+                court_case_number: document.getElementById('edit-reg-number').value,
+                // Also update registration number to match if user edited it
+                registration_number: document.getElementById('edit-reg-number').value,
+                court_decision_number: document.getElementById('edit-decision-number').value,
+                subject: document.getElementById('edit-subject').value
+            };
+
+            const { error } = await supabase
+                .from('file_cases')
+                .update(updates)
+                .eq('id', fileId);
+
+            if (error) throw error;
+
+            showToast('Değişiklikler kaydedildi.', 'success');
+            // Reload to refresh header etc
+            loadFileDetails();
+
+        } catch (error) {
+            console.error('Save error:', error);
+            showToast('Hata: ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
 }
 
 function updateStatusCard(file) {
@@ -253,6 +306,11 @@ async function handleSaveDetails(e) {
     try {
         const updates = {
             plaintiff: document.getElementById('edit-plaintiff').value.trim(),
+            defendant: document.getElementById('edit-defendant').value.trim(),
+            court_name: document.getElementById('edit-court').value.trim(),
+            claim_amount: document.getElementById('edit-amount').value.trim(),
+            court_case_number: document.getElementById('edit-reg-number').value.trim(),
+            court_decision_number: document.getElementById('edit-decision-number').value.trim(),
             registration_number: document.getElementById('edit-reg-number').value.trim(),
             subject: document.getElementById('edit-subject').value.trim()
         };
