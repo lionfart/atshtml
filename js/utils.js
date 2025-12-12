@@ -190,6 +190,54 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Header & AI Model Logic
+function initHeader() {
+    // Model Selector
+    const select = document.getElementById('header-model-select');
+    if (select) {
+        // defined in config.js
+        const models = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG.geminiModels : ['gemini-1.5-flash'];
+
+        select.innerHTML = '';
+        models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model;
+            option.text = model;
+            select.appendChild(option);
+        });
+
+        // Load saved
+        const saved = localStorage.getItem('preferredGeminiModel');
+        if (saved && models.includes(saved)) select.value = saved;
+
+        // Listen change
+        select.addEventListener('change', () => {
+            localStorage.setItem('preferredGeminiModel', select.value);
+            showToast(`Model değişti: ${select.value}`, 'info');
+        });
+    }
+
+    // Queue Count (if exists)
+    updateHeaderQueueCount();
+}
+
+function updateHeaderQueueCount() {
+    const el = document.getElementById('queue-count');
+    if (!el) return;
+    const saved = localStorage.getItem('adalet_upload_queue');
+    if (saved) {
+        try {
+            const q = JSON.parse(saved);
+            const count = q.filter(i => i.status === 'PROCESSING' || i.status === 'REVIEW_REQUIRED').length;
+            el.textContent = count;
+            if (count > 0) el.classList.add('badge-error');
+        } catch (e) { }
+    }
+}
+
+// Auto-run on load
+document.addEventListener('DOMContentLoaded', initHeader);
+
 // Generate UUID
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -198,3 +246,4 @@ function generateUUID() {
         return v.toString(16);
     });
 }
+// End of utils.js

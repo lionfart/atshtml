@@ -76,13 +76,24 @@
         <!-- Header -->
         <header class="header mb-6">
             <div class="header-left">
-                <a href="index.html" class="btn btn-outline"><i data-lucide="arrow-left"></i> Ana Sayfa</a>
-                <h1 class="ml-4">Avukat Yönetimi</h1>
+                <div style="font-weight:800; font-size:1.2rem; margin-right:20px; color:var(--accent-primary);">⚖️
+                    Adalet Takip</div>
+                <nav class="nav-links">
+                    <a href="index.html">Evrak Yükle</a>
+                    <a href="files.html">Dosya Listesi</a>
+                    <a href="lawyers.html" class="active">Avukat Yönetimi</a>
+                </nav>
             </div>
-            <button class="btn btn-primary"
-                onclick="document.getElementById('add-lawyer-modal').classList.add('active')">
-                <i data-lucide="user-plus"></i> Yeni Avukat
-            </button>
+            <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                <select id="header-model-select" class="form-control"
+                    style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
+                    <!-- Populated by JS -->
+                </select>
+                <button class="btn btn-primary"
+                    onclick="document.getElementById('add-lawyer-modal').classList.add('active')">
+                    <i data-lucide="user-plus"></i> Yeni Avukat
+                </button>
+            </div>
         </header>
 
         <div class="layout-grid">

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupRealtimeLawyers(loadLawyers);
     setupEventListeners();
     loadQueueFromStorage();
-    populateModelSelect();
+    // populateModelSelect(); // handled in utils.js
 });
 
 // ... (EventListeners, Setup, Queue Storage logic SAME) ... //
@@ -29,21 +29,9 @@ function setupEventListeners() {
     if (addLawyerForm) addLawyerForm.addEventListener('submit', handleAddLawyer);
 }
 
-function populatedData() {
-    const select = document.getElementById('gemini-model-select');
-    if (select) {
-        select.innerHTML = '';
-        APP_CONFIG.geminiModels.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model;
-            option.text = model + (model.includes('exp') ? ' (Experimental)' : '');
-            select.appendChild(option);
-        });
-        const savedModel = localStorage.getItem('preferredGeminiModel');
-        if (savedModel) select.value = savedModel;
-    }
-}
-function populateModelSelect() { populatedData(); }
+// Model selector is now handled in utils.js globally
+// function populateModelSelect() { ... } removed
+
 
 function loadQueueFromStorage() {
     const saved = localStorage.getItem('adalet_upload_queue');

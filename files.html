@@ -30,15 +30,21 @@
     <!-- Main App -->
     <main class="container">
         <!-- Header -->
-        <header class="header">
+        <header class="header mb-6">
             <div class="header-left">
-                <a href="index.html" class="btn btn-outline" style="margin-right: var(--space-4);">
-                    <i data-lucide="arrow-left"></i>
-                </a>
-                <div class="logo-text">
-                    <h1>Dosya Arşivi</h1>
-                    <p>Tüm dava dosyalarını görüntüleyin ve yönetin</p>
-                </div>
+                <div style="font-weight:800; font-size:1.2rem; margin-right:20px; color:var(--accent-primary);">⚖️
+                    Adalet Takip</div>
+                <nav class="nav-links">
+                    <a href="index.html">Evrak Yükle</a>
+                    <a href="files.html" class="active">Dosya Listesi</a>
+                    <a href="lawyers.html">Avukat Yönetimi</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <select id="header-model-select" class="form-control"
+                    style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
+                    <!-- Populated by JS -->
+                </select>
             </div>
         </header>
 

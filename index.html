@@ -70,23 +70,28 @@
 
     <!-- MAIN APP -->
     <main class="container">
-        <header class="header">
+        <header class="header mb-6">
             <div class="header-left">
-                <div class="logo">
-                    <div class="logo-icon"><i data-lucide="scale"></i></div>
-                    <div class="logo-text">
-                        <h1>Adalet Takip</h1>
-                        <p>Akıllı Hukuk Asistanı</p>
-                    </div>
-                </div>
+                <div style="font-weight:800; font-size:1.2rem; margin-right:20px; color:var(--accent-primary);">⚖️
+                    Adalet Takip</div>
+                <nav class="nav-links">
+                    <a href="index.html" class="active">Evrak Yükle</a>
+                    <a href="files.html">Dosya Listesi</a>
+                    <a href="lawyers.html">Avukat Yönetimi</a>
+                </nav>
             </div>
-            <div class="header-right">
-                <!-- NEW MENUS -->
-                <button class="btn btn-secondary" onclick="toggleUploadManager()" title="İşlem Kuyruğu">
-                    <i data-lucide="activity"></i> Kuyruk
+            <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                <select id="header-model-select" class="form-control"
+                    style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
+                    <!-- Populated by JS -->
+                </select>
+                <button class="btn btn-outline" onclick="toggleUploadManager()">
+                    <i data-lucide="layers"></i> <span id="queue-count" class="badge badge-active"
+                        style="margin-left:5px; font-size:0.75rem;">0</span>
                 </button>
-                <a href="files.html" class="btn btn-secondary"><i data-lucide="folder"></i> Arşiv</a>
-                <button class="btn btn-outline" onclick="openSettingsModal()"><i data-lucide="settings"></i></button>
+                <button class="icon-btn" onclick="openSettingsModal()">
+                    <i data-lucide="settings"></i>
+                </button>
             </div>
         </header>
 
