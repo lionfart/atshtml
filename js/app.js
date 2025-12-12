@@ -191,14 +191,26 @@ function openReviewModal(itemId) {
             ${candidates.length > 0 ? `
             <div style="margin-bottom:15px; background:rgba(6, 182, 212, 0.1); border:1px solid rgba(6, 182, 212, 0.3); border-radius:8px; padding:10px;">
                 <h4 style="font-size:0.8rem; color:var(--accent-secondary); margin-bottom:8px; display:flex; align-items:center; gap:5px;"><i data-lucide="sparkles"></i> Benzer Dosyalar</h4>
-                ${candidates.map(c => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; margin-bottom:5px;">
-                        <div>
-                            <div style="font-weight:600; font-size:0.9rem; color:#fff;">${escapeHtml(c.registration_number || 'N/A')}</div>
+                ${candidates.map(c => {
+        const score = c.matchScore || 0;
+        const isStrong = score >= 5;
+        const reason = c.matchReason || 'Benzerlik';
+
+        return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px; margin-bottom:5px; border-left: 3px solid ${isStrong ? 'var(--accent-success)' : 'var(--accent-warning)'};">
+                        <div style="flex:1;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="font-weight:600; font-size:0.9rem; color:#fff;">${escapeHtml(c.registration_number || 'Numara Yok')}</div>
+                                ${isStrong ? '<span class="badge badge-active" style="font-size:0.6rem; padding:2px 6px;">Yüksek Eşleşme</span>' : ''}
+                            </div>
                             <div style="font-size:0.75rem; opacity:0.8; color:#ccc;">${escapeHtml(c.court_name || '')} | ${escapeHtml(c.court_case_number || '')}</div>
+                            <div style="font-size:0.7rem; color:var(--accent-secondary); margin-top:2px;">Detect: ${escapeHtml(reason)}</div>
                         </div>
-                        <button onclick="linkToSpecificCase('${c.id}', '${escapeHtml(c.registration_number)}')" class="btn btn-sm btn-secondary" style="font-size:0.7rem;">Bağla</button>
-                    </div>`).join('')}
+                        <button onclick="linkToSpecificCase('${c.id}', '${escapeHtml(c.registration_number)}')" class="btn btn-sm btn-secondary" style="font-size:0.7rem; white-space:nowrap;">
+                            <i data-lucide="link" style="width:12px; height:12px; margin-right:4px;"></i> Bağla
+                        </button>
+                    </div>`;
+    }).join('')}
             </div>` : ''}
             <div class="flex gap-2" style="display:flex; gap:10px; margin-top:5px;">
                 <input type="text" id="manual-case-id" placeholder="Manuel Dosya No (2024/0001)" class="form-control">

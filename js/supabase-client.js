@@ -40,91 +40,90 @@ async function getFileCaseById(id) {
 
 async function findMatchingCase(analysisResult) {
     /* 
-       STRICT AUTO-MATCH RULES:
-       1. Esas No (court_case_number) MUST match.
-       2. Court Name (court_name) MUST match (fuzzy).
-       3. Plaintiff (plaintiff) MUST match (fuzzy).
+       STRICT AUTO-MATCH RULES v2:
+       1. Esas No (court_case_number) MUST match exactly for High Confidence.
+       2. If Esas matches, suggest it strongly and hide weak fuzzy matches.
+       3. If no Esas match, use strict fuzzy logic.
     */
 
-    let exactMatch = null;
     let candidates = [];
-
-    // Clean Input
     const searchEsas = (analysisResult.court_case_number || '').trim();
-    if (searchEsas.length < 3 || searchEsas.toLowerCase().includes('belirsiz')) {
-        // No Esas No -> Only Fuzzy Candidates based on Parties
-        if (analysisResult.plaintiff && analysisResult.plaintiff.length > 3) {
-            const searchName = analysisResult.plaintiff.split(' ')[0].trim();
-            const { data } = await supabase.from('file_cases').select(`*, lawyers(name)`).ilike('plaintiff', `%${searchName}%`).limit(5);
-            return { matchType: null, case: null, candidates: data || [] };
-        }
-        return { matchType: null, case: null, candidates: [] };
-    }
 
-    // 1. Search by Esas Number (Base Filter)
-    const cleanEsas = searchEsas.replace(/\s/g, '').replace(/\./g, ''); // 2024/123
-    const { data: potentialMatches } = await supabase.from('file_cases')
-        .select(`*, lawyers(name)`)
-        // Search broadly first
-        .or(`court_case_number.ilike.%${searchEsas.split('/')[0]}%,court_decision_number.ilike.%${searchEsas}%`)
-        .order('created_at', { ascending: false });
+    // 1. Search by Esas Number (Primary)
+    if (searchEsas.length >= 3 && !searchEsas.toLowerCase().includes('belirsiz')) {
+        const cleanEsas = searchEsas.replace(/\s/g, '').replace(/\./g, '');
 
-    if (potentialMatches && potentialMatches.length > 0) {
+        // Split year/number if possible (e.g. 2024/123)
+        let exactQuery = `court_case_number.ilike.%${searchEsas}%`;
 
-        for (const candidate of potentialMatches) {
-            let score = 0;
-            const cEsas = (candidate.court_case_number || '').replace(/\s/g, '').replace(/\./g, '');
-            const cCourt = (candidate.court_name || '').toLowerCase();
-            const cPlaintiff = (candidate.plaintiff || '').toLowerCase();
+        const { data: potentialMatches } = await supabase.from('file_cases')
+            .select(`*, lawyers(name)`)
+            .or(`court_case_number.ilike.%${searchEsas.split('/')[0]}%,court_decision_number.ilike.%${searchEsas}%`)
+            .order('created_at', { ascending: false });
 
-            const inEsas = analysisResult.court_case_number.replace(/\s/g, '').replace(/\./g, '');
-            const inCourt = (analysisResult.court_name || '').toLowerCase();
-            const inPlaintiff = (analysisResult.plaintiff || '').toLowerCase();
+        if (potentialMatches && potentialMatches.length > 0) {
+            for (const candidate of potentialMatches) {
+                let reasons = [];
+                let score = 0;
 
-            // CHECK 1: ESAS NO
-            if (cEsas === inEsas || cEsas.includes(inEsas) || inEsas.includes(cEsas)) {
-                score += 3;
-            }
+                const cEsas = (candidate.court_case_number || '').replace(/\s/g, '').replace(/\./g, '');
+                const cCourt = (candidate.court_name || '').toLowerCase();
+                const inCourt = (analysisResult.court_name || '').toLowerCase();
+                const inEsasSimple = searchEsas.replace(/\s/g, '').replace(/\./g, '');
 
-            // CHECK 2: COURT NAME
-            if (inCourt.length > 3 && cCourt.length > 3) {
-                if (cCourt.includes(inCourt) || inCourt.includes(cCourt)) score += 2;
-                // Simple word intersection
-                const commonWords = inCourt.split(' ').filter(w => w.length > 3 && cCourt.includes(w));
-                if (commonWords.length >= 2) score += 2;
-            }
+                // CHECK 1: ESAS NO
+                if (cEsas === inEsasSimple) {
+                    score += 10;
+                    reasons.push("Esas No Tam Eşleşme");
+                } else if (cEsas.includes(inEsasSimple) || inEsasSimple.includes(cEsas)) {
+                    score += 5;
+                    reasons.push("Esas No Benzerliği");
+                }
 
-            // CHECK 3: PLAINTIFF
-            if (inPlaintiff.length > 3 && cPlaintiff.length > 3) {
-                if (cPlaintiff.includes(inPlaintiff) || inPlaintiff.includes(cPlaintiff)) score += 2;
-            }
+                // CHECK 2: COURT NAME
+                if (inCourt.length > 3 && cCourt.length > 3) {
+                    if (cCourt.includes(inCourt) || inCourt.includes(cCourt)) {
+                        score += 3;
+                        reasons.push("Mahkeme Adı Eşleşmesi");
+                    }
+                }
 
-            // EVALUATE
-            // Total max score approx 7. 
-            // We need Esas (3) + Court (2) + Plaintiff (2) = 7 for FULL AUTO.
-            // Or at least Esas (3) + Court (2) = 5.
-
-            if (score >= 6) {
-                // Very High Confidence -> Auto Match
-                return { matchType: 'STRICT_FULL', case: candidate, candidates: [] };
-            }
-
-            if (score >= 3) {
-                // Good candidate
-                candidates.push(candidate);
+                if (score >= 5) {
+                    candidates.push({ ...candidate, matchScore: score, matchReason: reasons.join(', ') });
+                }
             }
         }
     }
 
-    // Fallback: Check strictly by parties if Esas didn't yield result
-    if (analysisResult.plaintiff && candidates.length === 0) {
+    // If we have a very strong Esas match, don't look further
+    const strongMatch = candidates.find(c => c.matchScore >= 10);
+    if (strongMatch) {
+        return { matchType: 'STRICT_FULL', case: strongMatch, candidates: [strongMatch] };
+    }
+
+    // 2. Fallback: Fuzzy Search by Parties (ONLY if no strong Esas candidates found)
+    if (candidates.length === 0 && analysisResult.plaintiff && analysisResult.plaintiff.length > 4) {
         const searchName = analysisResult.plaintiff.split(' ')[0].trim();
-        const { data } = await supabase.from('file_cases').select(`*, lawyers(name)`).ilike('plaintiff', `%${searchName}%`).limit(5);
-        if (data) candidates = [...candidates, ...data];
+        const { data } = await supabase.from('file_cases')
+            .select(`*, lawyers(name)`)
+            .ilike('plaintiff', `%${searchName}%`)
+            .limit(5);
+
+        if (data) {
+            data.forEach(c => {
+                const inPlaintiff = (analysisResult.plaintiff || '').toLowerCase();
+                const cPlaintiff = (c.plaintiff || '').toLowerCase();
+                if (cPlaintiff.includes(inPlaintiff) || inPlaintiff.includes(cPlaintiff)) {
+                    candidates.push({ ...c, matchScore: 3, matchReason: "Davacı Adı Benzerliği" });
+                }
+            });
+        }
     }
 
     // Remove duplicates
     candidates = candidates.filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i);
+    // Sort by score
+    candidates.sort((a, b) => b.matchScore - a.matchScore);
 
     return { matchType: null, case: null, candidates: candidates };
 }
@@ -262,8 +261,15 @@ function setupRealtimeLawyers(cb) { supabase.channel('public:lawyers').on('postg
 async function getLawyers() { const { data } = await supabase.from('lawyers').select('*').order('name'); return data || []; }
 async function createLawyer(name, username, password) { /*...*/ }
 // Lawyer Status
-async function updateLawyerStatus(id, newStatus) {
-    const { error } = await supabase.from('lawyers').update({ status: newStatus }).eq('id', id);
+// Lawyer Status
+async function updateLawyerStatus(id, newStatus, returnDate = null) {
+    const updates = { status: newStatus };
+    if (newStatus === 'ON_LEAVE' && returnDate) {
+        updates.leave_return_date = returnDate;
+    } else {
+        updates.leave_return_date = null;
+    }
+    const { error } = await supabase.from('lawyers').update(updates).eq('id', id);
     if (error) throw error;
 }
 

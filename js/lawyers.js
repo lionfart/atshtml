@@ -20,23 +20,27 @@ if (document.readyState === 'loading') {
 }
 
 // 1. Fetch & Render Sidebar
+// 1. Fetch & Render Sidebar
 async function fetchLawyers() {
     const list = document.getElementById('lawyers-sidebar');
     try {
         lawyers = await getLawyers();
         if (lawyers.length === 0) list.innerHTML = '<div class="p-4 text-center">Kayıtlı avukat yok.</div>';
         else {
-            list.innerHTML = lawyers.map(l => `
+            list.innerHTML = lawyers.map(l => {
+                let statusBadge = l.status === 'ACTIVE'
+                    ? `<span class="badge badge-active" style="font-size:0.7em;">Aktif</span>`
+                    : `<span class="badge badge-inactive" style="font-size:0.7em;">İzinde</span>`;
+
+                return `
                 <div class="lawyer-list-item ${selectedLawyerId === l.id ? 'active' : ''}" onclick="selectLawyer('${l.id}')">
                     <div>
                         <div class="font-medium">${escapeHtml(l.name)}</div>
                         <div class="text-xs text-muted">@${escapeHtml(l.username)}</div>
                     </div>
-                    <span class="badge ${l.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'}" style="font-size:0.7em;">
-                        ${l.status === 'ACTIVE' ? 'Aktif' : 'İzinde'}
-                    </span>
+                    ${statusBadge}
                 </div>
-            `).join('');
+            `}).join('');
         }
     } catch (e) {
         console.error(e);
@@ -55,7 +59,12 @@ async function selectLawyer(id) {
     document.getElementById('lawyer-content').classList.remove('hidden');
 
     document.getElementById('selected-lawyer-name').textContent = l.name;
-    const statusText = l.status === 'ACTIVE' ? '🟢 Şu an Aktif (Dosya Alıyor)' : '🔴 İzinde / Pasif (Dosya Almıyor)';
+
+    let statusText = l.status === 'ACTIVE' ? '🟢 Şu an Aktif (Dosya Alıyor)' : '🔴 İzinde (Dosya Almıyor)';
+    if (l.status !== 'ACTIVE' && l.leave_return_date) {
+        statusText += ` — Dönüş: ${formatDate(l.leave_return_date)}`;
+    }
+
     document.getElementById('selected-lawyer-status').textContent = statusText;
     document.getElementById('lbl-status-action').textContent = l.status === 'ACTIVE' ? 'İzne Çıkar' : 'Aktif Et';
 
@@ -147,21 +156,44 @@ function setupFilters() {
 }
 
 // 4. Actions
+// 4. Actions
 async function toggleLawyerStatus() {
     if (!selectedLawyerId) return;
     const l = lawyers.find(x => x.id === selectedLawyerId);
-    const newStatus = l.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 
-    if (!confirm(`Avukatın durumunu ${newStatus === 'ACTIVE' ? 'AKTİF' : 'PASİF'} yapmak istiyor musunuz?`)) return;
+    // Toggle Logic
+    let newStatus = 'ACTIVE';
+    let returnDate = null;
+
+    if (l.status === 'ACTIVE') {
+        newStatus = 'ON_LEAVE';
+        // Ask for return date
+        const dateInput = prompt("Avukat izne çıkıyor. Dönüş tarihi giriniz (YYYY-AA-GG) veya boş bırakınız (Süresiz):", "");
+        if (dateInput === null) return; // Cancelled
+
+        if (dateInput.trim() !== '') {
+            // Validate date format YYYY-MM-DD
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+                showToast('Geçersiz tarih formatı! YYYY-AA-GG şeklinde giriniz.', 'error');
+                return;
+            }
+            returnDate = dateInput;
+        }
+    } else {
+        newStatus = 'ACTIVE';
+        if (!confirm("Avukatı tekrar AKTİF (Dosya Alabilir) yapmak istiyor musunuz?")) return;
+    }
 
     try {
-        await updateLawyerStatus(selectedLawyerId, newStatus);
-        showToast('Durum güncellendi.', 'success');
+        await updateLawyerStatus(selectedLawyerId, newStatus, returnDate);
+        showToast(`Durum güncellendi: ${newStatus === 'ACTIVE' ? 'Aktif' : 'İzinde'}`, 'success');
+
         // Refresh
         await fetchLawyers(); // Update sidebar
         selectLawyer(selectedLawyerId); // Update header
     } catch (e) {
-        showToast('Güncellenemedi.', 'error');
+        console.error(e);
+        showToast('Güncellenemedi: ' + e.message, 'error');
     }
 }
 
