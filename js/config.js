@@ -30,12 +30,12 @@ const APP_CONFIG = {
     defaultBurstLimit: 2,
 
     // Gemini Models (Fallback Priority List)
+    // Updated with latest experimental models as request
     geminiModels: [
-        'gemini-1.5-flash-latest',
+        'gemini-2.0-flash-exp',
         'gemini-1.5-flash',
-        'gemini-1.5-pro-latest',
+        'gemini-1.5-flash-8b',
         'gemini-1.5-pro',
-        'gemini-pro',
         'gemini-1.0-pro'
     ],
 
