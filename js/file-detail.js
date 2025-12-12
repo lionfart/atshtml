@@ -153,9 +153,10 @@ async function loadNotes() {
     const container = document.getElementById('notes-list');
 
     try {
-        const notes = await getNotes(fileId);
+        const { data: notes, error } = await getNotes(fileId);
+        if (error) throw error;
 
-        if (notes.length === 0) {
+        if (!notes || notes.length === 0) {
             container.innerHTML = `
                 <div class="empty-state" style="padding: var(--space-4);">
                     <p>Henüz not yok.</p>

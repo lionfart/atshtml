@@ -31,6 +31,14 @@
                 <input type="password" id="gemini-api-key" placeholder="AIzaSy...">
             </div>
             <div class="form-group">
+                <label>Tercih Edilen AI Modeli</label>
+                <select id="gemini-model-select" class="form-control">
+                    <!-- Options populated by JS -->
+                </select>
+                <p style="font-size:0.7em; color:#666; margin-top:5px;">Seçilen model çalışmazsa otomatik olarak
+                    diğerleri denenecektir.</p>
+            </div>
+            <div class="form-group">
                 <label>Dağıtım Limiti (Catch-up)</label>
                 <input type="number" id="burst-limit" value="2" min="1" max="10">
             </div>
