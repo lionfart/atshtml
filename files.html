@@ -19,6 +19,9 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- SortableJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
     <style>
@@ -41,11 +44,17 @@
             border-bottom: 2px solid var(--border-color);
             user-select: none;
             white-space: nowrap;
-            cursor: pointer;
+            /* Allow drag but keep cursor correct */
         }
 
-        .advanced-table th:hover {
-            color: var(--accent-primary);
+        .advanced-table th.sortable-ghost {
+            opacity: 0.4;
+            background-color: var(--bg-tertiary);
+        }
+
+        .advanced-table th.sortable-drag {
+            background-color: var(--bg-card);
+            opacity: 1;
         }
 
         .advanced-table th .resize-handle {
@@ -53,12 +62,19 @@
             right: 0;
             top: 0;
             bottom: 0;
-            width: 5px;
+            width: 8px;
+            /* Wider hit area */
             cursor: col-resize;
             background: transparent;
+            z-index: 10;
         }
 
-        .advanced-table th .resize-handle:hover {
+        .advanced-table th:hover .resize-handle {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .advanced-table th .resize-handle:hover,
+        .advanced-table th .resize-handle.active {
             background: var(--accent-primary);
         }
 
@@ -198,17 +214,18 @@
             <div class="table-container" style="padding: 0;">
                 <table class="advanced-table" id="files-table">
                     <thead>
-                        <tr>
-                            <th class="col-no">Dosya No <i data-lucide="chevrons-up-down"
-                                    style="width:12px; opacity:0.5"></i></th>
-                            <th class="col-parties">Taraflar</th>
-                            <th class="col-subject">Konu</th>
-                            <th class="col-amount">Miktar</th>
-                            <th class="col-status">Durum</th>
-                            <th class="col-decision">Karar</th>
-                            <th class="col-doc">Son Evrak</th>
-                            <th class="col-lawyer">Avukat</th>
-                            <th class="col-date">Tarih</th>
+                        <tr id="table-headers">
+                            <th class="col-no" data-id="col-no">Dosya No <span class="resize-handle"></span></th>
+                            <th class="col-parties" data-id="col-parties">Taraflar <span class="resize-handle"></span>
+                            </th>
+                            <th class="col-subject" data-id="col-subject">Konu <span class="resize-handle"></span></th>
+                            <th class="col-amount" data-id="col-amount">Miktar <span class="resize-handle"></span></th>
+                            <th class="col-status" data-id="col-status">Durum <span class="resize-handle"></span></th>
+                            <th class="col-decision" data-id="col-decision">Karar <span class="resize-handle"></span>
+                            </th>
+                            <th class="col-doc" data-id="col-doc">Son Evrak <span class="resize-handle"></span></th>
+                            <th class="col-lawyer" data-id="col-lawyer">Avukat <span class="resize-handle"></span></th>
+                            <th class="col-date" data-id="col-date">Tarih <span class="resize-handle"></span></th>
                         </tr>
                     </thead>
                     <tbody id="files-table-body">
