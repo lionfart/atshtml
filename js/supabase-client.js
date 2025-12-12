@@ -93,18 +93,57 @@ async function getFileCaseById(id) {
 }
 
 async function findMatchingCase(analysisResult) {
-    if (analysisResult.court_case_number && analysisResult.court_case_number.length > 5 && !analysisResult.court_case_number.toLowerCase().includes('belirsiz')) {
-        const { data } = await supabase.from('file_cases').select(`*, lawyers(name)`).ilike('court_case_number', analysisResult.court_case_number.trim()).maybeSingle();
-        if (data) return { matchType: 'ESAS_NO', case: data };
-    }
-    if (analysisResult.plaintiff && analysisResult.plaintiff.length > 3 && !analysisResult.plaintiff.toLowerCase().includes('belirsiz')) {
-        const { data } = await supabase.from('file_cases').select(`*, lawyers(name)`).ilike('plaintiff', `%${analysisResult.plaintiff.split(' ')[0]}%`).limit(5);
+    let exactMatch = null;
+    let candidates = [];
+
+    // 1. Exact Match on Esas Number (Highly Reliable)
+    if (analysisResult.court_case_number && analysisResult.court_case_number.length > 3 && !analysisResult.court_case_number.toLowerCase().includes('belirsiz')) {
+        // Normalize: remove spaces, dots
+        const cleanEsas = analysisResult.court_case_number.replace(/\s/g, '').replace(/\./g, '');
+
+        // Try exact query first
+        const { data } = await supabase.from('file_cases')
+            .select(`*, lawyers(name)`)
+            .ilike('court_case_number', `%${analysisResult.court_case_number.split('/')[0]}%`) // Search by year part at least to narrow down
+            .order('created_at', { ascending: false });
+
         if (data && data.length > 0) {
-            const exactMatch = data.find(c => c.plaintiff.toLowerCase().includes(analysisResult.plaintiff.toLowerCase()));
-            if (exactMatch) return { matchType: 'PARTIES', case: exactMatch };
+            // Precise JS filtering
+            exactMatch = data.find(c => {
+                const cEsas = (c.court_case_number || '').replace(/\s/g, '').replace(/\./g, '');
+                return cEsas.includes(cleanEsas) || cleanEsas.includes(cEsas);
+            });
+
+            if (exactMatch) return { matchType: 'ESAS_NO', case: exactMatch, candidates: [] };
         }
     }
-    return null;
+
+    // 2. Fuzzy Match on Parties (Plaintiff/Defendant) for Candidates
+    if (analysisResult.plaintiff && analysisResult.plaintiff.length > 3 && !analysisResult.plaintiff.toLowerCase().includes('belirsiz')) {
+        // Search by first word of plaintiff
+        const searchName = analysisResult.plaintiff.split(' ')[0].trim();
+        const { data } = await supabase.from('file_cases')
+            .select(`*, lawyers(name)`)
+            .or(`plaintiff.ilike.%${searchName}%,defendant.ilike.%${searchName}%`)
+            .limit(5);
+
+        if (data && data.length > 0) {
+            // If plaintiff AND defendant match loosely, it's a very strong candidate (almost exact)
+            const strongCandidate = data.find(c =>
+                (c.plaintiff && c.plaintiff.toLowerCase().includes(analysisResult.plaintiff.toLowerCase())) &&
+                (c.defendant && analysisResult.defendant && c.defendant.toLowerCase().includes(analysisResult.defendant.toLowerCase()))
+            );
+
+            if (strongCandidate) {
+                // Return as exact match if confidence is high
+                return { matchType: 'PARTIES_STRONG', case: strongCandidate, candidates: data };
+            }
+
+            candidates = data;
+        }
+    }
+
+    return { matchType: null, case: null, candidates: candidates };
 }
 
 async function createFileCase(fileData, file = null) {
