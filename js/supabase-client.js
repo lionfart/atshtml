@@ -252,5 +252,39 @@ async function updateLawyerStatus(id, newStatus) {
     if (error) throw error;
 }
 
+// File & Document Management
+async function updateFileCase(id, updates) {
+    const { error } = await supabase.from('file_cases').update(updates).eq('id', id);
+    if (error) throw error;
+}
+
+async function deleteFileCase(id) {
+    // Cascade delete documents first if needed (Supabase usually handles strict FK but storage remains)
+    // For now trust FK cascade on DB
+    const { error } = await supabase.from('file_cases').delete().eq('id', id);
+    if (error) throw error;
+}
+
+async function renameDocument(docId, newName) {
+    const { error } = await supabase.from('documents').update({ name: newName }).eq('id', docId);
+    if (error) throw error;
+}
+
+async function deleteDocument(docId) {
+    // Also delete from storage? Ideally yes.
+    // First get path
+    const { data: doc } = await supabase.from('documents').select('storage_path').eq('id', docId).single();
+    if (doc && doc.storage_path) {
+        await supabase.storage.from(APP_CONFIG.storageBucket).remove([doc.storage_path]);
+    }
+    const { error } = await supabase.from('documents').delete().eq('id', docId);
+    if (error) throw error;
+}
+
 // Re-export needed
-window.getLawyers = getLawyers; window.createLawyer = createLawyer; window.updateLawyerStatus = updateLawyerStatus; window.getFileCases = getFileCases; window.getFileCaseById = getFileCaseById; window.createFileCase = createFileCase; window.uploadDocument = uploadDocument; window.getNotes = getNotes; window.createNote = createNote; window.analyzeWithGemini = analyzeWithGemini; window.performOcrWithGemini = performOcrWithGemini; window.findMatchingCase = findMatchingCase; window.initSupabase = initSupabase; window.setupRealtimeLawyers = setupRealtimeLawyers; window.getSystemSettings = getSystemSettings; window.updateSystemSettings = updateSystemSettings;
+window.getLawyers = getLawyers; window.createLawyer = createLawyer; window.updateLawyerStatus = updateLawyerStatus;
+window.getFileCases = getFileCases; window.getFileCaseById = getFileCaseById; window.createFileCase = createFileCase; window.updateFileCase = updateFileCase; window.deleteFileCase = deleteFileCase;
+window.uploadDocument = uploadDocument; window.renameDocument = renameDocument; window.deleteDocument = deleteDocument;
+window.getNotes = getNotes; window.createNote = createNote;
+window.analyzeWithGemini = analyzeWithGemini; window.performOcrWithGemini = performOcrWithGemini; window.findMatchingCase = findMatchingCase;
+window.initSupabase = initSupabase; window.setupRealtimeLawyers = setupRealtimeLawyers; window.getSystemSettings = getSystemSettings; window.updateSystemSettings = updateSystemSettings;

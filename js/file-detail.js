@@ -24,8 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const supabaseReady = initSupabase();
 
     if (supabaseReady) {
-        await loadFileDetails();
-        await loadNotes();
+        const p1 = loadFileDetails();
+        const p2 = loadNotes();
+        await Promise.allSettled([p1, p2]);
         setupDocumentUpload();
     }
 
