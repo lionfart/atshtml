@@ -6,12 +6,18 @@ let lawyers = [];
 let selectedLawyerId = null;
 let currentFiles = [];
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initPage = async () => {
     initSupabase();
     await fetchLawyers();
     setupFilters();
     lucide.createIcons();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPage);
+} else {
+    initPage();
+}
 
 // 1. Fetch & Render Sidebar
 async function fetchLawyers() {

@@ -9,7 +9,7 @@ let fileId = null;
 // Initialization
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initPage = async () => {
     // Get file ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     fileId = urlParams.get('id');
@@ -32,7 +32,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Setup form handlers
     setupFormHandlers();
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPage);
+} else {
+    initPage();
+}
+
 
 // ==========================================
 // Load File Details
@@ -43,7 +50,8 @@ async function loadFileDetails() {
         currentFile = await getFileCaseById(fileId);
 
         // Update header
-        document.getElementById('file-number').textContent = currentFile.registration_number;
+        const fileNo = currentFile.registration_number || currentFile.court_case_number || 'Numara Yok';
+        document.getElementById('file-number').textContent = fileNo;
         document.getElementById('file-created-date').textContent = 'Oluşturulma: ' + formatDate(currentFile.created_at);
         document.title = currentFile.registration_number + ' - Adalet Takip Sistemi';
 

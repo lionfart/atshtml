@@ -11,14 +11,20 @@ const handleSearchDebounced = debounce(() => {
 // Initialization
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initPage = async () => {
     // Initialize Supabase
     const supabaseReady = initSupabase();
 
     if (supabaseReady) {
         await loadFiles();
     }
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPage);
+} else {
+    initPage();
+}
 
 // ==========================================
 // Load Files
