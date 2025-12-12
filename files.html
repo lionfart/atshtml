@@ -21,6 +21,116 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Advanced Table Styles */
+        .advanced-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .advanced-table th {
+            position: relative;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border-color);
+            user-select: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .advanced-table th:hover {
+            color: var(--accent-primary);
+        }
+
+        .advanced-table th .resize-handle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            cursor: col-resize;
+            background: transparent;
+        }
+
+        .advanced-table th .resize-handle:hover {
+            background: var(--accent-primary);
+        }
+
+        .advanced-table td {
+            padding: 14px 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .advanced-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .advanced-table tr {
+            cursor: pointer;
+        }
+
+        .cell-truncate {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .col-no {
+            min-width: 100px;
+        }
+
+        .col-parties {
+            min-width: 180px;
+        }
+
+        .col-subject {
+            min-width: 150px;
+        }
+
+        .col-amount {
+            min-width: 100px;
+        }
+
+        .col-status {
+            min-width: 100px;
+        }
+
+        .col-decision {
+            min-width: 100px;
+        }
+
+        .col-doc {
+            min-width: 100px;
+        }
+
+        .col-lawyer {
+            min-width: 120px;
+        }
+
+        .col-date {
+            min-width: 100px;
+        }
+
+        .priority-high {
+            color: var(--accent-danger);
+        }
+
+        .priority-medium {
+            color: var(--accent-warning);
+        }
+
+        .priority-low {
+            color: var(--accent-success);
+        }
+    </style>
 </head>
 
 <body>
@@ -43,7 +153,6 @@
             <div class="header-right">
                 <select id="header-model-select" class="form-control"
                     style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
-                    <!-- Populated by JS -->
                 </select>
             </div>
         </header>
@@ -56,11 +165,11 @@
                     <div class="search-input-wrapper" style="flex: 2; min-width: 250px; position:relative;">
                         <i data-lucide="search"
                             style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:18px;"></i>
-                        <input type="text" id="search-input" placeholder="Dosya no, davacı veya konu ara..."
+                        <input type="text" id="search-input" placeholder="Dosya no, davacı, davalı, konu ara..."
                             class="form-control" style="padding-left:40px;" oninput="handleSearchDebounced()">
                     </div>
 
-                    <div style="flex: 1; min-width: 150px;">
+                    <div style="flex: 1; min-width: 130px;">
                         <select id="filter-status" class="form-control" onchange="loadFiles()">
                             <option value="">Tüm Durumlar</option>
                             <option value="OPEN">Açık Dosyalar</option>
@@ -68,54 +177,63 @@
                         </select>
                     </div>
 
-                    <div style="flex: 1; min-width: 150px;">
+                    <div style="flex: 1; min-width: 130px;">
                         <select id="filter-sort" class="form-control" onchange="loadFiles()">
                             <option value="date-desc">En Yeni</option>
                             <option value="date-asc">En Eski</option>
-                            <option value="reg-desc">Dosya No (Azalan)</option>
-                            <option value="reg-asc">Dosya No (Artan)</option>
+                            <option value="amount-desc">Miktar (Azalan)</option>
+                            <option value="reg-desc">Dosya No (Z-A)</option>
                         </select>
                     </div>
+
+                    <button class="btn btn-outline btn-sm" onclick="loadFiles()" title="Yenile">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Files Table Card -->
         <div class="card">
-            <div class="card-content" style="padding: 0;">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 120px;">Dosya No</th>
-                                <th>Davacı</th>
-                                <th class="hide-mobile">Konu</th>
-                                <th>Son İşlem / Durum</th>
-                                <th>Avukat</th>
-                                <th>Tarih</th>
-                                <th class="text-right">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody id="files-table-body">
-                            <tr>
-                                <td colspan="7" class="text-center" style="padding: var(--space-8);">
-                                    <div class="loading-placeholder">
-                                        <div class="spinner"></div>
-                                        <span>Yükleniyor...</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-container" style="padding: 0;">
+                <table class="advanced-table" id="files-table">
+                    <thead>
+                        <tr>
+                            <th class="col-no">Dosya No <i data-lucide="chevrons-up-down"
+                                    style="width:12px; opacity:0.5"></i></th>
+                            <th class="col-parties">Taraflar</th>
+                            <th class="col-subject">Konu</th>
+                            <th class="col-amount">Miktar</th>
+                            <th class="col-status">Durum</th>
+                            <th class="col-decision">Karar</th>
+                            <th class="col-doc">Son Evrak</th>
+                            <th class="col-lawyer">Avukat</th>
+                            <th class="col-date">Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-table-body">
+                        <tr>
+                            <td colspan="9" class="text-center" style="padding: 40px;">
+                                <div class="loading-placeholder"
+                                    style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                                    <i data-lucide="loader" class="spin"
+                                        style="width:32px; height:32px; color:var(--accent-primary);"></i>
+                                    <span style="color:var(--text-muted);">Dosyalar Yükleniyor...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Adalet Takip Sistemi © 2024</p>
-    </footer>
+        <!-- Stats Footer -->
+        <div
+            style="margin-top: 15px; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-muted);">
+            <span id="file-count-info">Toplam: 0 dosya</span>
+            <span>Adalet Takip Sistemi © 2024</span>
+        </div>
+    </main>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>

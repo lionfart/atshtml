@@ -242,7 +242,22 @@ ${text.slice(0, 30000)}
 // ... (Other helpers setupRealtimeLawyers, etc. SAME) ... //
 async function performOcrWithGemini(imageBase64, mimeType, apiKey) { const contentBody = { contents: [{ parts: [{ text: 'Metni çıkar.' }, { inlineData: { mimeType: mimeType, data: imageBase64 } }] }] }; return await callGeminiWithFallback(apiKey, contentBody); }
 function extractTextFromPDF() { /* Dummy for snippet context, assuming utils loaded */ }
-function initSupabase() { /*...*/ if (typeof SUPABASE_URL === 'undefined') return; supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }
+function initSupabase() {
+    if (typeof SUPABASE_URL === 'undefined' || typeof SUPABASE_ANON_KEY === 'undefined') {
+        console.error('Supabase URL veya Key tanımlı değil!');
+        return false;
+    }
+    try {
+        if (!window.supabaseClient) {
+            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+        supabase = window.supabaseClient;
+        return true;
+    } catch (e) {
+        console.error('Supabase başlatılamadı:', e);
+        return false;
+    }
+}
 function setupRealtimeLawyers(cb) { supabase.channel('public:lawyers').on('postgres_changes', { event: '*', schema: 'public', table: 'lawyers' }, () => cb()).subscribe(); }
 async function getLawyers() { const { data } = await supabase.from('lawyers').select('*').order('name'); return data || []; }
 async function createLawyer(name, username, password) { /*...*/ }

@@ -10,6 +10,8 @@ let fileId = null;
 // ==========================================
 
 const initPage = async () => {
+    console.log('[FileDetail] Sayfa başlatılıyor...');
+
     // Get file ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     fileId = urlParams.get('id');
@@ -20,25 +22,54 @@ const initPage = async () => {
         return;
     }
 
+    console.log('[FileDetail] File ID:', fileId);
+
     // Initialize Supabase
     const supabaseReady = initSupabase();
+    console.log('[FileDetail] Supabase hazır:', supabaseReady);
 
     if (supabaseReady) {
-        const p1 = loadFileDetails();
-        const p2 = loadNotes();
-        await Promise.allSettled([p1, p2]);
+        // Load data
+        loadFileDetails();
+        loadNotes();
         setupDocumentUpload();
+    } else {
+        // Retry
+        setTimeout(() => {
+            console.log('[FileDetail] Supabase tekrar deneniyor...');
+            if (initSupabase()) {
+                loadFileDetails();
+                loadNotes();
+                setupDocumentUpload();
+            } else {
+                showToast('Veritabanına bağlanılamadı.', 'error');
+            }
+        }, 1000);
     }
 
     // Setup form handlers
     setupFormHandlers();
 };
 
+// Robust initialization
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPage);
 } else {
     initPage();
 }
+
+// Window load fallback
+window.addEventListener('load', () => {
+    // Check if data loaded
+    const fileNumber = document.getElementById('file-number');
+    if (fileNumber && fileNumber.textContent === 'Yükleniyor...') {
+        console.log('[FileDetail] Window load fallback triggered');
+        if (initSupabase() && fileId) {
+            loadFileDetails();
+            loadNotes();
+        }
+    }
+});
 
 
 // ==========================================
