@@ -1,212 +1,167 @@
 // ==========================================
-// Adalet Takip Sistemi - Main Application
+// Adalet Takip Sistemi - Smart App Logic
 // ==========================================
 
-// Global state
-let uploadQueue = []; // { id, file, status, result, error }
+let uploadQueue = []; // { id, file, status, result, error, analysisData }
 let isProcessingQueue = false;
 
-// ==========================================
-// Initialization
-// ==========================================
-
 document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize Supabase
-    const supabaseReady = initSupabase();
-
-    if (supabaseReady) {
-        // Load initial data
-        await loadLawyers();
-    }
-
-    // Setup event listeners
+    initSupabase();
+    await loadLawyers();
     setupEventListeners();
 });
 
-// ==========================================
-// Event Listeners Setup
-// ==========================================
-
 function setupEventListeners() {
-    // File upload area
     const uploadArea = document.getElementById('file-upload-area');
     const fileInput = document.getElementById('document-upload');
 
     if (uploadArea && fileInput) {
         uploadArea.addEventListener('click', () => fileInput.click());
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragging');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragging');
-        });
-
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragging'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragging'));
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragging');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFiles(Array.from(files));
-            }
+            if (e.dataTransfer.files.length) handleFiles(Array.from(e.dataTransfer.files));
         });
-
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
+            if (e.target.files.length) {
                 handleFiles(Array.from(e.target.files));
-                // Reset input to allow selecting same files again if needed
                 fileInput.value = '';
             }
         });
     }
 
-    // Add lawyer form
+    // Add Lawyer Form
     const addLawyerForm = document.getElementById('add-lawyer-form');
-    if (addLawyerForm) {
-        addLawyerForm.addEventListener('submit', handleAddLawyer);
-    }
+    if (addLawyerForm) addLawyerForm.addEventListener('submit', handleAddLawyer);
 }
 
 // ==========================================
-// Queue & File Handling
+// Core File Handling Logic
 // ==========================================
 
 function handleFiles(files) {
-    if (files.length === 0) return;
-
+    if (!files.length) return;
     const manager = document.getElementById('upload-manager');
     manager.classList.remove('hidden');
     manager.classList.remove('minimized');
 
     files.forEach(file => {
-        // Validate
         if (file.size > APP_CONFIG.maxFileSize) {
-            showToast(`${file.name} çok büyük (Max 20MB).`, 'error');
+            showToast(`${file.name} çok büyük.`, 'error');
             return;
         }
-
-        const queueItem = {
+        const item = {
             id: generateUUID(),
             file: file,
-            status: 'PENDING', // PENDING, PROCESSING, SUCCESS, ERROR
+            status: 'PENDING',
             progress: 0,
-            log: 'Kuyruğa alındı...',
-            created_at: new Date()
+            log: 'Sıraya alındı...',
+            analysisData: null
         };
-
-        uploadQueue.unshift(queueItem);
-        // Start processing immediately (non-blocking)
-        processQueueItem(queueItem);
+        uploadQueue.unshift(item);
+        processQueueItem(item);
     });
-
     updateQueueUI();
 }
 
 async function processQueueItem(item) {
     item.status = 'PROCESSING';
-    item.log = 'OCR ve AI Analizi yapılıyor...';
-    item.progress = 20;
+    item.log = 'OCR ve Akıllı Analiz yapılıyor...';
+    item.progress = 10;
     updateQueueItemUI(item);
 
     try {
-        // 1. Process File (OCR & AI)
-        const analysisResult = await analyzeFileContent(item.file);
-
-        item.progress = 60;
-        item.log = 'Sisteme kaydediliyor ve avukat atanıyor...';
+        // 1. Analyze File
+        const analysis = await analyzeFileContent(item.file);
+        item.analysisData = analysis;
+        item.progress = 50;
+        item.log = 'Veritabanında eşleşme aranıyor...';
         updateQueueItemUI(item);
 
-        // 2. Auto-Create Case
-        const plaintiff = analysisResult.plaintiff || 'Bilinmeyen Davacı';
-        const subject = analysisResult.subject || 'Otomatik Dosya Girişi';
+        // 2. Smart Match Check
+        const matchResult = await findMatchingCase(analysis);
 
-        const newFileCase = await createFileCase(plaintiff, subject, item.file);
+        if (matchResult) {
+            // MATCH FOUND -> AUTO UPLOAD
+            item.status = 'MATCHED_AUTO';
+            item.log = `Eşleşti: ${matchResult.case.registration_number} (${matchResult.matchType === 'ESAS_NO' ? 'Esas No' : 'Taraf'})`;
+            item.progress = 80;
+            updateQueueItemUI(item);
 
-        // 3. Success
-        item.status = 'SUCCESS';
-        item.progress = 100;
-        item.log = `Dosya No: ${newFileCase.registration_number}`;
-        item.result = newFileCase;
+            await uploadDocument(matchResult.case.id, item.file, analysis);
 
-        // Refresh lawyers list to show updated counts
-        loadLawyers();
+            item.status = 'SUCCESS';
+            item.progress = 100;
+            item.log = `Dosyaya Eklendi: ${matchResult.case.registration_number}`;
+            item.result = matchResult.case;
+            showToast(`"${item.file.name}" mevcut dosyaya (${matchResult.case.registration_number}) eklendi.`, 'success');
 
-        showToast(`${item.file.name} başarıyla işlendi!`, 'success');
+        } else {
+            // NO MATCH -> REQUIRE REVIEW
+            item.status = 'REVIEW_REQUIRED';
+            item.progress = 100; // Ready for user
+            item.log = 'Yeni dosya tespiti. Onay bekleniyor.';
+            showToast(`"${item.file.name}" için onay bekleniyor.`, 'info');
+        }
 
     } catch (error) {
-        console.error('Queue item error:', error);
+        console.error('Process Error:', error);
         item.status = 'ERROR';
         item.log = error.message;
         item.error = error;
-        showToast(`${item.file.name} işlenemedi: ${error.message}`, 'error');
     }
-
     updateQueueItemUI(item);
     updateQueueCount();
 }
 
+// ==========================================
+// AI & OCR Helpers
+// ==========================================
+
 async function analyzeFileContent(file) {
     let text = '';
-    const isImage = file.type.startsWith('image/');
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-    const isText = file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt'); // Corrected txt check
-    const isDocx = file.name.toLowerCase().endsWith('.docx'); // Basic check
-
-    // Get API key
     let apiKey = '';
+
     try {
         const settings = await getSystemSettings();
-        apiKey = settings.gemini_api_key || '';
-    } catch (e) { console.log('Settings unavailable'); }
+        apiKey = settings.gemini_api_key;
+    } catch (e) { }
 
-    // Text Extraction
-    if (isText) {
-        text = await readFileAsText(file);
-    }
-    else if (isPdf) {
+    // Extract Text based on type
+    if (file.type === 'application/pdf') {
         try {
             text = await extractTextFromPDF(file);
-            // Fallback for scanned PDF
             if (text.length < 50 && apiKey) {
-                const imageBlob = await convertPDFPageToImage(file);
-                const base64 = await readFileAsBase64(imageBlob);
-                text = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
+                const img = await convertPDFPageToImage(file);
+                text = await performOcrWithGemini(await readFileAsBase64(img), 'image/jpeg', apiKey);
             }
-        } catch (e) {
-            if (apiKey) {
-                const imageBlob = await convertPDFPageToImage(file);
-                const base64 = await readFileAsBase64(imageBlob);
-                text = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
-            }
-        }
-    }
-    else if (isImage && apiKey) {
-        const base64 = await readFileAsBase64(file);
-        text = await performOcrWithGemini(base64, file.type, apiKey);
+        } catch (e) { console.warn('PDF Error', e); }
+    } else if (file.type.startsWith('image/') && apiKey) {
+        text = await performOcrWithGemini(await readFileAsBase64(file), file.type, apiKey);
+    } else {
+        text = await readFileAsText(file); // txt, etc
     }
 
-    if (!text || text.length < 10) {
-        return { plaintiff: '', subject: '' };
-    }
+    if (!text || text.length < 5) throw new Error('Metin okunamadı.');
 
-    // AI Analysis
+    // Analyze
     if (apiKey) {
-        try {
-            return await analyzeWithGemini(text, apiKey);
-        } catch (e) {
-            console.warn('AI analysis failed, falling back to regex', e);
-        }
+        return await analyzeWithGemini(text, apiKey);
+    } else {
+        // Fallback local regex (simplified)
+        return {
+            plaintiff: 'Belirsiz',
+            subject: 'AI Anahtarı Girilmedi',
+            type: 'Evrak',
+            viz_text: text.slice(0, 200)
+        };
     }
-
-    // Fallback Regex Analysis
-    return parseTextLocally(text);
 }
 
-
 // ==========================================
-// Queue UI Management
+// UI Logic (Queue & Review)
 // ==========================================
 
 function updateQueueUI() {
@@ -221,57 +176,39 @@ function updateQueueItemUI(item) {
     if (el) {
         el.outerHTML = getQueueItemHTML(item);
         lucide.createIcons();
-    } else {
-        updateQueueUI(); // Full refresh if not found
-    }
+    } else updateQueueUI();
 }
 
 function getQueueItemHTML(item) {
-    let statusClass = 'status-pending';
-    let statusIcon = 'clock';
-    let statusText = 'Bekliyor';
+    let badgeClass = 'status-pending';
+    let label = 'Bekliyor';
 
-    if (item.status === 'PROCESSING') {
-        statusClass = 'status-processing';
-        statusIcon = 'loader-2'; // spinner
-        statusText = 'İşleniyor';
-    } else if (item.status === 'SUCCESS') {
-        statusClass = 'status-success';
-        statusIcon = 'check-circle';
-        statusText = 'Tamamlandı';
-    } else if (item.status === 'ERROR') {
-        statusClass = 'status-error';
-        statusIcon = 'alert-triangle';
-        statusText = 'Hata';
-    }
+    if (item.status === 'PROCESSING') { badgeClass = 'status-processing'; label = 'Analiz...'; }
+    else if (item.status === 'SUCCESS') { badgeClass = 'status-success'; label = 'Tamamlandı'; }
+    else if (item.status === 'ERROR') { badgeClass = 'status-error'; label = 'Hata'; }
+    else if (item.status === 'REVIEW_REQUIRED') { badgeClass = 'status-warning'; label = 'Onay Bekliyor'; }
 
     return `
         <div class="upload-item" id="queue-item-${item.id}">
             <div class="upload-item-header">
-                <div class="upload-filename" title="${item.file.name}">${item.file.name}</div>
-                <div class="upload-status">
-                    <span class="status-badge ${statusClass}">
-                        ${item.status === 'PROCESSING' ? '<i data-lucide="loader-2" class="animate-spin" style="width:10px;height:10px;display:inline;"></i>' : ''}
-                        ${statusText}
-                    </span>
-                </div>
+                <div class="upload-filename" title="${item.file.name}">${escapeHtml(item.file.name)}</div>
+                <span class="status-badge ${badgeClass}">${label}</span>
             </div>
+            <div class="upload-details">${escapeHtml(item.log)}</div>
             
-            <div class="upload-details">
-                ${item.log}
-            </div>
+            ${item.status === 'PROCESSING' ? `<div class="mini-progress scanning"><div class="mini-progress-bar" style="width: ${item.progress}%"></div></div>` : ''}
 
-            ${item.status === 'PROCESSING' ? `
-                <div class="mini-progress ${item.log.includes('OCR') ? 'scanning' : ''}">
-                    <div class="mini-progress-bar" style="width: ${item.progress}%"></div>
+            ${item.status === 'REVIEW_REQUIRED' ? `
+                <div class="upload-actions">
+                    <button class="btn btn-primary btn-sm w-full" onclick="openReviewModal('${item.id}')">
+                        <i data-lucide="eye"></i> İncele & Onayla
+                    </button>
                 </div>
             ` : ''}
-
-            ${item.status === 'SUCCESS' && item.result ? `
+            
+            ${item.status === 'SUCCESS' ? `
                 <div class="upload-actions">
-                    <a href="file-detail.html?id=${item.result.id}" class="btn btn-primary btn-sm" style="width:100%">
-                        <i data-lucide="eye" style="width:14px"></i> İncele
-                    </a>
+                    <a href="file-detail.html?id=${item.result.id}" class="btn btn-ghost btn-sm w-full">Dosyaya Git</a>
                 </div>
             ` : ''}
         </div>
@@ -279,150 +216,187 @@ function getQueueItemHTML(item) {
 }
 
 function updateQueueCount() {
-    const count = uploadQueue.filter(i => i.status === 'PROCESSING' || i.status === 'PENDING').length;
-    document.getElementById('queue-count').textContent = count > 0 ? `${count} İşlem` : 'Kuyruk';
+    const count = uploadQueue.filter(i => i.status === 'PROCESSING' || i.status === 'PENDING' || i.status === 'REVIEW_REQUIRED').length;
+    document.getElementById('queue-count').textContent = count;
 }
 
 function toggleUploadManager() {
-    const manager = document.getElementById('upload-manager');
-    manager.classList.toggle('minimized');
+    document.getElementById('upload-manager').classList.toggle('minimized');
+}
 
-    const icon = document.getElementById('upload-toggle-icon');
-    if (manager.classList.contains('minimized')) {
-        icon.setAttribute('data-lucide', 'chevron-up');
-    } else {
-        icon.setAttribute('data-lucide', 'chevron-down');
-    }
+// ==========================================
+// Review Modal Logic
+// ==========================================
+
+let currentReviewItemId = null;
+
+function openReviewModal(itemId) {
+    const item = uploadQueue.find(i => i.id === itemId);
+    if (!item || !item.analysisData) return;
+
+    currentReviewItemId = itemId;
+    const data = item.analysisData;
+
+    // Fill Modal Data
+    const content = `
+        <div class="review-grid">
+            <div class="review-section">
+                <h3><i data-lucide="file-text"></i> Analiz Sonuçları</h3>
+                <div class="review-field">
+                    <label>Evrak Türü</label>
+                    <input type="text" id="review-type" value="${data.type || ''}" class="form-control">
+                </div>
+                <div class="review-field">
+                    <label>Mahkeme</label>
+                    <input type="text" id="review-court" value="${data.court_name || ''}" class="form-control">
+                </div>
+                <div class="review-field">
+                    <label>Esas No</label>
+                    <input type="text" id="review-esas" value="${data.court_case_number || ''}" class="form-control">
+                </div>
+            </div>
+            <div class="review-section">
+                <h3><i data-lucide="users"></i> Taraflar</h3>
+                <div class="review-field">
+                    <label>Davacı</label>
+                    <input type="text" id="review-plaintiff" value="${data.plaintiff || ''}" class="form-control">
+                </div>
+                <div class="review-field">
+                    <label>Davalı</label>
+                    <input type="text" id="review-defendant" value="${data.defendant || ''}" class="form-control">
+                </div>
+                 <div class="review-field">
+                    <label>Dava Değeri</label>
+                    <input type="text" id="review-amount" value="${data.claim_amount || ''}" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="review-summary">
+            <label>Özet</label>
+            <textarea id="review-summary" class="form-control" rows="2">${data.summary || data.subject || ''}</textarea>
+        </div>
+        <div class="review-preview">
+            <label>Metin Önizlemesi</label>
+            <p>${data.viz_text || 'Metin yok'}</p>
+        </div>
+        
+        <div class="review-manual-link mt-4">
+            <label>Ya da Mevcut Bir Dosyaya Bağla (Sistem No Girin)</label>
+            <div class="flex gap-2">
+                <input type="text" id="manual-case-id" placeholder="Örn: 2024/0005" class="form-control">
+                <button onclick="linkToExistingCase()" class="btn btn-secondary">Bağla</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('review-modal-content').innerHTML = content;
+    document.getElementById('review-modal').classList.add('active');
     lucide.createIcons();
 }
 
-// ==========================================
-// Lawyers Management
-// ==========================================
+async function approveNewCase() {
+    const item = uploadQueue.find(i => i.id === currentReviewItemId);
+    const btn = document.getElementById('btn-approve-new');
+    if (!item) return;
 
+    btn.disabled = true;
+    btn.innerHTML = 'Oluşturuluyor...';
+
+    try {
+        // Gather edited data from inputs
+        const newData = {
+            type: document.getElementById('review-type').value,
+            court_name: document.getElementById('review-court').value,
+            court_case_number: document.getElementById('review-esas').value,
+            plaintiff: document.getElementById('review-plaintiff').value,
+            defendant: document.getElementById('review-defendant').value,
+            claim_amount: document.getElementById('review-amount').value,
+            summary: document.getElementById('review-summary').value,
+            subject: document.getElementById('review-summary').value
+        };
+
+        // Create
+        const newCase = await createFileCase(newData, item.file);
+
+        // Success
+        item.status = 'SUCCESS';
+        item.result = newCase;
+        item.log = `Yeni Dosya Açıldı: ${newCase.registration_number}`;
+
+        closeReviewModal();
+        updateQueueItemUI(item);
+        loadLawyers(); // Refresh UI
+        showToast('Yeni dosya oluşturuldu ve ataması yapıldı.', 'success');
+
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Onayla & Yeni Klasör Aç';
+    }
+}
+
+async function linkToExistingCase() {
+    const regNum = document.getElementById('manual-case-id').value.trim();
+    if (!regNum) return showToast('Lütfen Dosya No girin (Örn: 2024/0001)', 'warning');
+
+    const item = uploadQueue.find(i => i.id === currentReviewItemId);
+
+    try {
+        // Find ID from Reg Num
+        const { data: cases } = await supabase.from('file_cases').select('id').eq('registration_number', regNum);
+
+        if (!cases || cases.length === 0) throw new Error('Bu numarada dosya bulunamadı.');
+        const caseId = cases[0].id;
+
+        await uploadDocument(caseId, item.file, item.analysisData);
+
+        item.status = 'SUCCESS';
+        item.result = { id: caseId, registration_number: regNum };
+        item.log = `Elle Eklendi: ${regNum}`;
+
+        closeReviewModal();
+        updateQueueItemUI(item);
+        showToast('Dosya başarıyla eklendi.', 'success');
+
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
+
+function closeReviewModal() {
+    document.getElementById('review-modal').classList.remove('active');
+    currentReviewItemId = null;
+}
+
+// ==========================================
+// Initial Loader
+// ==========================================
 async function loadLawyers() {
     const container = document.getElementById('lawyers-list');
-    if (!container) return;
-
     try {
         const lawyers = await getLawyers();
-
-        if (lawyers.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i data-lucide="users"></i>
-                    <p>Henüz avukat eklenmedi.</p>
+        if (!lawyers.length) return container.innerHTML = '<p>Avukat yok.</p>';
+        container.innerHTML = lawyers.map(l => `
+            <div class="lawyer-item">
+                <div>
+                   <strong>${escapeHtml(l.name)}</strong>
+                   <small>${l.assigned_files_count} Dosya</small>
                 </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
-
-        container.innerHTML = lawyers.map(lawyer => `
-            <div class="lawyer-item" data-lawyer-id="${lawyer.id}">
-                <div class="lawyer-info">
-                    <a href="lawyer.html?id=${lawyer.id}" class="lawyer-name">${escapeHtml(lawyer.name)}</a>
-                    <div class="lawyer-stats">
-                        Atanan: ${lawyer.assigned_files_count || 0} | Telafi Borcu: ${lawyer.missed_assignments_count || 0}
-                    </div>
-                </div>
-                <div class="lawyer-actions">
-                    <span class="badge ${lawyer.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'}">
-                        ${lawyer.status === 'ACTIVE' ? 'Aktif' : 'İzinli'}
-                    </span>
-                </div>
+                <span class="badge ${l.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'}">${l.status}</span>
             </div>
         `).join('');
-
-        lucide.createIcons();
-
-    } catch (error) {
-        console.error('Failed to load lawyers:', error);
-        container.innerHTML = `
-            <div class="empty-state">
-                <i data-lucide="alert-circle"></i>
-                <p>Avukatlar yüklenemedi.</p>
-            </div>
-        `;
-        lucide.createIcons();
-    }
+    } catch (e) { container.innerHTML = 'Hata.'; }
 }
-
 async function handleAddLawyer(e) {
     e.preventDefault();
-
-    const name = document.getElementById('new-lawyer-name').value.trim();
-    const username = document.getElementById('new-lawyer-username').value.trim();
-    const password = document.getElementById('new-lawyer-password').value;
-
-    if (!name || !username || !password) {
-        showToast('Tüm alanları doldurun.', 'error');
-        return;
-    }
-
     try {
-        await createLawyer(name, username, password);
-        showToast('Avukat eklendi!', 'success');
-        document.getElementById('add-lawyer-form').reset();
-        await loadLawyers();
-    } catch (error) {
-        console.error('Failed to add lawyer:', error);
-        showToast('Hata: ' + error.message, 'error');
-    }
+        await createLawyer(
+            document.getElementById('new-lawyer-name').value,
+            document.getElementById('new-lawyer-username').value,
+            document.getElementById('new-lawyer-password').value
+        );
+        showToast('Eklendi', 'success');
+        e.target.reset();
+        loadLawyers();
+    } catch (e) { showToast(e.message, 'error'); }
 }
-
-// ==========================================
-// Settings Modal
-// ==========================================
-
-function openSettingsModal() {
-    document.getElementById('settings-modal').classList.add('active');
-    loadSettingsData();
-}
-
-function closeSettingsModal() {
-    document.getElementById('settings-modal').classList.remove('active');
-}
-
-async function loadSettingsData() {
-    try {
-        const settings = await getSystemSettings();
-        document.getElementById('gemini-api-key').value = settings.gemini_api_key || '';
-        document.getElementById('burst-limit').value = settings.catchup_burst_limit || APP_CONFIG.defaultBurstLimit;
-    } catch (error) {
-        console.error('Failed to load settings:', error);
-    }
-}
-
-async function saveSettings() {
-    const apiKey = document.getElementById('gemini-api-key').value.trim();
-    const burstLimit = parseInt(document.getElementById('burst-limit').value) || APP_CONFIG.defaultBurstLimit;
-
-    const saveBtn = document.getElementById('save-settings-btn');
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<div class="spinner"></div><span>Kaydediliyor...</span>';
-
-    try {
-        await updateSystemSettings({
-            gemini_api_key: apiKey,
-            catchup_burst_limit: burstLimit
-        });
-
-        showToast('Ayarlar kaydedildi.', 'success');
-        closeSettingsModal();
-
-    } catch (error) {
-        console.error('Failed to save settings:', error);
-        showToast('Ayarlar kaydedilemedi.', 'error');
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<span>Kaydet</span>';
-    }
-}
-
-// Close modal on escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeSettingsModal();
-    }
-});

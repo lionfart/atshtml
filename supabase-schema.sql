@@ -1,9 +1,9 @@
 -- ==========================================
--- Adalet Takip Sistemi - FIX SUPABASE PERMISSIONS
+-- Adalet Takip Sistemi - Schema Update v3 (Smart Matching)
 -- ==========================================
 -- Lütfen bu kodun tamamını Supabase SQL Editor'e yapıştırıp çalıştırın.
 
--- 1. Tabloların var olduğundan emin olalım
+-- Core Tables (Existing structure maintained)
 CREATE TABLE IF NOT EXISTS lawyers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -21,8 +21,15 @@ CREATE TABLE IF NOT EXISTS lawyers (
 
 CREATE TABLE IF NOT EXISTS file_cases (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    registration_number VARCHAR(50) NOT NULL,
-    plaintiff VARCHAR(500) NOT NULL,
+    registration_number VARCHAR(50) NOT NULL, -- Sistem No (Örn: 2024/0001)
+    
+    -- New Smart Fields
+    court_name VARCHAR(255), -- Mahkeme Adı (İstanbul 1. Asliye Hukuk vb.)
+    court_case_number VARCHAR(100), -- Esas No (2024/123 E.)
+    plaintiff VARCHAR(500) NOT NULL, -- Davacı
+    defendant VARCHAR(500), -- Davalı
+    claim_amount VARCHAR(100), -- Dava Değeri
+    
     subject TEXT,
     lawyer_id UUID REFERENCES lawyers(id) ON DELETE SET NULL,
     status VARCHAR(20) DEFAULT 'OPEN',
@@ -33,6 +40,7 @@ CREATE TABLE IF NOT EXISTS file_cases (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Belge Tablosu
 CREATE TABLE IF NOT EXISTS documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(500) NOT NULL,
@@ -40,7 +48,7 @@ CREATE TABLE IF NOT EXISTS documents (
     file_case_id UUID NOT NULL REFERENCES file_cases(id) ON DELETE CASCADE,
     storage_path VARCHAR(1000),
     public_url TEXT,
-    analysis JSONB,
+    analysis JSONB, -- AI Analiz Sonuçları (Full JSON) here
     upload_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -62,45 +70,27 @@ CREATE TABLE IF NOT EXISTS system_settings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. GARANTİ ÇÖZÜM: RLS'Yİ DEVRE DIŞI BIRAK (Şimdilik)
--- Auth sistemi olmayan bir HTML sitesi için en sorunsuz yöntem budur.
--- Veri yazma hatalarını kesin olarak çözer.
-
+-- Disable RLS for Public Access (Fixes permission issues)
 ALTER TABLE lawyers DISABLE ROW LEVEL SECURITY;
 ALTER TABLE file_cases DISABLE ROW LEVEL SECURITY;
 ALTER TABLE documents DISABLE ROW LEVEL SECURITY;
 ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
 ALTER TABLE system_settings DISABLE ROW LEVEL SECURITY;
 
--- 3. İzinleri 'anon' rolüne (giriş yapmamış kullanıcı) aç
+-- Grants
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
 
--- 4. Eğer RLS'yi ilerde açmak isterseniz diye 'Yedek Güvenlik Politikaları'
--- (Şu an devre dışı olduğu için etkisizdir ama veritabanında bulunsun)
-DROP POLICY IF EXISTS "Public Access Lawyers" ON lawyers;
-CREATE POLICY "Public Access Lawyers" ON lawyers FOR ALL USING (true) WITH CHECK (true);
+-- Indexes for Smart Matching
+CREATE INDEX IF NOT EXISTS idx_file_cases_esaso ON file_cases(court_case_number);
+CREATE INDEX IF NOT EXISTS idx_file_cases_parties ON file_cases(plaintiff, defendant);
 
-DROP POLICY IF EXISTS "Public Access File Cases" ON file_cases;
-CREATE POLICY "Public Access File Cases" ON file_cases FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public Access Documents" ON documents;
-CREATE POLICY "Public Access Documents" ON documents FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public Access Notes" ON notes;
-CREATE POLICY "Public Access Notes" ON notes FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public Access Settings" ON system_settings;
-CREATE POLICY "Public Access Settings" ON system_settings FOR ALL USING (true) WITH CHECK (true);
-
--- 5. Storage Ayarları
+-- Storage Setup
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('documents', 'documents', true)
 ON CONFLICT (id) DO UPDATE SET public = true;
 
 DROP POLICY IF EXISTS "Public Storage Access" ON storage.objects;
 CREATE POLICY "Public Storage Access" ON storage.objects FOR ALL USING ( bucket_id = 'documents' ) WITH CHECK ( bucket_id = 'documents' );
-
--- Bitti. "Run" butonuna basarak çalıştırın.
