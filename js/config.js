@@ -1,15 +1,10 @@
 // ==========================================
-// Supabase Configuration
+// Adalet Takip Sistemi - Configuration
 // ==========================================
 
 // TODO: Replace with your actual Supabase project credentials
-// You can find these in your Supabase project settings -> API
-
-const SUPABASE_URL = 'https://sjjilkxxsnsaljmhddlh.supabase.co'; // e.g., 'https://xxxxx.supabase.co'
-const SUPABASE_ANON_KEY = 'sb_publishable_2jdThnkkp2snAOG-7XMOZg_fpKkdumW'; // Your anon/public key
-
-// Gemini API Key (optional - can also be stored in system_settings table)
-const DEFAULT_GEMINI_API_KEY = '';
+const SUPABASE_URL = 'https://sjjilkxxsnsaljmhddlh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_2jdThnkkp2snAOG-7XMOZg_fpKkdumW';
 
 // App Configuration
 const APP_CONFIG = {
@@ -30,14 +25,18 @@ const APP_CONFIG = {
     defaultBurstLimit: 2,
 
     // Gemini Models (Fallback Priority List)
-    // Updated with Future/Experimental models
+    // Updated based on user request and potential future releases
     geminiModels: [
-        'gemini-3.0-pro',       // Future / Hypothetical
-        'gemini-3.0-flash',     // Future / Hypothetical
-        'gemini-2.5-pro',       // Future / Hypothetical
-        'gemini-2.0-flash-exp', // Experimental (Available Dec 2024)
+        'gemini-3.0-pro',
+        'gemini-3.0-flash',
+        'gemini-2.5-pro',
+        'gemini-2.5-flash',
+        'gemini-2.0-pro-exp',
+        'gemini-2.0-flash-exp',
         'gemini-1.5-pro',
+        'gemini-1.5-pro-latest',
         'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
         'gemini-1.5-flash-8b',
         'gemini-1.0-pro'
     ],
