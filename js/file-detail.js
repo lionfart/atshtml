@@ -222,7 +222,7 @@ async function loadNotes() {
         container.innerHTML = notes.map(note => `
             <div class="note-item">
                 <div class="note-header">
-                    <span class="note-author">${escapeHtml(note.author_name)}</span>
+                    <span class="note-author">${escapeHtml(note.lawyers?.name || 'Sistem')}</span>
                     <span class="note-date">${formatDateTime(note.created_at)}</span>
                 </div>
                 <div class="note-content">${escapeHtml(note.content)}</div>
