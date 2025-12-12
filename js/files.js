@@ -34,22 +34,24 @@ if (document.readyState === 'loading') {
 // Load Files
 // ==========================================
 
-async function loadFiles() {
+async function loadFiles(retryCount = 0) {
     const tbody = document.getElementById('files-table-body');
     if (!tbody) return;
 
-    // Show loading
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="7" class="text-center" style="padding: 40px;">
-                <div class="loading-placeholder" style="display:flex; flex-direction:column; align-items:center; gap:10px; color:var(--text-muted);">
-                    <i data-lucide="loader" class="spin" style="width:32px; height:32px;"></i>
-                    <span>Dosyalar Yükleniyor...</span>
-                </div>
-            </td>
-        </tr>
-    `;
-    lucide.createIcons();
+    // Only show big loader on first try
+    if (retryCount === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center" style="padding: 40px;">
+                    <div class="loading-placeholder" style="display:flex; flex-direction:column; align-items:center; gap:10px; color:var(--text-muted);">
+                        <i data-lucide="loader" class="spin" style="width:32px; height:32px;"></i>
+                        <span>Dosyalar Yükleniyor...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        lucide.createIcons();
+    }
 
     try {
         const searchTerm = document.getElementById('search-input')?.value || '';
@@ -67,6 +69,14 @@ async function loadFiles() {
             sort: sortFilter
         });
 
+        // Supabase/Network might be slow or return empty initially due to connection
+        // If empty and no search term, try once more after delay
+        if (files.length === 0 && !searchTerm && !statusFilter && retryCount < 2) {
+            console.warn('No files found, retrying...', retryCount + 1);
+            setTimeout(() => loadFiles(retryCount + 1), 800);
+            return;
+        }
+
         if (files.length === 0) {
             tbody.innerHTML = `
                 <tr>
@@ -82,9 +92,13 @@ async function loadFiles() {
             return;
         }
 
-        tbody.innerHTML = files.map(file => `
+        tbody.innerHTML = files.map(file => {
+            // FALLBACK FOR REGISTRATION NUMBER
+            const displayNo = file.registration_number || file.court_case_number || '<span style="opacity:0.5">No Yok</span>';
+
+            return `
             <tr onclick="window.location.href='file-detail.html?id=${file.id}'" style="cursor:pointer;">
-                <td class="font-semibold" style="color:var(--accent-primary);">${escapeHtml(file.registration_number)}</td>
+                <td class="font-semibold" style="color:var(--accent-primary);">${displayNo}</td>
                 <td>
                     <div style="font-weight:500;">${escapeHtml(file.plaintiff || '-')}</div>
                     <div style="font-size:0.8em; opacity:0.7;">vs ${escapeHtml(file.defendant || '-')}</div>
@@ -108,12 +122,18 @@ async function loadFiles() {
                     </button>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
 
         lucide.createIcons();
 
     } catch (error) {
         console.error('Failed to load files:', error);
+        // Retry on error too
+        if (retryCount < 3) {
+            setTimeout(() => loadFiles(retryCount + 1), 1000);
+            return;
+        }
+
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="text-center" style="padding: 20px; color:var(--accent-danger);">

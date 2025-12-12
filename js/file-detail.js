@@ -45,25 +45,35 @@ if (document.readyState === 'loading') {
 // Load File Details
 // ==========================================
 
-async function loadFileDetails() {
+async function loadFileDetails(retryCount = 0) {
     try {
+        // Retry logic wrapper for fetch
         currentFile = await getFileCaseById(fileId);
+
+        if (!currentFile && retryCount < 3) {
+            console.warn('File not found yet, retrying details...', retryCount);
+            setTimeout(() => loadFileDetails(retryCount + 1), 1000);
+            return;
+        }
+
+        if (!currentFile) throw new Error("Dosya bulunamadı.");
 
         // Update header
         const fileNo = currentFile.registration_number || currentFile.court_case_number || 'Numara Yok';
         document.getElementById('file-number').textContent = fileNo;
         document.getElementById('file-created-date').textContent = 'Oluşturulma: ' + formatDate(currentFile.created_at);
-        document.title = currentFile.registration_number + ' - Adalet Takip Sistemi';
+
+        const titleEl = document.querySelector('title');
+        if (titleEl) titleEl.textContent = fileNo + ' - Adalet Takip Sistemi';
 
         // Update form fields
-        document.getElementById('edit-plaintiff').value = currentFile.plaintiff || '';
-        document.getElementById('edit-defendant').value = currentFile.defendant || '';
-        document.getElementById('edit-court').value = currentFile.court_name || '';
-        document.getElementById('edit-amount').value = currentFile.claim_amount || '';
-        document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
-        document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
-        document.getElementById('edit-subject').value = currentFile.subject || '';
-        document.getElementById('edit-subject').value = currentFile.subject || '';
+        if (document.getElementById('edit-plaintiff')) document.getElementById('edit-plaintiff').value = currentFile.plaintiff || '';
+        if (document.getElementById('edit-defendant')) document.getElementById('edit-defendant').value = currentFile.defendant || '';
+        if (document.getElementById('edit-court')) document.getElementById('edit-court').value = currentFile.court_name || '';
+        if (document.getElementById('edit-amount')) document.getElementById('edit-amount').value = currentFile.claim_amount || '';
+        if (document.getElementById('edit-reg-number')) document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
+        if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
+        if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
 
         // Update status card
         updateStatusCard(currentFile);
@@ -75,7 +85,14 @@ async function loadFileDetails() {
 
     } catch (error) {
         console.error('Failed to load file details:', error);
+
+        if (retryCount < 3) {
+            setTimeout(() => loadFileDetails(retryCount + 1), 1000);
+            return;
+        }
+
         showToast('Dosya yüklenemedi: ' + error.message, 'error');
+        document.getElementById('file-number').innerHTML = `<span style="color:red">Yükleme Hatası</span>`;
     }
 }
 
