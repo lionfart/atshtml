@@ -253,6 +253,19 @@ function closeReviewModal() { document.getElementById('review-modal').classList.
 // ... (loadLawyers, Settings SAME) ... //
 async function loadLawyers() { const c = document.getElementById('lawyers-list'); try { const l = await getLawyers(); c.innerHTML = l.length ? l.map(a => `<div class="lawyer-item"><div><strong>${escapeHtml(a.name)}</strong><span style="font-size:0.8em;color:#666;display:block;">${a.assigned_files_count || 0} Dosya</span></div><span class="badge ${a.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'}">${a.status}</span></div>`).join('') : '<p style="text-align:center;color:#666">Yok.</p>'; } catch (e) { c.innerHTML = 'Hata'; } }
 async function handleAddLawyer(e) { e.preventDefault(); try { await createLawyer(document.getElementById('new-lawyer-name').value, document.getElementById('new-lawyer-username').value, document.getElementById('new-lawyer-password').value); showToast('Eklendi', 'success'); e.target.reset(); loadLawyers(); } catch (x) { showToast(x.message, 'error'); } }
+// ==========================================
+// Settings Modal Logic
+// ==========================================
+
+function openSettingsModal() {
+    document.getElementById('settings-modal').classList.add('active');
+    loadSettingsData();
+}
+
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.remove('active');
+}
+
 async function loadSettingsData() { try { const s = await getSystemSettings(); document.getElementById('gemini-api-key').value = s.gemini_api_key || ''; document.getElementById('burst-limit').value = s.catchup_burst_limit || 2; const p = localStorage.getItem('preferredGeminiModel'); if (p) document.getElementById('gemini-model-select').value = p; } catch (e) { } }
 async function saveSettings() { try { await updateSystemSettings({ gemini_api_key: document.getElementById('gemini-api-key').value.trim(), catchup_burst_limit: parseInt(document.getElementById('burst-limit').value) }); localStorage.setItem('preferredGeminiModel', document.getElementById('gemini-model-select').value); showToast('Kaydedildi', 'success'); closeSettingsModal(); } catch (e) { showToast('Hata', 'error'); } }
 window.openSettingsModal = openSettingsModal; window.closeSettingsModal = closeSettingsModal; window.saveSettings = saveSettings; window.openReviewModal = openReviewModal; window.closeReviewModal = closeReviewModal; window.approveNewCase = approveNewCase; window.linkToExistingCase = linkToExistingCase; window.linkToSpecificCase = linkToSpecificCase; window.toggleUploadManager = toggleUploadManager; window.removeFromQueue = removeFromQueue;
