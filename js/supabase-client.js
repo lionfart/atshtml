@@ -230,5 +230,11 @@ function initSupabase() { /*...*/ if (typeof SUPABASE_URL === 'undefined') retur
 function setupRealtimeLawyers(cb) { supabase.channel('public:lawyers').on('postgres_changes', { event: '*', schema: 'public', table: 'lawyers' }, () => cb()).subscribe(); }
 async function getLawyers() { const { data } = await supabase.from('lawyers').select('*').order('name'); return data || []; }
 async function createLawyer(name, username, password) { /*...*/ }
+// Lawyer Status
+async function updateLawyerStatus(id, newStatus) {
+    const { error } = await supabase.from('lawyers').update({ status: newStatus }).eq('id', id);
+    if (error) throw error;
+}
+
 // Re-export needed
-window.getLawyers = getLawyers; window.createLawyer = createLawyer; window.getFileCases = getFileCases; window.getFileCaseById = getFileCaseById; window.createFileCase = createFileCase; window.uploadDocument = uploadDocument; window.getNotes = getNotes; window.createNote = createNote; window.analyzeWithGemini = analyzeWithGemini; window.performOcrWithGemini = performOcrWithGemini; window.findMatchingCase = findMatchingCase; window.initSupabase = initSupabase; window.setupRealtimeLawyers = setupRealtimeLawyers; window.getSystemSettings = getSystemSettings; window.updateSystemSettings = updateSystemSettings;
+window.getLawyers = getLawyers; window.createLawyer = createLawyer; window.updateLawyerStatus = updateLawyerStatus; window.getFileCases = getFileCases; window.getFileCaseById = getFileCaseById; window.createFileCase = createFileCase; window.uploadDocument = uploadDocument; window.getNotes = getNotes; window.createNote = createNote; window.analyzeWithGemini = analyzeWithGemini; window.performOcrWithGemini = performOcrWithGemini; window.findMatchingCase = findMatchingCase; window.initSupabase = initSupabase; window.setupRealtimeLawyers = setupRealtimeLawyers; window.getSystemSettings = getSystemSettings; window.updateSystemSettings = updateSystemSettings;

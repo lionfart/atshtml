@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avukat Yönetimi - Adalet Takip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-6);
+            align-items: start;
+        }
+
+        .sidebar-list {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .lawyer-list-item {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lawyer-list-item:hover,
+        .lawyer-list-item.active {
+            background: var(--surface-hover);
+        }
+
+        .lawyer-list-item.active {
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .stat-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container" style="padding-top: var(--space-6);">
+        <!-- Header -->
+        <header class="header mb-6">
+            <div class="header-left">
+                <a href="index.html" class="btn btn-outline"><i data-lucide="arrow-left"></i> Ana Sayfa</a>
+                <h1 class="ml-4">Avukat Yönetimi</h1>
+            </div>
+            <button class="btn btn-primary"
+                onclick="document.getElementById('add-lawyer-modal').classList.add('active')">
+                <i data-lucide="user-plus"></i> Yeni Avukat
+            </button>
+        </header>
+
+        <div class="layout-grid">
+            <!-- Sidebar -->
+            <div class="sidebar-list" id="lawyers-sidebar">
+                <div class="p-4 text-center text-muted">Yükleniyor...</div>
+            </div>
+
+            <!-- Content -->
+            <div id="lawyer-content" class="hidden">
+                <!-- Stats & Actions -->
+                <div class="card mb-6">
+                    <div class="card-header flex justify-between items-center">
+                        <div>
+                            <h2 class="card-title" id="selected-lawyer-name">Avukat Adı</h2>
+                            <p class="text-sm text-muted mt-1" id="selected-lawyer-status">Durum: -</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="btn-toggle-status" class="btn btn-outline" onclick="toggleLawyerStatus()">
+                                <i data-lucide="power"></i> <span id="lbl-status-action">İzne Çıkar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-label">Toplam Dosya</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value text-success" id="stat-open">0</div>
+                        <div class="stat-label">Açık Dosya</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value text-secondary" id="stat-closed">0</div>
+                        <div class="stat-label">Kapalı Dosya</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Dosyalar</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="flex gap-4 mb-4" style="display:flex; gap:1rem;">
+                            <input type="text" id="filter-search" placeholder="Dosya No, Taraf, İçerik ara..."
+                                class="form-control" style="flex:2;">
+                            <select id="filter-sort" class="form-control" style="flex:1;">
+                                <option value="date-desc">En Yeni</option>
+                                <option value="date-asc">En Eski</option>
+                            </select>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Dosya / Esas</th>
+                                        <th>Taraflar</th>
+                                        <th>Mahkeme</th>
+                                        <th>Durum</th>
+                                        <th>Tarih</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lawyer-files-list">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="empty-selection" class="card p-6 text-center text-muted">
+                <i data-lucide="user" style="width:48px; height:48px; margin-bottom:10px; opacity:0.5;"></i>
+                <p>Detaylarını görmek için soldan bir avukat seçin.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Lawyer Modal -->
+    <div id="add-lawyer-modal" class="modal">
+        <div class="modal-overlay" onclick="this.parentElement.classList.remove('active')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Yeni Avukat Ekle</h3>
+                <button class="icon-btn" onclick="this.closest('.modal').classList.remove('active')"><i
+                        data-lucide="x"></i></button>
+            </div>
+            <form id="form-new-lawyer" onsubmit="handleCreateLawyer(event)">
+                <div class="form-group">
+                    <label>Ad Soyad</label>
+                    <input type="text" id="new-name" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="new-username" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="new-password" required class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/lawyers.js"></script>
+</body>
+
+</html>
