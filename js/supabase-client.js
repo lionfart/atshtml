@@ -56,7 +56,7 @@ async function createLawyer(name, username, password) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    const { data: existing } = await supabase.from('lawyers').select('id').eq('username', username).single();
+    const { data: existing } = await supabase.from('lawyers').select('id').eq('username', username).maybeSingle();
     if (existing) throw new Error('Bu kullanıcı adı alınmış.');
 
     const { data: newLawyer, error } = await supabase
@@ -342,8 +342,11 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
     if (modelIndex >= models.length) throw new Error('AI analizi başarısız.');
 
     const currentModel = models[modelIndex];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`;
+    console.log(`🤖 AI Request (${modelIndex + 1}/${models.length}): ${currentModel}`, url);
+
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(contentBody)

@@ -387,6 +387,47 @@ async function loadLawyers() {
         `).join('');
     } catch (e) { container.innerHTML = 'Hata.'; }
 }
+// ==========================================
+// Settings Modal Logic
+// ==========================================
+
+function openSettingsModal() {
+    document.getElementById('settings-modal').classList.add('active');
+    loadSettingsData();
+}
+
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.remove('active');
+}
+
+async function loadSettingsData() {
+    try {
+        const settings = await getSystemSettings();
+        document.getElementById('gemini-api-key').value = settings.gemini_api_key || '';
+    } catch (error) {
+        console.error('Failed to load settings:', error);
+    }
+}
+
+async function saveSettings() {
+    const apiKey = document.getElementById('gemini-api-key').value.trim();
+    try {
+        await updateSystemSettings({ gemini_api_key: apiKey });
+        showToast('Ayarlar kaydedildi.', 'success');
+        closeSettingsModal();
+    } catch (error) {
+        showToast('Ayarlar kaydedilemedi.', 'error');
+    }
+}
+
+// Global scope check
+window.openSettingsModal = openSettingsModal;
+window.closeSettingsModal = closeSettingsModal;
+window.saveSettings = saveSettings;
+
+// ==========================================
+// Initial Loader
+// ==========================================
 async function handleAddLawyer(e) {
     e.preventDefault();
     try {
