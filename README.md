@@ -178,3 +178,4 @@ Feel free to customize this template to fit your specific needs:
 ## ❓ Questions or Issues
 
 If you have questions or encounter issues, please refer to the documentation for Next.js, Docker, `lowdb`, GitHub Actions, and Dyad. If you believe there's an issue with the template itself, consider opening an issue in the template repository.
+# atshtml

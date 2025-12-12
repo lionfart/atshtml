@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adalet Takip Sistemi - Dosya Detayı">
+    <title>Dosya Detayı - Adalet Takip Sistemi</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Dosyayı Sil</h2>
+                <button class="icon-btn" onclick="closeDeleteModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <p class="modal-description">Bu dosyayı ve tüm içeriğini (evraklar, notlar) silmek istediğinize emin
+                misiniz? Bu işlem geri alınamaz.</p>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">İptal</button>
+                <button class="btn btn-danger" id="confirm-delete-btn" onclick="confirmDeleteFile()">
+                    <i data-lucide="trash-2"></i>
+                    <span>Sil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <main class="container">
+        <!-- Header -->
+        <header class="header" id="page-header">
+            <div class="header-left">
+                <a href="files.html" class="btn btn-outline" style="margin-right: var(--space-4);">
+                    <i data-lucide="arrow-left"></i>
+                </a>
+                <div>
+                    <h1 id="file-number">Yükleniyor...</h1>
+                    <p id="file-created-date" class="text-muted"></p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-danger" onclick="openDeleteModal()">
+                    <i data-lucide="trash-2"></i>
+                    <span>Dosyayı Sil</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Column - Details & Notes -->
+            <div class="grid-column" style="grid-column: span 2;">
+                <!-- Tabs -->
+                <div class="card">
+                    <div class="tabs">
+                        <div class="tabs-list" style="margin: var(--space-4);">
+                            <button class="tab-trigger active" onclick="switchTab('details')">Dosya Bilgileri</button>
+                            <button class="tab-trigger" onclick="switchTab('notes')">Süreç & Notlar</button>
+                        </div>
+
+                        <!-- Details Tab -->
+                        <div class="tab-content active" id="tab-details">
+                            <div class="card-content">
+                                <form id="file-details-form">
+                                    <div class="form-group">
+                                        <label for="edit-plaintiff">Davacı</label>
+                                        <input type="text" id="edit-plaintiff" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-reg-number">Dosya No</label>
+                                        <input type="text" id="edit-reg-number">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-subject">Dava Konusu</label>
+                                        <textarea id="edit-subject" rows="4" style="resize: vertical;"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="save-details-btn">
+                                        <i data-lucide="save"></i>
+                                        <span>Değişiklikleri Kaydet</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Notes Tab -->
+                        <div class="tab-content" id="tab-notes">
+                            <div class="card-content">
+                                <h3 style="margin-bottom: var(--space-4);">Notlar ve İşlem Geçmişi</h3>
+                                <p class="card-description" style="margin-bottom: var(--space-4);">Bu dosyaya dair
+                                    alınan notlar ve sistem kayıtları.</p>
+
+                                <!-- Add Note Form -->
+                                <div class="flex gap-2 mb-4">
+                                    <input type="text" id="new-note-input" placeholder="Yeni not ekle..."
+                                        style="flex: 1;">
+                                    <button class="btn btn-primary" onclick="addNote()">
+                                        <i data-lucide="send"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Notes List -->
+                                <div class="notes-list" id="notes-list">
+                                    <div class="loading-placeholder">
+                                        <div class="spinner"></div>
+                                        <span>Notlar yükleniyor...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Status & Documents -->
+            <div class="grid-column">
+                <!-- Status Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="info"></i>
+                            Durum
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="status-content">
+                            <div class="loading-placeholder">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="file-text"></i>
+                            Evraklar
+                        </h2>
+                        <span id="documents-count" class="text-muted" style="font-size: var(--font-size-sm);">(0)</span>
+                    </div>
+                    <div class="card-content">
+                        <!-- Upload Area -->
+                        <div class="form-group">
+                            <label>Yeni Evrak Ekle</label>
+                            <div class="file-upload-area" id="doc-upload-area" style="padding: var(--space-4);">
+                                <input type="file" id="doc-upload-input" hidden>
+                                <div class="file-upload-content">
+                                    <i data-lucide="upload"></i>
+                                    <span style="font-size: var(--font-size-sm);">Dosya yükle</span>
+                                </div>
+                            </div>
+                            <div id="doc-upload-progress" class="processing-indicator hidden">
+                                <div class="spinner"></div>
+                                <span>Yükleniyor...</span>
+                            </div>
+                        </div>
+
+                        <!-- Documents List -->
+                        <div class="documents-list" id="documents-list">
+                            <!-- Documents will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Adalet Takip Sistemi © 2024</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/file-detail.js"></script>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

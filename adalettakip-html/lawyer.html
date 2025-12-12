@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adalet Takip Sistemi - Avukat Dashboard">
+    <title>Avukat Paneli - Adalet Takip Sistemi</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Main App -->
+    <main class="container">
+        <!-- Header -->
+        <header class="header" id="page-header">
+            <div class="header-left">
+                <a href="index.html" class="btn btn-outline" style="margin-right: var(--space-4);">
+                    <i data-lucide="arrow-left"></i>
+                </a>
+                <div>
+                    <h1 id="lawyer-name">Yükleniyor...</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="badge badge-inactive" id="lawyer-status">-</span>
+                        <span class="text-muted" id="lawyer-return-date" style="font-size: var(--font-size-sm);"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="main-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: var(--space-6);">
+            <!-- Total Files Card -->
+            <div class="card">
+                <div class="card-header" style="padding-bottom: var(--space-2);">
+                    <h3 class="card-title" style="font-size: var(--font-size-sm); font-weight: 500;">Toplam Dosya</h3>
+                </div>
+                <div class="card-content" style="padding-top: 0;">
+                    <div id="stat-total" style="font-size: var(--font-size-3xl); font-weight: 700;">-</div>
+                    <p id="stat-open-closed" class="text-muted" style="font-size: var(--font-size-xs);">- Açık, - Kapalı
+                    </p>
+                </div>
+            </div>
+
+            <!-- Decisions Card -->
+            <div class="card">
+                <div class="card-header" style="padding-bottom: var(--space-2);">
+                    <h3 class="card-title" style="font-size: var(--font-size-sm); font-weight: 500;">Karar
+                        İstatistikleri</h3>
+                </div>
+                <div class="card-content" style="padding-top: 0;" id="decisions-content">
+                    <p class="text-muted" style="font-size: var(--font-size-sm);">Henüz karar yok.</p>
+                </div>
+            </div>
+
+            <!-- Placeholder Card -->
+            <div class="card">
+                <div class="card-header" style="padding-bottom: var(--space-2);">
+                    <h3 class="card-title" style="font-size: var(--font-size-sm); font-weight: 500;">Ajanda / Notlar
+                    </h3>
+                </div>
+                <div class="card-content" style="padding-top: 0;">
+                    <div
+                        style="height: 80px; background: var(--glass-bg); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center;">
+                        <span class="text-muted" style="font-size: var(--font-size-xs); text-align: center;">
+                            Kişisel Ajanda ve Takvim<br>(Çok Yakında)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Files Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="folder"></i>
+                    Son Atanan Dosyalar
+                </h2>
+            </div>
+            <div class="card-content" style="padding: 0;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Dosya No</th>
+                                <th>Davacı</th>
+                                <th class="hide-mobile">Konu</th>
+                                <th>Durum</th>
+                                <th class="text-right">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-files-body">
+                            <tr>
+                                <td colspan="5" class="text-center" style="padding: var(--space-8);">
+                                    <div class="loading-placeholder">
+                                        <div class="spinner"></div>
+                                        <span>Yükleniyor...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Adalet Takip Sistemi © 2024</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/lawyer.js"></script>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

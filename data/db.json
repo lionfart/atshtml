@@ -1,0 +1,1593 @@
+{
+  "lawyers": [
+    {
+      "id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "name": "bahri kaya",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 20
+    },
+    {
+      "id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "name": "simge kaya",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 20
+    },
+    {
+      "id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "name": "salih",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 19
+    },
+    {
+      "id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "name": "galip",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 19
+    },
+    {
+      "id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "name": "simge",
+      "status": "ACTIVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 12
+    },
+    {
+      "id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "name": "xc",
+      "status": "ACTIVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 11
+    },
+    {
+      "id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "name": "s",
+      "status": "ACTIVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 13
+    },
+    {
+      "id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "name": "d",
+      "status": "ACTIVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 12
+    },
+    {
+      "id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "name": "h",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 10
+    },
+    {
+      "id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "name": "d",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 10
+    },
+    {
+      "id": "379ad294-168c-4c1d-b5b7-b42a21b43b46",
+      "name": "ds",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 0
+    },
+    {
+      "id": "admin_id",
+      "name": "Administrator",
+      "username": "admin",
+      "password_hash": "$2b$10$2KYkrlcGx0Of0ExsgNDgGuAK0moZ8TljOxT2g6HArFEaStIge.j1a",
+      "role": "ADMIN",
+      "status": "ON_LEAVE",
+      "missed_assignments_count": 0,
+      "assigned_files_count": 0,
+      "leave_return_date": "2025-12-07"
+    }
+  ],
+  "file_cases": [
+    {
+      "id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "registration_number": "2025/0146",
+      "plaintiff": "Ali",
+      "subject": "Tapu iptal ve tescil davası",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T20:05:39.449Z",
+      "status": "OPEN",
+      "latest_activity_type": "Diğer",
+      "latest_activity_date": "2025-12-06T21:09:19.173Z",
+      "latest_decision_result": "DAVA KABUL"
+    },
+    {
+      "id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "registration_number": "2025/0145",
+      "plaintiff": "Antalya Vakıflar Bölge Müdürlüğü",
+      "subject": "Fenni mesul idari para cezası iptali ve kuruma atfı",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:27:18.207Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e50a7434-da3e-4dbd-a423-7cdc136352cd",
+      "registration_number": "2025/0144",
+      "plaintiff": "Bayındırlar Yapı Anonim Şirketi",
+      "subject": "Konkordato kararının yapım işi sözleşmelerine etkisi",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:16:27.699Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "d6f0997c-6ef5-4216-9e61-769d6f27bdc8",
+      "registration_number": "2025/0143",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:07:03.585Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c9088634-27a0-4863-b194-bed2d3170b1d",
+      "registration_number": "2025/0142",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T19:06:58.765Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "71b866a2-adb6-4254-b6f8-2cae78fe3bf6",
+      "registration_number": "2025/0141",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:06:55.727Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "033f2770-cbf8-4822-8c54-87ec0ec8cf37",
+      "registration_number": "2025/0140",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:06:51.390Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "8749e9c5-382a-4372-801b-768b76e31f38",
+      "registration_number": "2025/0139",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T19:06:46.482Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "62f6f9a9-6362-42bf-a3a7-033230a7033c",
+      "registration_number": "2025/0138",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:06:42.586Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "d7a3f0bf-5380-4776-8c97-7c2652373810",
+      "registration_number": "2025/0137",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:06:38.618Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "9f702e02-5f5b-4c86-89ca-2e501d719910",
+      "registration_number": "2025/0136",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:06:35.225Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e9baaea8-414b-4c84-b900-b5894762c476",
+      "registration_number": "2025/0135",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:06:31.677Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "6a12beca-db1d-4a61-9811-48e96d3a2bd8",
+      "registration_number": "2025/0134",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:06:28.550Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f14df544-b161-4a8b-9ba3-be4a70125543",
+      "registration_number": "2025/0133",
+      "plaintiff": "asdasd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:06:24.553Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c245fad5-7134-442b-becf-da5b92ca74bf",
+      "registration_number": "2025/0132",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:06:20.826Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "09a2fefe-1826-40b1-8489-13042920d4f3",
+      "registration_number": "2025/0131",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:06:15.961Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ffcc668e-019d-43e2-8468-8cecada91b6f",
+      "registration_number": "2025/0130",
+      "plaintiff": "sad",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T19:06:09.374Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e92f861d-7f07-4e3f-8f82-6784ad94713b",
+      "registration_number": "2025/0129",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:06:05.655Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "bc8e3c99-a4d7-4a17-bdef-87105ca72311",
+      "registration_number": "2025/0128",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:06:00.814Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "92780d90-b945-4712-8cbb-d9134853d096",
+      "registration_number": "2025/0127",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T19:05:56.573Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b61b2df4-9c34-4fae-be50-9009539f0a83",
+      "registration_number": "2025/0126",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:05:51.124Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "25058ac6-783f-436b-9c33-c8bd746b571c",
+      "registration_number": "2025/0125",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:05:38.101Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "507c322c-2867-48c9-93a1-41aa4cf23962",
+      "registration_number": "2025/0124",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T19:05:29.478Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "71d4a3f0-ff2a-48cc-857e-5403fc6cd161",
+      "registration_number": "2025/0123",
+      "plaintiff": "sda",
+      "subject": "asd",
+      "lawyer_id": "1bee27ed-61e5-4229-9b58-5b8e81f38d5a",
+      "created_at": "2025-12-06T19:05:25.402Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "d2d80ca8-8152-4c06-aff0-46432b20e0d8",
+      "registration_number": "2025/0122",
+      "plaintiff": "Bayındırlar Yapı A.Ş.",
+      "subject": "Konkordato sonrası yapım işi devamı ve hak ediş ödemeleri",
+      "lawyer_id": "23b4ca15-1dad-493b-bfbd-e5e605c9cb2e",
+      "created_at": "2025-12-06T19:05:17.058Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ec43f706-ea50-45a5-b463-484e0861429f",
+      "registration_number": "2025/0121",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T18:07:57.781Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "5824654a-b448-4aba-8156-742b79111f10",
+      "registration_number": "2025/0120",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:07:54.943Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "328585d4-4c64-456e-9cfd-160f5678bdc8",
+      "registration_number": "2025/0119",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:07:50.738Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "68f291b3-0df4-46a0-9e30-ba6b5b18e22c",
+      "registration_number": "2025/0118",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:07:47.287Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b3bea365-ef01-4c81-8412-5d8df4061a98",
+      "registration_number": "2025/0117",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:07:43.231Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "8a2076b3-8b91-4dfb-b1a4-b2d2b9cab0a6",
+      "registration_number": "2025/0116",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:07:37.797Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "bf13a33c-c2c6-45cc-b82e-41b0620fbd67",
+      "registration_number": "2025/0115",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:07:31.917Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "db868590-0854-4493-bb62-47df3c47df14",
+      "registration_number": "2025/0114",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:07:27.445Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "7a7fa378-3b40-4d9b-9f46-11b2bc4ca055",
+      "registration_number": "2025/0113",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:07:19.929Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ed571878-5530-425d-b8ba-c803c0378d7d",
+      "registration_number": "2025/0112",
+      "plaintiff": "sad",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:07:15.273Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "0d516beb-eb6f-4854-9a01-1006b5e30773",
+      "registration_number": "2025/0111",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:07:10.315Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "762d4013-70fa-4a3e-a4a1-567efeb271e9",
+      "registration_number": "2025/0110",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:07:05.548Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f95e7e60-32e3-4a21-8aac-df8014239c03",
+      "registration_number": "2025/0109",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T18:07:00.521Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "0084b9d2-03a0-4877-9cda-6370524ca57a",
+      "registration_number": "2025/0108",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:06:56.037Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "13cc37b6-557a-4902-9045-2ad13422c303",
+      "registration_number": "2025/0107",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:06:50.197Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "28269b87-5e87-4c62-8053-b049275e3e2e",
+      "registration_number": "2025/0106",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T18:06:42.181Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "481b3402-0467-4819-9312-36de7efe9915",
+      "registration_number": "2025/0105",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:06:37.998Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c0146f16-a794-44ed-b452-33035f82dadf",
+      "registration_number": "2025/0104",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:06:33.263Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "02986a0e-292f-42da-9945-978a2a9522e0",
+      "registration_number": "2025/0103",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T18:06:17.105Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c000af73-f2cf-4d7c-b1be-535f295c62e6",
+      "registration_number": "2025/0102",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:06:13.909Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "198136fd-2c9c-4c21-b8cf-e5e61ae39ad0",
+      "registration_number": "2025/0101",
+      "plaintiff": "sad",
+      "subject": "Görüş Hk.",
+      "lawyer_id": "4ec7a621-890c-4ff8-9fc8-9c35b53c6751",
+      "created_at": "2025-12-06T18:06:12.381Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "170627ac-7d7a-41e5-90bc-46139353e699",
+      "registration_number": "2025/0100",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:47.492Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "604f0fcb-d182-45eb-bdbd-4f469180c414",
+      "registration_number": "2025/0099",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:44.996Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "3adb9efa-4496-4417-9205-47cf76176d9e",
+      "registration_number": "2025/0098",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:41.586Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "93ba2711-b7db-469f-a70d-fffa4f306d7d",
+      "registration_number": "2025/0097",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:37.348Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "993cf82c-66d8-4144-bd0d-bfca19a5831d",
+      "registration_number": "2025/0096",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:34.016Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "04d73735-8c0b-4195-b167-765f4d234180",
+      "registration_number": "2025/0095",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:30.749Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "85098457-720d-4ce1-bc2c-e4ffd6af7842",
+      "registration_number": "2025/0094",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:26.693Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "19397a29-05c0-479b-aacd-19c4d3ea1bd5",
+      "registration_number": "2025/0093",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:23.088Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "27e520d2-d757-4fa0-bcd5-2cc76a3f6fa0",
+      "registration_number": "2025/0092",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:19.505Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "44daba49-d3b7-4b2e-b2d7-f0b61cb72178",
+      "registration_number": "2025/0091",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:16.129Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ed937241-5afe-41ab-841b-13bffeef162b",
+      "registration_number": "2025/0090",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:12.545Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "3398f182-8e05-41c6-90f2-5a2c79b3745c",
+      "registration_number": "2025/0089",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:09.148Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e48d04ef-3fba-4db4-b6df-f6402ba7c330",
+      "registration_number": "2025/0088",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:02:04.994Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b5516c49-3e4a-4ffc-af22-fc87437bca45",
+      "registration_number": "2025/0087",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "02b072af-f209-4eb9-a32e-758c95ebc5df",
+      "created_at": "2025-12-06T18:02:01.574Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c70001dc-8e36-4088-afe3-175ecd2da274",
+      "registration_number": "2025/0086",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T18:00:24.074Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "401260ed-e559-4f1c-9ac1-b04b1209605d",
+      "registration_number": "2025/0085",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "3385d007-71bd-404b-b0f7-d1ec2d9ef521",
+      "created_at": "2025-12-06T18:00:20.880Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "8d6000aa-04b5-4754-ac1a-1cdbdf355372",
+      "registration_number": "2025/0084",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T18:00:17.831Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "fad42ce0-c45d-4ad9-a750-39ab4201ba2e",
+      "registration_number": "2025/0083",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T18:00:15.049Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ba5b7093-bf38-464d-b9f5-d2219763e2e0",
+      "registration_number": "2025/0082",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T18:00:12.147Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "a9716743-6567-413a-b575-aeab0e8eed55",
+      "registration_number": "2025/0081",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T18:00:08.397Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "90e2a160-5786-42c3-bc3d-869d746b1024",
+      "registration_number": "2025/0080",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:59:56.233Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f1c4002a-edbf-4a48-aee1-7febecf9bc54",
+      "registration_number": "2025/0079",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:59:51.271Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "1d3636ac-c369-41c6-ad5a-da73062b53d9",
+      "registration_number": "2025/0078",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:59:48.890Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "0ae54574-d47e-4e03-b162-b81830be09a3",
+      "registration_number": "2025/0077",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:59:43.651Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e37d948e-d979-4f33-a7a3-5f4f83fdcfeb",
+      "registration_number": "2025/0076",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:59:40.689Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e47fced8-3723-4690-a9fa-389a1fa00e21",
+      "registration_number": "2025/0075",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:59:36.883Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "e9a49f51-bc35-4593-b9e4-60140c3d7d54",
+      "registration_number": "2025/0074",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:59:34.546Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "dc89bed3-d673-4529-b5cc-3de05cca1876",
+      "registration_number": "2025/0073",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:59:11.036Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "3ff72a5e-fb13-46ba-a76c-85019d185960",
+      "registration_number": "2025/0072",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:59:06.262Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "6bf59271-e29b-4c7c-bc4f-b4ba8288adfb",
+      "registration_number": "2025/0071",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:58:59.462Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b8dc5684-21ea-490e-bc3a-5a3b695464da",
+      "registration_number": "2025/0070",
+      "plaintiff": "asd",
+      "subject": "das",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:58:53.939Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "2eedbd0f-bf2e-464d-998a-c4a00346878e",
+      "registration_number": "2025/0069",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:49:39.577Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ed0706ca-15aa-4b0a-b707-fd4c3a27b1b2",
+      "registration_number": "2025/0068",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:49:36.423Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f3bacf6c-1e54-4b16-bc0f-888b71f1405e",
+      "registration_number": "2025/0067",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:49:31.700Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "475531e6-86bc-425a-aa4a-faa6f52208e2",
+      "registration_number": "2025/0066",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:49:28.449Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "5ad8d192-12d1-4b67-9393-2b4de81c8b0b",
+      "registration_number": "2025/0065",
+      "plaintiff": "asd",
+      "subject": "ads",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:49:25.092Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "590d6091-ef15-4c4e-bf86-1472a39a5b7f",
+      "registration_number": "2025/0064",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:49:22.304Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "90bb333e-519b-4c16-9401-33109b1f4004",
+      "registration_number": "2025/0063",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:49:17.904Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "14a7544a-7e8e-4a83-9d17-0d60b023c0cc",
+      "registration_number": "2025/0062",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:49:11.109Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ed5950f7-8fba-4b53-ad11-9b98ab6efbce",
+      "registration_number": "2025/0061",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:49:07.690Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "2ba66f91-f45e-4f3d-be89-26bb5f5176c4",
+      "registration_number": "2025/0060",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:49:05.298Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f1a38d4d-29b5-4129-8171-fc46b876db98",
+      "registration_number": "2025/0059",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:49:02.648Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f201061f-2767-4aa4-ae27-d95a3d000f27",
+      "registration_number": "2025/0058",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:48:57.103Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "52453a83-c81a-45f5-89d9-60a95236e701",
+      "registration_number": "2025/0057",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:48:47.469Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "bc0722dc-9b8d-42d0-9617-0b34fb2045c0",
+      "registration_number": "2025/0056",
+      "plaintiff": "asda",
+      "subject": "sad",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:48:46.161Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "695be0a3-c141-426e-a907-eb4994f75a12",
+      "registration_number": "2025/0055",
+      "plaintiff": "asdasd",
+      "subject": "adsd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:48:45.029Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "aadaeec4-7f79-4700-9cdb-2ff518820ffc",
+      "registration_number": "2025/0054",
+      "plaintiff": "asd",
+      "subject": "ads",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:48:42.909Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "1ecefcbd-277d-49af-a46d-2fbe14176f69",
+      "registration_number": "2025/0053",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:48:41.522Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "7f0ef237-950a-4a08-b745-4d75592bc787",
+      "registration_number": "2025/0052",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:48:39.889Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "aad55812-9534-4070-ac23-dc58c3857431",
+      "registration_number": "2025/0051",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:48:38.297Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "39078df5-7d2a-447e-b232-7844e3593242",
+      "registration_number": "2025/0050",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:48:36.501Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "80b9e368-c9eb-46cb-b08e-823ffc694364",
+      "registration_number": "2025/0049",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:48:32.742Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "47e4a0bd-7dea-422a-9cfb-f5ab24c1506e",
+      "registration_number": "2025/0048",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:48:30.927Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "d918494d-b88a-4542-b8b1-92fb2fb7608f",
+      "registration_number": "2025/0047",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:48:23.132Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "11469907-56db-4698-b105-50a801d3c426",
+      "registration_number": "2025/0046",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:48:18.763Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "a6c8e51b-9ef9-4154-a184-ac9fc5f9d20a",
+      "registration_number": "2025/0045",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:48:13.246Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "347519d0-80ff-406e-9e73-d5b609d1181d",
+      "registration_number": "2025/0044",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:48:08.771Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "03cc3612-0cdb-4287-951c-4466d726f0b3",
+      "registration_number": "2025/0043",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:48:07.376Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "579d9ab1-0e65-41e9-af4f-52ab13caaba9",
+      "registration_number": "2025/0042",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:48:06.069Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c6bd84d1-5ac2-4436-bea6-9234d35b3679",
+      "registration_number": "2025/0041",
+      "plaintiff": "adas",
+      "subject": "asd",
+      "lawyer_id": "8dcb0934-d068-435e-b8d9-cad1549662e5",
+      "created_at": "2025-12-06T17:48:04.590Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "4aae5e42-7719-4805-a4f3-e7c6c7099051",
+      "registration_number": "2025/0040",
+      "plaintiff": "asd",
+      "subject": "Görüş Hk.",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:47:55.071Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ac9afd04-e222-44e1-b26e-2daf097528da",
+      "registration_number": "2025/0039",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:38:33.971Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c80fe81a-c58f-4551-bba4-9358a5f2579c",
+      "registration_number": "2025/0038",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:38:30.586Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "7ac5e772-91c0-41b0-8922-68bdc757b7c2",
+      "registration_number": "2025/0037",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:38:27.090Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "3429be29-40e1-4edf-9770-4bf1eeab853f",
+      "registration_number": "2025/0036",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:38:24.464Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "8450db1f-f985-498c-8141-c1ed0168bf21",
+      "registration_number": "2025/0035",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:38:20.114Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "4de65528-8fd0-4fae-bc8c-7ddc886f62de",
+      "registration_number": "2025/0034",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:38:13.949Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "6e581364-a35d-431b-8680-3abaabacf7c2",
+      "registration_number": "2025/0033",
+      "plaintiff": "asda",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:38:09.285Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "1e45545a-00d2-4f94-81b1-7cdd28ca0bae",
+      "registration_number": "2025/0032",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:38:08.052Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "4a6ca3a3-8808-4172-b2cd-3acc5fef5066",
+      "registration_number": "2025/0031",
+      "plaintiff": "asdasd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:38:06.818Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "6169fa91-ca6b-42a6-8091-92d4189df917",
+      "registration_number": "2025/0030",
+      "plaintiff": "asd",
+      "subject": "asdas",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:38:05.451Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ab4fc702-c314-4e82-aedb-f7e5d1af8bd3",
+      "registration_number": "2025/0029",
+      "plaintiff": "asdasd",
+      "subject": "asdas",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:38:01.806Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "71c9c37b-cffe-4a12-801b-48813b70bde1",
+      "registration_number": "2025/0028",
+      "plaintiff": "asdas",
+      "subject": "asda",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:38:00.123Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "04a476d5-f049-4249-8d90-a34f70ab4260",
+      "registration_number": "2025/0027",
+      "plaintiff": "asdas",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:37:58.845Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "d4fce102-dd65-4024-b8f3-65f5b35cbd25",
+      "registration_number": "2025/0026",
+      "plaintiff": "asdas",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:37:57.415Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "810c7f73-9350-4ad6-8a40-f5859866afb4",
+      "registration_number": "2025/0025",
+      "plaintiff": "asdas",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:37:56.070Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b197303c-db42-47d4-8dd4-1e49d62ddf26",
+      "registration_number": "2025/0024",
+      "plaintiff": "asdas",
+      "subject": "asdas",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:37:54.885Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "2b3da941-151e-4a8a-a12e-2dfb14133e4b",
+      "registration_number": "2025/0023",
+      "plaintiff": "asdas",
+      "subject": "asdas",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:37:52.973Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b9d642bb-ae55-4493-a277-8a9d9e921eea",
+      "registration_number": "2025/0022",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:37:48.191Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "15b7bfee-38f2-4e24-8eea-5ba36370f763",
+      "registration_number": "2025/0021",
+      "plaintiff": "asdas",
+      "subject": "asda",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:37:35.886Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "b1fc7dc0-3e78-488c-986e-f52b9ab44d31",
+      "registration_number": "2025/0020",
+      "plaintiff": "asdas",
+      "subject": "asdas",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:37:31.419Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "fa7fb09a-0c9e-4636-97f6-49a95050e2dc",
+      "registration_number": "2025/0019",
+      "plaintiff": "asdas",
+      "subject": "asda",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:37:27.620Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "0902cddd-a78c-409c-9514-20ef519d8ba5",
+      "registration_number": "2025/0018",
+      "plaintiff": "aasda",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:37:21.914Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "31819914-00ff-498a-b026-e5dbf5209fba",
+      "registration_number": "2025/0017",
+      "plaintiff": "asdas",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:37:15.808Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "cc8a1069-4d1a-47a1-9308-0a4d87a3ecca",
+      "registration_number": "2025/0016",
+      "plaintiff": "asdas",
+      "subject": "asdas",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:37:14.362Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ace4ac08-74e2-4f91-b1c4-7c7db0eac09e",
+      "registration_number": "2025/0015",
+      "plaintiff": "asdas",
+      "subject": "asdas",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:37:12.946Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ff761496-a6b3-4075-a4c8-333f1150e0ca",
+      "registration_number": "2025/0014",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:37:11.386Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c5301ee5-f20b-46bb-8c90-b654f9cf09d1",
+      "registration_number": "2025/0013",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:37:05.811Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "a01e8bb7-13e9-4404-8d00-023069369476",
+      "registration_number": "2025/0012",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:37:04.144Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "a934ad27-f023-41d2-8d77-cfac0ac2a24e",
+      "registration_number": "2025/0011",
+      "plaintiff": "asd",
+      "subject": "Görüş Hk.",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:37:02.627Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ddb91722-2f46-4835-aa6b-9f698b2420e2",
+      "registration_number": "2025/0010",
+      "plaintiff": "asadsd",
+      "subject": "asd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:32:06.455Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "c0a1f297-a35d-431c-bc66-685872edccda",
+      "registration_number": "2025/0009",
+      "plaintiff": "asdasd",
+      "subject": "asdsd",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:31:56.895Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "9c94b9ce-eed1-4f94-ab89-5bb9f82a6bd7",
+      "registration_number": "2025/0008",
+      "plaintiff": "asd",
+      "subject": "asda",
+      "lawyer_id": "dfc4b03d-3cf4-432c-97a0-10be26d10bc4",
+      "created_at": "2025-12-06T17:31:52.854Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "45908172-5c33-4fe4-9709-39ef24019bfb",
+      "registration_number": "2025/0007",
+      "plaintiff": "asdasdss",
+      "subject": "asdasd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:31:36.694Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "5d37ee11-1b0c-4377-ae63-12f3a22b2d6e",
+      "registration_number": "2025/0006",
+      "plaintiff": "asdasda",
+      "subject": "asdas",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:31:34.709Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "cc19fe24-0a41-476e-803b-bd6383eb4c6e",
+      "registration_number": "2025/0005",
+      "plaintiff": "sad",
+      "subject": "ad",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:31:31.825Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f8058763-b603-4411-b529-67c979ec30fb",
+      "registration_number": "2025/0004",
+      "plaintiff": "asd",
+      "subject": "asd",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:31:23.422Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "df734340-0c81-4e0e-84d3-29e1ee3eed4d",
+      "registration_number": "2025/0003",
+      "plaintiff": "asda",
+      "subject": "asd",
+      "lawyer_id": "d7fdeb63-8ed4-4552-b999-218f9a17097e",
+      "created_at": "2025-12-06T17:31:11.788Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "ec7db4f8-b1a6-4cc3-9bb1-4db40de6666f",
+      "registration_number": "2025/0002",
+      "plaintiff": "ss",
+      "subject": "asd",
+      "lawyer_id": "baa2683e-6a95-4fca-8512-49ca60828157",
+      "created_at": "2025-12-06T17:31:04.875Z",
+      "status": "OPEN"
+    },
+    {
+      "id": "f68ec5db-f3fc-43fe-8724-b27540950458",
+      "registration_number": "2025/0001",
+      "plaintiff": "aydın",
+      "subject": "Görüş Hk.",
+      "lawyer_id": "7f3548ea-0e13-4118-a73c-ce35ed60faae",
+      "created_at": "2025-12-06T17:30:39.019Z",
+      "status": "OPEN"
+    }
+  ],
+  "documents": [
+    {
+      "id": "fb5f9ace-fda1-45ff-9a63-c45284b7e0d8",
+      "name": "örnekçöp.txt",
+      "type": "text/plain",
+      "upload_date": "2025-12-06T19:55:48.163Z",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "path": "C:\\Users\\Bahri\\dyad-apps\\wild-lobster-skip\\uploads\\cpzthgt8cyn25ig7l90xuqpfs.txt"
+    },
+    {
+      "id": "f176a074-f6df-4788-a929-7eb2ff27e304",
+      "name": "4530172-2.pdf",
+      "type": "application/pdf",
+      "upload_date": "2025-12-06T19:56:16.683Z",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "path": "C:\\Users\\Bahri\\dyad-apps\\wild-lobster-skip\\uploads\\tutvjoxyqa6yv924a52v6ql7c.pdf"
+    },
+    {
+      "id": "dace0ff0-77e3-48e4-8a1d-2b2184ef40d3",
+      "name": "cx.txt",
+      "type": "text/plain",
+      "upload_date": "2025-12-06T19:57:31.772Z",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "path": "C:\\Users\\Bahri\\dyad-apps\\wild-lobster-skip\\uploads\\b1o7zw9dcv0m2m80dfezzlxn4.txt"
+    },
+    {
+      "id": "8e7dec06-d015-47d9-8f50-712d41407e69",
+      "name": "hjd.txt",
+      "type": "text/plain",
+      "upload_date": "2025-12-06T20:11:11.003Z",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "path": "C:\\Users\\Bahri\\dyad-apps\\wild-lobster-skip\\uploads\\leh49clwqg0qjtrwgkbbeiw76.txt"
+    },
+    {
+      "id": "d38f6f78-7e21-47d6-a92b-9d9f45192bec",
+      "name": "cx.txt",
+      "type": "text/plain",
+      "upload_date": "2025-12-06T20:12:40.154Z",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "path": "C:\\Users\\Bahri\\dyad-apps\\wild-lobster-skip\\uploads\\d7g30iqu7f4qtu9i9fuuu7m5n.txt"
+    },
+    {
+      "id": "eed98ac6-3aa6-412c-9711-68af67b813a0",
+      "name": "document.pdf",
+      "type": "application/pdf",
+      "upload_date": "2025-12-06T21:09:03.455Z",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "path": "C:\\Users\\Bahri\\dyad-apps\\wild-lobster-skip\\uploads\\i1t473r0iwavhdqkzdvmmdg82.pdf",
+      "analysis": {
+        "type": "Diğer",
+        "summary": "Tür: Diğer\nKonu: Kamu yapısında fenni mesuliyet üstlenen teknik personele kesilen idari para cezalarının iptal edilip edilemeyeceği, cezanın kuruma mı yoksa personele mi verileceği ve tekil mi çoğul mu olacağı hususunda hukuki görüş talebi.\nTaraf: Yok",
+        "subject": "Kamu yapısında fenni mesuliyet üstlenen teknik personele kesilen idari para cezalarının iptal edilip edilemeyeceği, cezanın kuruma mı yoksa personele mi verileceği ve tekil mi çoğul mu olacağı hususunda hukuki görüş talebi."
+      }
+    }
+  ],
+  "system_settings": {
+    "last_assignment_index": 8,
+    "catchup_burst_limit": 2,
+    "catchup_sequence_count": 1,
+    "gemini_api_key": "AIzaSyC23IxBEEf5K4rHoUgS1a0CX0bqslbBsSA"
+  },
+  "notes": [
+    {
+      "id": "272f0c99-fdb3-4e1d-980f-f17136dfda09",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "Yeni evrak yüklendi: 4530172-2.pdf",
+      "created_at": "2025-12-06T19:27:54.489Z"
+    },
+    {
+      "id": "7cb49bc5-0f67-4aea-b52e-120e76639d40",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "Yeni evrak yüklendi: 1763310446289.pdf",
+      "created_at": "2025-12-06T19:28:12.410Z"
+    },
+    {
+      "id": "f5774089-1187-40f4-b535-6832148f956e",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "⚠️ Evrak analizi başarısız oldu: PDF parsing failed.",
+      "created_at": "2025-12-06T19:33:50.313Z"
+    },
+    {
+      "id": "52fa2fd1-f9c0-4514-89b6-5d4138bd6e5b",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "⚠️ Evrak analizi başarısız oldu: PDF okunamadı. Dosya şifreli, bozuk veya desteklenmeyen formatta olabilir. Lütfen JPG/PNG formatında yüklemeyi deneyin.",
+      "created_at": "2025-12-06T19:37:22.558Z"
+    },
+    {
+      "id": "2fc688a7-2179-473d-ab6a-8dd2b472d08f",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "📤 Yeni evrak eklendi: örnekçöp.txt",
+      "created_at": "2025-12-06T19:37:38.636Z"
+    },
+    {
+      "id": "01cf649f-04dd-4e02-98de-671aeae650fe",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**Sistem Tarafından Otomatik Analiz**\n📄 Evrak: örnekçöp.txt\n\n🔎 **Bulgular:**\n- **Konu (Tahmini):** Tapu İptal ve Tescil Davası\n- **İlgili Kişi/Kurum:** ali emre",
+      "created_at": "2025-12-06T19:37:59.086Z"
+    },
+    {
+      "id": "535b49c5-349a-43f2-a3a9-608e7da5f270",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "⚠️ Evrak analizi başarısız oldu: PDF okunamadı. Dosya şifreli, bozuk veya desteklenmeyen formatta olabilir. Lütfen JPG/PNG formatında yüklemeyi deneyin.",
+      "created_at": "2025-12-06T19:38:21.389Z"
+    },
+    {
+      "id": "1745ad63-b7b5-4fc5-8220-2d755ad30ff2",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**Sistem Tarafından Otomatik Analiz**\n📄 Evrak: 11081628 sayılı esas görüş Aylin.pdf\n\n🔎 **Bulgular:**\n- **Konu (Tahmini):** Bayındırlar Yapı A.Ş. hakkında verilen konkordato mühleti kararı ve bir alacaklı tarafından uygulanan ihtiyati haciz nedeniyle, ortağı olduğu iş ortaklıkları tarafından yürütülen yapım işlerinin devamlılığı ve hak ediş ödemelerinin hukuki durumu hakkında görüş bildirilmesi.\n- **İlgili Kişi/Kurum:** Bayındırlar Yapı A.Ş.",
+      "created_at": "2025-12-06T19:46:10.586Z"
+    },
+    {
+      "id": "deb797e4-64b6-4a02-b802-820301d297f3",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**Sistem Tarafından Otomatik Analiz**\n📄 Evrak: örnekçöp.txt\n\n🔎 **Bulgular:**\n- **Konu (Tahmini):** Tapu iptal ve tescil davası\n- **İlgili Kişi/Kurum:** ali emre",
+      "created_at": "2025-12-06T19:46:46.506Z"
+    },
+    {
+      "id": "3a28c792-a828-44d8-9274-000136ccc759",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**Sistem Tarafından Otomatik Analiz**\n📄 Evrak: 4530172-2.pdf\n\n🔎 **Bulgular:**\n- **Konu (Tahmini):** Kepez Belediyesi tarafından kesilen, özel okul ve yüzme havuzu inşaatında ruhsat eki projesine aykırı imalatlar ve bunların zamanında bildirilmemesi nedeniyle uygulanan idari para cezalarına itiraz.\n- **İlgili Kişi/Kurum:** Deniz AKGÖZ",
+      "created_at": "2025-12-06T19:47:24.533Z"
+    },
+    {
+      "id": "e66f415c-7210-4cbb-86b5-7c0de358b88d",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**📜 Dava Dilekçesi Yüklendi**\nEvrak: örnekçöp.txt\n\n🔎 **Özet/Analiz:**\n- **Analiz Türü:** Dava Dilekçesi\n- **Konu:** Konya'da bir tapu iptal ve tescil davası.\n- **İlgili Taraf:** ali emre",
+      "created_at": "2025-12-06T19:55:50.238Z"
+    },
+    {
+      "id": "0af0543f-9c08-477a-8828-374ddd030166",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**📄 Diğer Yüklendi**\nEvrak: 4530172-2.pdf\n\n🔎 **Özet/Analiz:**\n- **Analiz Türü:** Diğer\n- **Konu:** Kepez Belediyesi tarafından İmar Kanunu'na aykırı yapım faaliyetleri nedeniyle kesilen idari para cezasına yapılan itiraz.\n- **İlgili Taraf:** Deniz AKGÖZ",
+      "created_at": "2025-12-06T19:56:38.796Z"
+    },
+    {
+      "id": "b14109be-5a15-4d2e-93cb-c928fb990e09",
+      "file_case_id": "495a83bd-090e-4113-99e9-e0da907f4a90",
+      "lawyer_id": null,
+      "content": "**📈 İstinaf Başvurusu Yüklendi**\nEvrak: cx.txt\n\n🔎 **Özet/Analiz:**\n- **Analiz Türü:** İstinaf Başvurusu\n- **Konu:** Antalya'da tapu iptali ve tescili talebi\n- **İlgili Taraf:** Ali Mustafa",
+      "created_at": "2025-12-06T19:57:33.878Z"
+    },
+    {
+      "id": "a2571e0b-4ecf-4aa3-987d-a424b960611e",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "lawyer_id": null,
+      "content": "**👨‍⚖️ Gerekçeli Karar Yüklendi**\nEvrak: hjd.txt\n\n🔎 **Özet/Analiz:**\n- **Analiz Türü:** Gerekçeli Karar\n- **Konu:** Tapu iptal ve tescil davası\n- **İlgili Taraf:** Ali Ayşe",
+      "created_at": "2025-12-06T20:06:38.451Z"
+    },
+    {
+      "id": "b17ac579-9bad-4e11-bad9-871ff9bd1122",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "lawyer_id": null,
+      "content": "**👨‍⚖️ Gerekçeli Karar Yüklendi**\nEvrak: hjd.txt\n\n🔎 **Özet/Analiz:**\n- **Analiz Türü:** Gerekçeli Karar\n- **Konu:** Tapu iptal ve tescil davasında işlemin iptali talebi\n- **İlgili Taraf:** ali ayşe",
+      "created_at": "2025-12-06T20:11:17.940Z"
+    },
+    {
+      "id": "04d5a71d-31c9-44af-b233-4b421bc46487",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "lawyer_id": null,
+      "content": "📤 Yeni evrak eklendi: cx.txt",
+      "created_at": "2025-12-06T20:12:40.154Z"
+    },
+    {
+      "id": "eee56c86-eb67-45b4-83f5-9aeae1a84667",
+      "file_case_id": "65b99a61-3956-4cc9-b47a-f3c5470a25f0",
+      "lawyer_id": null,
+      "content": "**📄 Diğer Yüklendi**\nEvrak: document.pdf\n\n🔎 **Özet/Analiz:**\n- **Analiz Türü:** Diğer\n- **Konu:** Kamu yapısında fenni mesuliyet üstlenen teknik personele kesilen idari para cezalarının iptal edilip edilemeyeceği, cezanın kuruma mı yoksa personele mi verileceği ve tekil mi çoğul mu olacağı hususunda hukuki görüş talebi.\n- **İlgili Taraf:** Yok",
+      "created_at": "2025-12-06T21:09:19.173Z"
+    }
+  ]
+}
