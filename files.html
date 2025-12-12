@@ -50,11 +50,32 @@
 
         <!-- Search & Filters Card -->
         <div class="card" style="margin-bottom: var(--space-6);">
-            <div class="card-header">
-                <div class="search-input-wrapper" style="flex: 1; max-width: 600px;">
-                    <i data-lucide="search"></i>
-                    <input type="text" id="search-input" placeholder="Dosya no, davacı veya konu ara..."
-                        oninput="handleSearchDebounced()">
+            <div class="card-content" style="padding: 15px;">
+                <div class="flex gap-4 responsive-controls"
+                    style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
+                    <div class="search-input-wrapper" style="flex: 2; min-width: 250px; position:relative;">
+                        <i data-lucide="search"
+                            style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:18px;"></i>
+                        <input type="text" id="search-input" placeholder="Dosya no, davacı veya konu ara..."
+                            class="form-control" style="padding-left:40px;" oninput="handleSearchDebounced()">
+                    </div>
+
+                    <div style="flex: 1; min-width: 150px;">
+                        <select id="filter-status" class="form-control" onchange="loadFiles()">
+                            <option value="">Tüm Durumlar</option>
+                            <option value="OPEN">Açık Dosyalar</option>
+                            <option value="CLOSED">Kapalı Dosyalar</option>
+                        </select>
+                    </div>
+
+                    <div style="flex: 1; min-width: 150px;">
+                        <select id="filter-sort" class="form-control" onchange="loadFiles()">
+                            <option value="date-desc">En Yeni</option>
+                            <option value="date-asc">En Eski</option>
+                            <option value="reg-desc">Dosya No (Azalan)</option>
+                            <option value="reg-asc">Dosya No (Artan)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>

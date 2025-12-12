@@ -5,13 +5,29 @@
 // ==========================================
 // ... (getFileCases, getFileCaseById, getLawyers SAME) ... //
 async function getFileCases(options = {}) {
-    let query = supabase.from('file_cases').select(`*, lawyers (id, name)`).order('created_at', { ascending: false });
+    let query = supabase.from('file_cases').select(`*, lawyers (id, name)`);
+
+    // Sort logic
+    if (options.sort === 'date-asc') query = query.order('created_at', { ascending: true });
+    else if (options.sort === 'reg-desc') query = query.order('registration_number', { ascending: false });
+    else if (options.sort === 'reg-asc') query = query.order('registration_number', { ascending: true });
+    else query = query.order('created_at', { ascending: false }); // Default
+
+    // Search
     if (options.search) {
         const term = `%${options.search.toLowerCase()}%`;
-        query = query.or(`plaintiff.ilike.${term},defendant.ilike.${term},court_case_number.ilike.${term},court_decision_number.ilike.${term},registration_number.ilike.${term}`);
+        query = query.or(`plaintiff.ilike.${term},defendant.ilike.${term},court_case_number.ilike.${term},court_decision_number.ilike.${term},registration_number.ilike.${term},subject.ilike.${term}`);
     }
+
+    // Filter by Status
+    if (options.status) query = query.eq('status', options.status);
+
+    // Filter by Lawyer
     if (options.lawyerId) query = query.eq('lawyer_id', options.lawyerId);
-    const { data, error } = await query; if (error) throw error;
+
+    const { data, error } = await query;
+    if (error) throw error;
+
     return (data || []).map(file => ({ ...file, lawyer_name: file.lawyers?.name || 'Atanmamış' }));
 }
 
