@@ -59,6 +59,16 @@ async function createLawyer(name, username, password) {
     return newLawyer;
 }
 
+function setupRealtimeLawyers(callback) {
+    supabase
+        .channel('public:lawyers')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'lawyers' }, (payload) => {
+            console.log('Avukat tablosu değişti:', payload);
+            callback();
+        })
+        .subscribe();
+}
+
 // ==========================================
 // File Cases & Smart Matching API
 // ==========================================
@@ -99,46 +109,87 @@ async function findMatchingCase(analysisResult) {
 
 async function createFileCase(fileData, file = null) {
     let selectedLawyerId = fileData.lawyer_id;
+
+    // A. Avukat Atama (Atomic DB Function)
     if (!selectedLawyerId) {
-        const settings = await getSystemSettings();
-        const lawyers = await getLawyers();
-        const activeLawyers = lawyers.filter(l => l.status === 'ACTIVE');
-        if (activeLawyers.length === 0) throw new Error('Atanabilecek aktif avukat yok.');
-        const assignedLawyer = await assignLawyer(lawyers, activeLawyers, settings);
-        selectedLawyerId = assignedLawyer.id;
-        await supabase.from('lawyers').update({ assigned_files_count: (assignedLawyer.assigned_files_count || 0) + 1 }).eq('id', selectedLawyerId);
+        // Use RPC to assign lawyer atomically in the database
+        // Burst limit is optional logic, for now round-robin is safer via SQL
+        const { data: assignedId, error: assignError } = await supabase.rpc('assign_next_lawyer_round_robin', { burst_limit: 2 });
+
+        if (assignError) {
+            console.error('Lawyer assignment RPC failed, fallback to JS logic:', assignError);
+            // Fallback JS Logic (Not concurrent safe but better than crashing)
+            const settings = await getSystemSettings();
+            const lawyers = await getLawyers();
+            const activeLawyers = lawyers.filter(l => l.status === 'ACTIVE');
+            if (activeLawyers.length === 0) throw new Error('Atanabilecek aktif avukat yok.');
+            const assigned = await assignLawyerLegacy(lawyers, activeLawyers, settings);
+            selectedLawyerId = assigned.id;
+        } else if (!assignedId) {
+            throw new Error('Aktif avukat bulunamadı (DB).');
+        } else {
+            selectedLawyerId = assignedId;
+        }
     }
-    const year = new Date().getFullYear();
-    const { count } = await supabase.from('file_cases').select('*', { count: 'exact', head: true }).gte('created_at', `${year}-01-01`);
-    const regNumber = `${year}/${String((count || 0) + 1).padStart(4, '0')}`;
+
+    // B. Dosya No Üretimi (Atomic DB Function)
+    // Eski yöntem: const count = ... (Race condition riski vardı)
+    // Yeni yöntem: RPC
+    const { data: regNumber, error: regError } = await supabase.rpc('get_next_case_number');
+
+    // Fallback if RPC fails (e.g. function not created yet)
+    let finalRegNumber = regNumber;
+    if (regError || !regNumber) {
+        console.warn('RPC get_next_case_number failed, using fallback.', regError);
+        const year = new Date().getFullYear();
+        const { count } = await supabase.from('file_cases').select('*', { count: 'exact', head: true }).gte('created_at', `${year}-01-01`);
+        finalRegNumber = `${year}/${String((count || 0) + 1 + Math.floor(Math.random() * 10)).padStart(4, '0')}`; // Random padding to minimize collision slightly
+    }
+
+    // Create File Case
     const { data: newFile, error } = await supabase.from('file_cases').insert([{
-        registration_number: regNumber, court_name: fileData.court_name, court_case_number: fileData.court_case_number,
-        plaintiff: fileData.plaintiff, defendant: fileData.defendant, claim_amount: fileData.claim_amount, subject: fileData.subject,
-        lawyer_id: selectedLawyerId, status: 'OPEN'
+        registration_number: finalRegNumber,
+        court_name: fileData.court_name,
+        court_case_number: fileData.court_case_number,
+        plaintiff: fileData.plaintiff,
+        defendant: fileData.defendant,
+        claim_amount: fileData.claim_amount,
+        subject: fileData.subject,
+        lawyer_id: selectedLawyerId,
+        status: 'OPEN'
     }]).select().single();
+
     if (error) throw error;
+
+    // Upload Document
     if (file) {
-        await uploadDocument(newFile.id, file, { summary: fileData.summary, type: fileData.type, viz_text: fileData.viz_text });
+        await uploadDocument(newFile.id, file, {
+            summary: fileData.summary,
+            type: fileData.type,
+            viz_text: fileData.viz_text
+        });
     }
     return newFile;
 }
 
-async function assignLawyer(allLawyers, activeLawyers, settings) {
-    const totalFiles = activeLawyers.reduce((sum, l) => sum + (l.assigned_files_count || 0), 0);
-    const avg = totalFiles / activeLawyers.length;
-    const needed = activeLawyers.map(l => ({ ...l, deficit: avg - (l.assigned_files_count || 0) })).filter(l => l.deficit > 0.5).sort((a, b) => b.deficit - a.deficit);
-    const burstLimit = settings.catchup_burst_limit || 2;
-    const currentSeq = settings.catchup_sequence_count || 0;
-    let selected, newSeq = currentSeq;
-    if (needed.length > 0 && currentSeq < burstLimit) {
-        selected = needed[0]; newSeq++;
-    } else {
-        newSeq = 0; let idx = (settings.last_assignment_index + 1) % allLawyers.length, loops = 0;
-        while (loops < allLawyers.length) { if (allLawyers[idx].status === 'ACTIVE') { selected = allLawyers[idx]; break; } idx = (idx + 1) % allLawyers.length; loops++; }
-        if (!selected) selected = activeLawyers[0];
-        await updateSystemSettings({ last_assignment_index: allLawyers.findIndex(l => l.id === selected.id) });
+// Eski JS mantığı (Fallback için tutuyoruz)
+async function assignLawyerLegacy(allLawyers, activeLawyers, settings) {
+    let idx = (settings.last_assignment_index + 1) % allLawyers.length;
+    let loops = 0;
+    let selected = null;
+    while (loops < allLawyers.length) {
+        if (allLawyers[idx].status === 'ACTIVE') { selected = allLawyers[idx]; break; }
+        idx = (idx + 1) % allLawyers.length;
+        loops++;
     }
-    await updateSystemSettings({ catchup_sequence_count: newSeq });
+    if (!selected && activeLawyers.length > 0) selected = activeLawyers[0];
+
+    // Update settings (unsafe)
+    if (selected) {
+        await supabase.from('lawyers').update({ assigned_files_count: (selected.assigned_files_count || 0) + 1 }).eq('id', selected.id);
+        const index = allLawyers.findIndex(l => l.id === selected.id);
+        await updateSystemSettings({ last_assignment_index: index });
+    }
     return selected;
 }
 

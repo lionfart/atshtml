@@ -8,6 +8,7 @@ let isProcessingQueue = false;
 document.addEventListener('DOMContentLoaded', async () => {
     initSupabase();
     await loadLawyers();
+    setupRealtimeLawyers(loadLawyers);
     setupEventListeners();
 
     // Restore Queue & Settings
