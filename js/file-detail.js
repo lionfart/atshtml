@@ -18,7 +18,8 @@ const initPage = async () => {
 
     if (!fileId) {
         showToast('Dosya ID bulunamadı.', 'error');
-        window.location.href = 'files.html';
+        // window.location.href = 'files.html';
+        console.error('Missing File ID in URL');
         return;
     }
 

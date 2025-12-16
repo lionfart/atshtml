@@ -627,3 +627,15 @@ select {
         opacity: 1;
     }
 }
+
+/* Enhanced Table Interactivity */
+.advanced-table tbody tr,
+#files-table-body tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.advanced-table tbody tr:hover,
+#files-table-body tr:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}

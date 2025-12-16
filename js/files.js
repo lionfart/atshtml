@@ -52,6 +52,7 @@ else initPage();
 function initTableFeatures() {
     initColumnDragging();
     initColumnResizing();
+    initRowClicks();
     applyColumnOrder(); // Apply saved order on init
 }
 
@@ -191,7 +192,7 @@ function renderTableRows() {
             return `<td class="${colId}">${getCellContent(file, colId)}</td>`;
         }).join('');
 
-        return `<tr onclick="window.location.href='file-detail.html?id=${file.id}'">${cells}</tr>`;
+        return `<tr data-file-id="${file.id}">${cells}</tr>`;
     }).join('');
 
     tbody.innerHTML = html;
@@ -235,6 +236,17 @@ async function loadFiles(retryCount = 0) {
             tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="color:red;">Hata: ${escapeHtml(error.message)}</td></tr>`;
         }
     }
+}
+
+function initRowClicks() {
+    const tbody = document.getElementById('files-table-body');
+    if (!tbody) return;
+    tbody.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr');
+        if (tr && tr.dataset.fileId) {
+            window.location.href = `file-detail.html?id=${tr.dataset.fileId}`;
+        }
+    });
 }
 
 window.loadFiles = loadFiles;
