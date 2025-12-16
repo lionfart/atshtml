@@ -243,8 +243,16 @@ function initRowClicks() {
     if (!tbody) return;
     tbody.addEventListener('click', (e) => {
         const tr = e.target.closest('tr');
-        if (tr && tr.dataset.fileId) {
-            window.location.href = `file-detail.html?id=${tr.dataset.fileId}`;
+        if (tr) {
+            const id = tr.getAttribute('data-file-id');
+            console.log('[Files] Row clicked, ID:', id);
+
+            if (id && id !== 'undefined' && id !== 'null') {
+                window.location.href = `file-detail.html?id=${id}`;
+            } else {
+                console.error('[Files] Invalid ID clicked:', id);
+                // Optional: Show visible feedback if needed
+            }
         }
     });
 }
