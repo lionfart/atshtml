@@ -165,7 +165,13 @@ function getCellContent(file, colId) {
         case 'col-decision': return file.latest_decision_result ? esc(file.latest_decision_result) : '<span style="opacity:0.4">-</span>';
         case 'col-doc': return file.latest_activity_type ? `<span style="font-size:0.85em;">${esc(file.latest_activity_type)}</span>` : '<span style="opacity:0.4">-</span>';
         case 'col-lawyer': return esc(file.lawyer_name || 'Atanmamış');
-        case 'col-date': return `<span style="font-family:monospace; font-size:0.85em;">${formatDate(file.created_at)}</span>`;
+        case 'col-date':
+            if (file.next_hearing_date) {
+                return `<div style="color:var(--accent-warning); font-size:0.85em; font-weight:600;"><i data-lucide="calendar" style="width:12px;display:inline;"></i> ${formatDate(file.next_hearing_date)}</div>`;
+            } else if (file.deadline_date) {
+                return `<div style="color:var(--accent-danger); font-size:0.85em; font-weight:600;"><i data-lucide="alarm-clock" style="width:12px;display:inline;"></i> ${formatDate(file.deadline_date)}</div>`;
+            }
+            return `<span style="font-family:monospace; font-size:0.85em;">${formatDate(file.created_at)}</span>`;
         default: return '-';
     }
 }

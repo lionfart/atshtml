@@ -182,11 +182,13 @@ async function getSystemSettings() { const { data, error } = await supabase.from
 async function updateSystemSettings(updates) { const { data: existing } = await supabase.from('system_settings').select('id').single(); if (existing) return await supabase.from('system_settings').update(updates).eq('id', existing.id); }
 
 // ==========================================
-// AI Analysis (Prompt Updated for Decision No)
+// AI Analysis (Prompt Updated for Decision No & Workflow)
 // ==========================================
-// ... (callGeminiWithFallback SAME) ... //
-async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) { /* SAME */
-    const models = APP_CONFIG.geminiModels || ['gemini-1.5-flash']; if (modelIndex >= models.length) throw new Error('AI analizi başarısız.');
+async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
+    // Model Priority: 2.0 Flash (Fast/Smart) -> 1.5 Flash (Reliable) -> 1.5 Pro (Fallback)
+    const models = APP_CONFIG.geminiModels || ['gemini-2.0-flash-exp', 'gemini-1.5-flash'];
+
+    if (modelIndex >= models.length) throw new Error('AI analizi başarısız.');
     const currentModel = models[modelIndex];
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contentBody) });
@@ -200,36 +202,45 @@ async function analyzeWithGemini(text, apiKey) {
     if (!apiKey) throw new Error('API keysiz analiz yapılamaz.');
     const prompt = `
 Sen Türk Hukuk Sistemine hakim uzman bir avukat asistanısın. Bu belgeyi analiz et ve YALNIZCA aşağıdaki JSON formatında veri döndür.
-ÖNEMLİ: 
-- "court_case_number" (Esas No) ile "court_decision_number" (Karar No) birbirinden farklıdır. Karıştırma.
-- Esas No genellikle "2023/123" veya "2023/123 E." formatındadır.
-- Karar No genellikle "2024/55 K." veya "K. 2024/55" formatındadır. Savcılık "Sor. No" ise onu Esas No yapma, Subject kısmına ekle.
+AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri değil, avukatın yapması gerekenleri ve takvimi çıkar.
 
-İSTENEN VERİLER:
-1. "type": Evrakın hukuki türü.
-2. "plaintiff": Davacı Adı Soyadı/Unvanı.
-3. "defendant": Davalı Adı Soyadı/Unvanı.
-4. "court_name": Mahkeme Adı.
-5. "court_case_number": Esas Numarası (Sadece Esas!).
-6. "court_decision_number": Karar Numarası (Varsa).
-7. "claim_amount": Dava Değeri.
-8. "subject": Dava Konusu.
-9. "summary": 2 cümlelik özet.
-10. "viz_text": İlk 300 karakter temiz metin.
+ÖNEMLİ KURALLAR:
+1. "court_case_number" (Esas) vs "court_decision_number" (Karar) farkına dikkat et.
+2. Savcılık "Sor. No" varsa Subject kısmına ekle, Esas No yapma.
+3. TARİHLERİ "YYYY-MM-DD" formatında çıkar. Bulamazsan null yap.
+4. "urgency": Eğer süre kısıtlaması varsa (örn: "2 hafta kesin süre", "yakalama emri") "HIGH", normal dava akışıysa "MEDIUM", sadece bilgi amaçlıysa "LOW".
+
+İSTENEN JSON FORMATI:
+{
+  "type": "Dilekçe | Mahkeme Kararı | Tensip Zaptı | Bilirkişi Raporu | Diğer",
+  "plaintiff": "Davacı Adı",
+  "defendant": "Davalı Adı",
+  "court_name": "Mahkeme Adı",
+  "court_case_number": "2023/123 E.",
+  "court_decision_number": "2024/55 K. (Yoksa null)",
+  "claim_amount": "100.000 TL (Yoksa null)",
+  "subject": "Dava Konusu",
+  "summary": "2 cümlelik özet.",
+  "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
+  "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi)",
+  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
+  "urgency": "HIGH | MEDIUM | LOW",
+  "viz_text": "İlk 300 karakter temiz metin"
+}
 
 BELGE METNİ:
 """
 ${text.slice(0, 30000)}
 """
 `;
-    // ... (rest same: force JSON)
-    // Force JSON response for latest models
+    // Force JSON response
     const contentBody = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
     try {
         const responseText = await callGeminiWithFallback(apiKey, contentBody);
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (jsonMatch) return JSON.parse(jsonMatch[0]);
     } catch (e) {
+        console.warn("JSON parsing failed, retrying with simple prompt...");
         const simpleBody = { contents: [{ parts: [{ text: prompt }] }] };
         const responseText = await callGeminiWithFallback(apiKey, simpleBody);
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);

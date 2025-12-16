@@ -185,8 +185,25 @@ function openReviewModal(itemId) {
                 <div class="review-field"><label>Davalı</label><input type="text" id="review-defendant" value="${data.defendant || ''}" class="form-control"></div>
                 <div class="review-field"><label>Değer</label><input type="text" id="review-amount" value="${data.claim_amount || ''}" class="form-control"></div>
             </div>
+            <div class="review-section" style="border-left: 2px solid var(--accent-warning); padding-left: 10px;">
+                <h3><i data-lucide="calendar-clock"></i> İş Akışı</h3>
+                <div class="review-field"><label>Duruşma</label><input type="date" id="review-hearing" value="${data.next_hearing_date || ''}" class="form-control"></div>
+                <div class="review-field"><label>Kesin Süre</label><input type="date" id="review-deadline" value="${data.deadline_date || ''}" class="form-control" style="color:var(--accent-danger);"></div>
+                <div class="review-field"><label>Aciliyet</label>
+                    <select id="review-urgency" class="form-control">
+                        <option value="LOW" ${data.urgency === 'LOW' ? 'selected' : ''}>Düşük</option>
+                        <option value="MEDIUM" ${(!data.urgency || data.urgency === 'MEDIUM') ? 'selected' : ''}>Orta</option>
+                        <option value="HIGH" ${data.urgency === 'HIGH' ? 'selected' : ''}>Yüksek (Acil)</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="review-summary"><label>Özet</label><textarea id="review-summary" class="form-control" rows="2">${data.summary || data.subject || ''}</textarea></div>
+        <div class="review-summary">
+            <label>Özet</label><textarea id="review-summary" class="form-control" rows="2">${data.summary || data.subject || ''}</textarea>
+        </div>
+        <div class="review-summary" style="margin-top:10px;">
+             <label>AI Önerisi</label><input type="text" id="review-action" value="${data.suggested_action || ''}" class="form-control" style="font-style:italic; color:var(--text-secondary);">
+        </div>
         <div class="review-manual-link mt-4" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
             ${candidates.length > 0 ? `
             <div style="margin-bottom:15px; background:rgba(6, 182, 212, 0.1); border:1px solid rgba(6, 182, 212, 0.3); border-radius:8px; padding:10px;">
@@ -232,12 +249,15 @@ async function approveNewCase() {
             type: document.getElementById('review-type').value,
             court_name: document.getElementById('review-court').value,
             court_case_number: document.getElementById('review-esas').value,
-            court_decision_number: document.getElementById('review-decision').value, // NEW
+            court_decision_number: document.getElementById('review-decision').value,
             plaintiff: document.getElementById('review-plaintiff').value,
             defendant: document.getElementById('review-defendant').value,
             claim_amount: document.getElementById('review-amount').value,
             summary: document.getElementById('review-summary').value,
-            subject: document.getElementById('review-summary').value
+            subject: document.getElementById('review-summary').value,
+            // Workflow fields (mapped to schema)
+            next_hearing_date: document.getElementById('review-hearing').value || null,
+            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value}] [Urgency: ${document.getElementById('review-urgency').value}]`
         };
         const newCase = await createFileCase(newData, item.file);
         item.status = 'SUCCESS'; item.result = newCase; item.log = `Yeni: ${newCase.registration_number}`;
