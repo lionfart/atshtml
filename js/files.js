@@ -248,10 +248,13 @@ function initRowClicks() {
             console.log('[Files] Row clicked, ID:', id);
 
             if (id && id !== 'undefined' && id !== 'null') {
-                window.location.href = `file-detail.html?id=${id}`;
+                // Debugging: Ask user confirmation to see the ID
+                if (confirm(`Dosya Detayına gidiliyor...\nID: ${id}\n\nDevam edilsin mi?`)) {
+                    window.location.href = `file-detail.html?id=${id}`;
+                }
             } else {
+                alert('HATA: Geçersiz Dosya ID! Lütfen sayfayı yenileyin.');
                 console.error('[Files] Invalid ID clicked:', id);
-                // Optional: Show visible feedback if needed
             }
         }
     });
