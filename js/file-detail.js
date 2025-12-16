@@ -475,8 +475,20 @@ async function handleDocumentUpload(file) {
             }
         }
 
-        await uploadDocument(fileId, file, aiData);
+        const uploadedDoc = await uploadDocument(fileId, file, aiData);
         showToast('Evrak yüklendi.', 'success');
+
+        // Auto-Close Prompt
+        if (aiData && aiData.is_final_decision === true) {
+            if (await UIModals.confirm(`Bu evrakta KESİN KARAR (${aiData.decision_result || 'Nihai'}) tespit edildi.\nDosya durumu "KAPALI" olarak güncellensin mi?`)) {
+                await supabase.from('file_cases').update({ status: 'CLOSED' }).eq('id', fileId);
+                showToast('Dosya kapatıldı.', 'info');
+                // Refresh status UI if needed or reload
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        } else {
+            updateDocumentsList(fileId);
+        }
 
         // Refresh
         await loadFileDetails();
@@ -507,7 +519,7 @@ function viewDocument(docId, publicUrl) {
 }
 
 async function renameDocumentPrompt(docId, currentName) {
-    const newName = prompt('Yeni isim:', currentName);
+    const newName = await UIModals.prompt('Yeni isim:', currentName);
     if (newName && newName !== currentName) {
         try {
             await renameDocument(docId, newName);
@@ -520,7 +532,7 @@ async function renameDocumentPrompt(docId, currentName) {
 }
 
 async function deleteDocumentConfirm(docId) {
-    if (!confirm('Bu evrakı silmek istediğinize emin misiniz?')) return;
+    if (!await UIModals.confirm('Bu evrakı silmek istediğinize emin misiniz?')) return;
 
     try {
         await deleteDocument(docId);
@@ -568,3 +580,11 @@ document.addEventListener('keydown', (e) => {
         closeDeleteModal();
     }
 });
+
+// Window Exports
+window.viewDocument = viewDocument;
+window.renameDocumentPrompt = renameDocumentPrompt;
+window.deleteDocumentConfirm = deleteDocumentConfirm;
+window.openDeleteModal = openDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.confirmDeleteFile = confirmDeleteFile;

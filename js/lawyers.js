@@ -158,7 +158,11 @@ function setupFilters() {
 // 4. Actions
 // 4. Actions
 async function toggleLawyerStatus() {
-    if (!selectedLawyerId) return;
+    console.log('[Lawyers] Toggle status clicked. Selected:', selectedLawyerId);
+    if (!selectedLawyerId) {
+        showToast('Önce bir avukat seçmelisiniz.', 'warning');
+        return;
+    }
     const l = lawyers.find(x => x.id === selectedLawyerId);
 
     // Toggle Logic
@@ -168,7 +172,7 @@ async function toggleLawyerStatus() {
     if (l.status === 'ACTIVE') {
         newStatus = 'ON_LEAVE';
         // Ask for return date
-        const dateInput = prompt("Avukat izne çıkıyor. Dönüş tarihi giriniz (YYYY-AA-GG) veya boş bırakınız (Süresiz):", "");
+        const dateInput = await UIModals.prompt("Avukat izne çıkıyor. Dönüş tarihi giriniz (YYYY-AA-GG) veya boş bırakınız (Süresiz):", "");
         if (dateInput === null) return; // Cancelled
 
         if (dateInput.trim() !== '') {
@@ -181,7 +185,7 @@ async function toggleLawyerStatus() {
         }
     } else {
         newStatus = 'ACTIVE';
-        if (!confirm("Avukatı tekrar AKTİF (Dosya Alabilir) yapmak istiyor musunuz?")) return;
+        if (!await UIModals.confirm("Avukatı tekrar AKTİF (Dosya Alabilir) yapmak istiyor musunuz?")) return;
     }
 
     try {

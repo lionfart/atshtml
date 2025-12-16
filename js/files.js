@@ -163,9 +163,24 @@ function getCellContent(file, colId) {
             const sClass = file.status === 'OPEN' ? 'badge-active' : 'badge-inactive';
             const sText = file.status === 'OPEN' ? 'Açık' : 'Kapalı';
             return `<span class="badge ${sClass}">${sText}</span>`;
-        case 'col-decision': return file.latest_decision_result ? esc(file.latest_decision_result) : '<span style="opacity:0.4">-</span>';
-        case 'col-doc': return file.latest_activity_type ? `<span style="font-size:0.85em;">${esc(file.latest_activity_type)}</span>` : '<span style="opacity:0.4">-</span>';
-        case 'col-lawyer': return esc(file.lawyer_name || 'Atanmamış');
+        case 'col-decision':
+            if (file.latest_decision_result) {
+                const color = file.latest_decision_result.toLowerCase().includes('red') ? 'var(--accent-danger)' :
+                    file.latest_decision_result.toLowerCase().includes('kabul') ? 'var(--accent-success)' : 'var(--text-primary)';
+                return `<span style="font-weight:600; color:${color}">${esc(file.latest_decision_result)}</span>`;
+            }
+            return '<span style="opacity:0.4">-</span>';
+        case 'col-doc':
+            if (!file.latest_activity_type) return '<span style="opacity:0.4">-</span>';
+            const tooltip = file.latest_activity_summary ? `data-tooltip="${escapeHtml(file.latest_activity_summary.substring(0, 200)) + (file.latest_activity_summary.length > 200 ? '...' : '')}"` : '';
+            return `<span style="font-size:0.85em;" ${tooltip}>${esc(file.latest_activity_type)}</span>`;
+        case 'col-lawyer':
+            const lName = file.lawyers?.name || 'Atanmamış';
+            const lStatus = file.lawyers?.status;
+            let lStyle = 'color:var(--text-primary);';
+            if (lStatus === 'ON_LEAVE') lStyle = 'color:var(--text-muted); opacity:0.7;'; // Pale gray
+            else if (lStatus === 'ACTIVE') lStyle = 'color:var(--accent-success); opacity:0.9;'; // Pale green
+            return `<span style="${lStyle}">${esc(lName)}</span>`;
         case 'col-date':
             if (file.next_hearing_date) {
                 return `<div style="color:var(--accent-warning); font-size:0.85em; font-weight:600;"><i data-lucide="calendar" style="width:12px;display:inline;"></i> ${formatDate(file.next_hearing_date)}</div>`;

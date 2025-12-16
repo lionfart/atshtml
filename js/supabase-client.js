@@ -5,7 +5,7 @@
 // ==========================================
 // ... (getFileCases, getFileCaseById, getLawyers SAME) ... //
 async function getFileCases(options = {}) {
-    let query = supabase.from('file_cases').select(`*, lawyers (id, name)`);
+    let query = supabase.from('file_cases').select(`*, lawyers (id, name, status)`);
 
     // Sort logic
     if (options.sort === 'date-asc') query = query.order('created_at', { ascending: true });
@@ -193,17 +193,49 @@ async function uploadDocument(fileCaseId, file, aiData = null) {
     await createNote(fileCaseId, null, noteText);
 
     // Update File Case Activity
-    await supabase.from('file_cases').update({
+    const updates = {
         latest_activity_type: aiData?.type || 'Yeni Evrak',
+        latest_activity_summary: aiData?.summary || null,
         latest_activity_date: new Date().toISOString()
-    }).eq('id', fileCaseId);
+    };
+
+    // Update decision result if present
+    if (aiData && aiData.decision_result) {
+        updates.latest_decision_result = aiData.decision_result;
+    }
+
+    await supabase.from('file_cases').update(updates).eq('id', fileCaseId);
 
     return doc;
 }
 async function createNote(fileCaseId, lawyerId, content) { await supabase.from('notes').insert([{ file_case_id: fileCaseId, lawyer_id: lawyerId, content }]); }
 async function getNotes(fileCaseId) { return await supabase.from('notes').select(`*, lawyers(name)`).eq('file_case_id', fileCaseId).order('created_at', { ascending: false }); }
 async function getSystemSettings() { const { data, error } = await supabase.from('system_settings').select('*').single(); if (error) return { last_assignment_index: -1, catchup_burst_limit: 2 }; return data; }
-async function updateSystemSettings(updates) { const { data: existing } = await supabase.from('system_settings').select('id').single(); if (existing) return await supabase.from('system_settings').update(updates).eq('id', existing.id); }
+async function updateSystemSettings(updates) {
+    const { data: existing } = await supabase.from('system_settings').select('id').single();
+    if (existing) return await supabase.from('system_settings').update(updates).eq('id', existing.id);
+}
+
+async function renameDocument(docId, newName) {
+    const { error } = await supabase.from('documents').update({ name: newName }).eq('id', docId);
+    if (error) throw error;
+}
+
+async function deleteDocument(docId) {
+    // 1. Get storage path
+    const { data: doc, error: getError } = await supabase.from('documents').select('storage_path').eq('id', docId).single();
+    if (getError) throw getError;
+
+    // 2. Remove from Storage
+    if (doc.storage_path) {
+        const { error: storageError } = await supabase.storage.from(APP_CONFIG.storageBucket).remove([doc.storage_path]);
+        if (storageError) console.warn('Storage delete warning:', storageError);
+    }
+
+    // 3. Remove from DB
+    const { error: dbError } = await supabase.from('documents').delete().eq('id', docId);
+    if (dbError) throw dbError;
+}
 
 // ==========================================
 // AI Analysis (Prompt Updated for Decision No & Workflow)
@@ -247,16 +279,17 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "summary": "2 cümlelik özet.",
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
   "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi)",
-  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
-  "urgency": "HIGH | MEDIUM | LOW",
-  "viz_text": "İlk 300 karakter temiz metin"
+  "decision_result": "Kabul | Red | Kısmen Kabul | İptal | Yetkisizlik | null (Karar sonucu)",
+  "is_final_decision": true,
+  "urgency": "High | Medium | Low",
+  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'"
 }
 
 BELGE METNİ:
 """
 ${text.slice(0, 30000)}
 """
-`;
+    `;
     // Force JSON response
     const contentBody = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
     try {
