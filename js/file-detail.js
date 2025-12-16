@@ -17,6 +17,16 @@ const initPage = async () => {
     fileId = urlParams.get('id');
 
     if (!fileId) {
+        // Fallback: Check session storage (handle clean URL redirects dropping params)
+        fileId = sessionStorage.getItem('currentFileId');
+        if (fileId) {
+            console.log('Recovered File ID from session:', fileId);
+            // Optional: Restore URL visually
+            // window.history.replaceState(null, '', `file-detail.html?id=${fileId}`);
+        }
+    }
+
+    if (!fileId) {
         showToast('Dosya ID bulunamadı.', 'error');
         // window.location.href = 'files.html';
         console.error('Missing File ID in URL:', window.location.href);
