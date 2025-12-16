@@ -249,7 +249,10 @@ function updateDocumentsList(documents) {
                 <i data-lucide="file-text"></i>
             </div>
             <div class="document-info">
-                <div class="document-name" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')">${escapeHtml(doc.name)}</div>
+                <div class="document-name" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" ${doc.analysis?.summary ? `data-tooltip="${escapeHtml(doc.analysis.summary.substring(0, 200) + (doc.analysis.summary.length > 200 ? '...' : ''))}"` : ''}>
+                    ${escapeHtml(doc.name)}
+                    ${doc.analysis?.type ? `<span class="badge" style="font-size:0.65em; margin-left:5px; opacity:0.8;">${escapeHtml(doc.analysis.type)}</span>` : ''}
+                </div>
                 <div class="document-date">${formatDate(doc.upload_date)}</div>
             </div>
             <div class="document-actions">
@@ -439,10 +442,40 @@ async function handleDocumentUpload(file) {
     }
 
     const progressEl = document.getElementById('doc-upload-progress');
+    const analyzeCheckbox = document.getElementById('analyze-doc-checkbox');
+    const shouldAnalyze = analyzeCheckbox ? analyzeCheckbox.checked : false;
+
     progressEl.classList.remove('hidden');
 
+    // Update progress text
+    const progressText = progressEl.querySelector('span');
+    if (progressText) progressText.textContent = shouldAnalyze ? 'Yapay zeka inceliyor...' : 'Yükleniyor...';
+
     try {
-        await uploadDocument(fileId, file, true);
+        let aiData = null;
+        if (shouldAnalyze) {
+            // Get text / analysis
+            let text = '';
+            const settings = await getSystemSettings();
+            const apiKey = settings.gemini_api_key;
+
+            if (apiKey) {
+                if (file.type.startsWith('image/')) {
+                    const base64 = await readFileAsBase64(file);
+                    text = await performOcrWithGemini(base64, file.type, apiKey);
+                } else {
+                    text = await readFileAsText(file);
+                }
+
+                if (text && text.length > 10) {
+                    aiData = await analyzeWithGemini(text, apiKey);
+                }
+            } else {
+                showToast('AI anahtarı eksik, analiz atlandı.', 'warning');
+            }
+        }
+
+        await uploadDocument(fileId, file, aiData);
         showToast('Evrak yüklendi.', 'success');
 
         // Refresh
@@ -457,6 +490,7 @@ async function handleDocumentUpload(file) {
         showToast('Yükleme hatası: ' + error.message, 'error');
     } finally {
         progressEl.classList.add('hidden');
+        if (progressText) progressText.textContent = 'Yükleniyor...';
     }
 }
 

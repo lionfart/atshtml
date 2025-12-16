@@ -213,3 +213,7 @@ async function handleCreateLawyer(e) {
         showToast(err.message, 'error');
     }
 }
+
+// Window Exports
+window.toggleLawyerStatus = toggleLawyerStatus;
+window.handleCreateLawyer = handleCreateLawyer;

@@ -175,7 +175,31 @@ async function createFileCase(fileData, file = null) {
 
 // ... (assignLawyerLegacy, uploadDocument, createNote, etc. SAME) ... //
 async function assignLawyerLegacy(allLawyers, activeLawyers, settings) { let idx = (settings.last_assignment_index + 1) % allLawyers.length; let loops = 0; let selected = null; while (loops < allLawyers.length) { if (allLawyers[idx].status === 'ACTIVE') { selected = allLawyers[idx]; break; } idx = (idx + 1) % allLawyers.length; loops++; } if (!selected && activeLawyers.length > 0) selected = activeLawyers[0]; if (selected) { await supabase.from('lawyers').update({ assigned_files_count: (selected.assigned_files_count || 0) + 1 }).eq('id', selected.id); await updateSystemSettings({ last_assignment_index: allLawyers.findIndex(l => l.id === selected.id) }); } return selected; }
-async function uploadDocument(fileCaseId, file, aiData = null) { const ext = file.name.split('.').pop(); const fileName = `${fileCaseId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`; const { error: upErr } = await supabase.storage.from(APP_CONFIG.storageBucket).upload(fileName, file); if (upErr) throw upErr; const { data: urlData } = supabase.storage.from(APP_CONFIG.storageBucket).getPublicUrl(fileName); const { data: doc, error: docErr } = await supabase.from('documents').insert([{ name: file.name, type: aiData?.type || file.type, file_case_id: fileCaseId, storage_path: fileName, public_url: urlData.publicUrl, analysis: aiData }]).select().single(); if (docErr) throw docErr; let noteText = `📤 Yeni evrak: ${file.name}`; if (aiData && aiData.type) noteText += ` (${aiData.type})`; await createNote(fileCaseId, null, noteText); return doc; }
+async function uploadDocument(fileCaseId, file, aiData = null) {
+    const ext = file.name.split('.').pop();
+    const fileName = `${fileCaseId}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
+    const { error: upErr } = await supabase.storage.from(APP_CONFIG.storageBucket).upload(fileName, file);
+    if (upErr) throw upErr;
+
+    const { data: urlData } = supabase.storage.from(APP_CONFIG.storageBucket).getPublicUrl(fileName);
+    const { data: doc, error: docErr } = await supabase.from('documents').insert([{ name: file.name, type: aiData?.type || file.type, file_case_id: fileCaseId, storage_path: fileName, public_url: urlData.publicUrl, analysis: aiData }]).select().single();
+    if (docErr) throw docErr;
+
+    // Note Content
+    let noteText = `📤 Yeni evrak: ${file.name}`;
+    if (aiData && aiData.type) noteText += ` (${aiData.type})`;
+    if (aiData && aiData.summary) noteText += `\n📝 Özet: ${aiData.summary}`;
+
+    await createNote(fileCaseId, null, noteText);
+
+    // Update File Case Activity
+    await supabase.from('file_cases').update({
+        latest_activity_type: aiData?.type || 'Yeni Evrak',
+        latest_activity_date: new Date().toISOString()
+    }).eq('id', fileCaseId);
+
+    return doc;
+}
 async function createNote(fileCaseId, lawyerId, content) { await supabase.from('notes').insert([{ file_case_id: fileCaseId, lawyer_id: lawyerId, content }]); }
 async function getNotes(fileCaseId) { return await supabase.from('notes').select(`*, lawyers(name)`).eq('file_case_id', fileCaseId).order('created_at', { ascending: false }); }
 async function getSystemSettings() { const { data, error } = await supabase.from('system_settings').select('*').single(); if (error) return { last_assignment_index: -1, catchup_burst_limit: 2 }; return data; }

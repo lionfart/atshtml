@@ -260,6 +260,12 @@ async function approveNewCase() {
             case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value}] [Urgency: ${document.getElementById('review-urgency').value}]`
         };
         const newCase = await createFileCase(newData, item.file);
+
+        // [NEW] Upload the initial document immediately
+        if (item.file) {
+            await uploadDocument(newCase.id, item.file, item.analysisData);
+        }
+
         item.status = 'SUCCESS'; item.result = newCase; item.log = `Yeni: ${newCase.registration_number}`;
         closeReviewModal(); saveQueueToStorage(); updateQueueItemUI(item); loadLawyers(); showToast('Yeni dosya oluşturuldu.', 'success');
     } catch (e) { showToast('Hata: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="check-circle"></i> Onayla'; }
