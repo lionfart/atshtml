@@ -645,10 +645,7 @@ async function handleAddTag() {
         showToast('Etiket eklenemedi.', 'error');
     }
 }
-    } catch (e) {
-    showToast('Etiket eklenemedi.', 'error');
-}
-}
+
 
 async function removeTag(tagToRemove) {
     if (!confirm(`'${tagToRemove}' etiketini kaldırmak istiyor musunuz?`)) return;
