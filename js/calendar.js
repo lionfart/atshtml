@@ -37,8 +37,8 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
     try {
         const { data, error } = await supabase
             .from('file_cases')
-            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject')
-            .or('next_hearing_date.neq.null,deadline_date.neq.null');
+            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject');
+        // Removed .or() filter to avoid syntax errors with nulls. We will filter in JS.
 
         if (error) throw error;
 
