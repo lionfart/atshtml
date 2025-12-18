@@ -122,6 +122,8 @@ async function loadFileDetails(retryCount = 0) {
 
         // Update documents list
         updateDocumentsList(currentFile.documents || []);
+        // Render Tags
+        renderTags(currentFile.tags || []);
 
         lucide.createIcons();
 
@@ -599,6 +601,61 @@ function closeDeleteModal() {
     document.getElementById('delete-modal').classList.remove('active');
 }
 
+function renderTags(tags) {
+    const container = document.getElementById('tags-container');
+    if (!tags || tags.length === 0) {
+        container.innerHTML = '<span class="text-muted" style="font-size: 0.9em;">Etiket yok.</span>';
+        return;
+    }
+
+    container.innerHTML = tags.map(tag => `
+        <span class="badge badge-outline" style="display:flex; align-items:center; gap:4px; padding:4px 8px;">
+            <i data-lucide="tag" style="width:12px;"></i>
+            ${escapeHtml(tag)}
+            <i data-lucide="x" style="width:12px; cursor:pointer;" onclick="removeTag('${escapeHtml(tag)}')"></i>
+        </span>
+    `).join('');
+    lucide.createIcons();
+}
+
+async function handleAddTag() {
+    const select = document.getElementById('new-tag-select');
+    const tag = select.value;
+    if (!tag) return;
+
+    try {
+        const { data: file } = await supabase.from('file_cases').select('tags').eq('id', fileId).single();
+        const currentTags = file.tags || [];
+
+        if (!currentTags.includes(tag)) {
+            const newTags = [...currentTags, tag];
+            await supabase.from('file_cases').update({ tags: newTags }).eq('id', fileId);
+            showToast('Etiket eklendi.', 'success');
+            await loadFileDetails();
+        } else {
+            showToast('Bu etiket zaten ekli.', 'info');
+        }
+        select.value = '';
+    } catch (e) {
+        showToast('Etiket eklenemedi.', 'error');
+    }
+}
+
+async function removeTag(tagToRemove) {
+    if (!confirm(`'${tagToRemove}' etiketini kaldırmak istiyor musunuz?`)) return;
+    try {
+        const { data: file } = await supabase.from('file_cases').select('tags').eq('id', fileId).single();
+        const currentTags = file.tags || [];
+        const newTags = currentTags.filter(t => t !== tagToRemove);
+
+        await supabase.from('file_cases').update({ tags: newTags }).eq('id', fileId);
+        showToast('Etiket kaldırıldı.', 'success');
+        await loadFileDetails();
+    } catch (e) {
+        showToast('Etiket kaldırılamadı.', 'error');
+    }
+}
+
 async function confirmDeleteFile() {
     const btn = document.getElementById('confirm-delete-btn');
     btn.disabled = true;
@@ -633,3 +690,5 @@ window.closeDeleteModal = closeDeleteModal;
 window.confirmDeleteFile = confirmDeleteFile;
 window.handleAddTag = handleAddTag;
 window.removeTag = removeTag;
+
+console.log('file-detail.js loaded successfully');
