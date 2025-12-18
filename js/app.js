@@ -117,7 +117,17 @@ async function analyzeFileContent(file) {
     // Text Extraction
     const lowerName = file.name.toLowerCase();
     if (file.type === 'application/pdf') {
-        if (typeof extractTextFromPDF === 'function') text = await extractTextFromPDF(file);
+        if (typeof extractTextFromPDF === 'function') {
+            text = await extractTextFromPDF(file);
+            // Fallback for Scanned PDFs
+            if ((!text || text.length < 50) && typeof convertPDFPageToImage === 'function' && apiKey) {
+                try {
+                    const imageBlob = await convertPDFPageToImage(file);
+                    const base64 = await readFileAsBase64(imageBlob);
+                    text = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
+                } catch (e) { console.warn("OCR fallback failed:", e); }
+            }
+        }
     } else if (lowerName.endsWith('.odt')) {
         text = await extractTextFromODT(file);
     } else if (lowerName.endsWith('.udf')) {
