@@ -26,7 +26,9 @@ function showToast(message, type = 'info', duration = 4000) {
     container.appendChild(toast);
 
     // Initialize icons in the new toast
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 
     // Auto remove after duration
     setTimeout(() => {
