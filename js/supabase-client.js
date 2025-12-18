@@ -205,13 +205,16 @@ async function uploadDocument(fileCaseId, file, aiData = null) {
     }
 
     // Update tags if present (append to existing or set new)
+    // Update tags if present (append to existing)
     if (aiData && aiData.tags && Array.isArray(aiData.tags) && aiData.tags.length > 0) {
-        // We need to fetch existing tags first or use a postgres function. 
-        // For simplicity, we overwrite or perform a JS merge if we had the case data.
-        // Better: Use a custom RPC or just set it. Let's just set it for now or append via array syntax if Supabase supported it easily.
-        // Strategy: We will just UPDATE it. If user wants to keep old tags, they can manage it in UI.
-        // Ideally we should merge. Let's try to fetch current first? No, for "New Document" usually it implies updating the case context.
-        updates.tags = aiData.tags;
+        // Fetch current tags first to merge
+        const { data: currentFile } = await supabase.from('file_cases').select('tags').eq('id', fileCaseId).single();
+        const existingTags = currentFile?.tags || [];
+
+        // Merge arrays and remove duplicates
+        const newTags = [...new Set([...existingTags, ...aiData.tags])];
+
+        updates.tags = newTags;
     }
 
     await supabase.from('file_cases').update(updates).eq('id', fileCaseId);

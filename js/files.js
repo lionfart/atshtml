@@ -4,7 +4,7 @@
 
 // Global State
 let columnOrder = JSON.parse(localStorage.getItem('filesColumnOrder')) || [
-    'col-no', 'col-parties', 'col-subject', 'col-amount', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
+    'col-no', 'col-parties', 'col-tags', 'col-subject', 'col-amount', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
 ];
 let loadedFilesData = []; // Store data for re-rendering without refetching
 

@@ -619,9 +619,13 @@ function renderTags(tags) {
 }
 
 async function handleAddTag() {
-    const select = document.getElementById('new-tag-select');
-    const tag = select.value;
-    if (!tag) return;
+    const input = document.getElementById('new-tag-input');
+    const tag = input.value.trim();
+
+    if (!tag) {
+        showToast('Lütfen bir etiket yazın veya seçin.', 'warning');
+        return;
+    }
 
     try {
         const { data: file } = await supabase.from('file_cases').select('tags').eq('id', fileId).single();
@@ -635,10 +639,15 @@ async function handleAddTag() {
         } else {
             showToast('Bu etiket zaten ekli.', 'info');
         }
-        select.value = '';
+        input.value = ''; // Clear input
     } catch (e) {
+        console.error('Tag error:', e);
         showToast('Etiket eklenemedi.', 'error');
     }
+}
+    } catch (e) {
+    showToast('Etiket eklenemedi.', 'error');
+}
 }
 
 async function removeTag(tagToRemove) {
