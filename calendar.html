@@ -5,18 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Takvim - Adalet Takip Sistemi</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Scripts (Loaded early to prevent ReferenceErrors) -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
-    <script src="js/config.js"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/toast.js"></script>
-    <script src="js/calendar.js"></script>
+    <!-- Unified Styles -->
+    <link rel="stylesheet" href="css/styles.css">
 
     <style>
         .calendar-container {
@@ -24,117 +22,105 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            min-height: 600px;
+            min-height: 700px;
+            color: #1f2937;
+            /* Force dark text for visibility on white bg */
+        }
+
+        .fc-header-toolbar {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.5em !important;
+            font-weight: 600;
+            color: #111827;
+            /* Dark title */
+        }
+
+        .fc-button-primary {
+            background-color: var(--accent-primary) !important;
+            border-color: var(--accent-primary) !important;
+        }
+
+        .fc-button-active {
+            background-color: var(--accent-primary-hover) !important;
+        }
+
+        /* Fix grid text colors */
+        .fc-col-header-cell-cushion,
+        .fc-daygrid-day-number {
+            color: #374151;
+            /* Dark gray for dates */
+            text-decoration: none !important;
+        }
+
+        .fc-col-header-cell-cushion:hover,
+        .fc-daygrid-day-number:hover {
+            color: var(--accent-primary);
         }
 
         .fc-event {
             cursor: pointer;
             transition: transform 0.2s;
+            border: none;
         }
 
         .fc-event:hover {
             transform: scale(1.02);
             z-index: 5;
         }
-
-        .fc-toolbar-title {
-            font-size: 1.5em !important;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .fc-button-primary {
-            background-color: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
-        }
-
-        .fc-button-active {
-            background-color: var(--primary-hover) !important;
-        }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-area">
-                <div class="logo-icon">
-                    <i data-lucide="scale"></i>
-                </div>
-                <h1>Adalet Takip Sistemi</h1>
-            </div>
-            <div class="header-right">
-                <div class="ai-model-selector" title="Kullanılan Yapay Zeka Modeli">
-                    <i data-lucide="cpu" style="width:16px; opacity:0.7;"></i>
-                    <select id="header-model-select" class="model-select-dropdown"></select>
-                </div>
-                <div class="user-profile">
-                    <div class="avatar">
-                        <i data-lucide="user"></i>
-                    </div>
-                    <span>Av. Yönetici</span>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <nav class="nav-menu">
-                <a href="index.html" class="nav-item">
-                    <i data-lucide="folder"></i>
-                    <span>Dosyalar</span>
-                </a>
-                <a href="lawyers.html" class="nav-item">
-                    <i data-lucide="users"></i>
-                    <span>Avukatlar</span>
-                </a>
-                <a href="calendar.html" class="nav-item active">
-                    <i data-lucide="calendar"></i>
-                    <span>Takvim</span>
-                </a>
-                <a href="dashboard.html" class="nav-item">
-                    <i data-lucide="bar-chart-2"></i>
-                    <span>Raporlar</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i data-lucide="bar-chart-2"></i>
-                    <span>Raporlar</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i data-lucide="settings"></i>
-                    <span>Ayarlar</span>
-                </a>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="content-area">
-            <div class="page-header">
-                <h2>Duruşma ve İş Takvimi</h2>
-                <div class="header-actions">
-                    <button class="btn btn-outline" onclick="window.location.reload()">
-                        <i data-lucide="refresh-cw"></i> Yenile
-                    </button>
-                </div>
-            </div>
-
-            <div class="calendar-container" id="calendar"></div>
-        </main>
-    </div>
-
-    <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <main class="container">
+        <!-- Unified Header (Matches index.html) -->
+        <header class="header mb-6">
+            <div class="header-left">
+                <div style="font-weight:800; font-size:1.2rem; margin-right:20px; color:var(--accent-primary);">⚖️
+                    Adalet Takip</div>
+                <nav class="nav-links">
+                    <a href="index.html">Evrak Yükle</a>
+                    <a href="files.html">Dosya Listesi</a>
+                    <a href="lawyers.html">Avukat Yönetimi</a>
+                    <a href="calendar.html" class="active">Takvim</a>
+                    <a href="dashboard.html">Raporlar</a>
+                </nav>
+            </div>
+            <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                <!-- Model select removed for simplicity in calendar view -->
+                <div class="user-profile" style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.9rem; color:var(--text-secondary);">Av. Yönetici</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-header"
+            style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-size:1.5rem; font-weight:600;">Duruşma ve İş Takvimi</h2>
+            <button class="btn btn-outline" onclick="window.location.reload()">
+                <i data-lucide="refresh-cw"></i> Yenile
+            </button>
+        </div>
+
+        <div class="calendar-container" id="calendar"></div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/calendar.js"></script>
+
     <script>
-        // Initialize Lucide icons
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
     </script>
-    <!-- AI Agent -->
     <script src="js/agent.js"></script>
 </body>
 
