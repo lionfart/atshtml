@@ -132,18 +132,33 @@ function applyColumnOrder() {
     const headerMap = {};
     headers.forEach(h => headerMap[h.getAttribute('data-id')] = h);
 
+    // Append any missing headers (if schema changed)
+    headers.forEach(h => {
+        const id = h.getAttribute('data-id');
+        if (!columnOrder.includes(id)) {
+            // Special handling for col-tags: insert after col-parties if possible
+            if (id === 'col-tags') {
+                const partiesIndex = columnOrder.indexOf('col-parties');
+                if (partiesIndex !== -1) {
+                    columnOrder.splice(partiesIndex + 1, 0, id);
+                } else {
+                    columnOrder.push(id);
+                }
+            } else {
+                columnOrder.push(id);
+            }
+        }
+    });
+
+    // Save updated order
+    localStorage.setItem('filesColumnOrder', JSON.stringify(columnOrder));
+
     // Clear and append in order
     headerRow.innerHTML = '';
     columnOrder.forEach(id => {
-        if (headerMap[id]) headerRow.appendChild(headerMap[id]);
-    });
-
-    // Append any missing headers (if schema changed)
-    headers.forEach(h => {
-        if (!columnOrder.includes(h.getAttribute('data-id'))) {
-            headerRow.appendChild(h);
-            columnOrder.push(h.getAttribute('data-id'));
-        }
+        // Only append if the header element actually exists in the DOM
+        const headerEl = headers.find(h => h.getAttribute('data-id') === id);
+        if (headerEl) headerRow.appendChild(headerEl);
     });
 }
 
