@@ -460,9 +460,29 @@ async function handleDocumentUpload(file) {
             const apiKey = settings.gemini_api_key;
 
             if (apiKey) {
-                if (file.type.startsWith('image/')) {
-                    const base64 = await readFileAsBase64(file);
-                    text = await performOcrWithGemini(base64, file.type, apiKey);
+                if (file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.tiff') || file.name.toLowerCase().endsWith('.tif')) {
+                    let base64 = '';
+                    if (file.name.toLowerCase().endsWith('.tiff') || file.name.toLowerCase().endsWith('.tif')) {
+                        base64 = await convertTiffToBase64(file);
+                        // Treat as Image for OCR
+                        text = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
+                    } else {
+                        base64 = await readFileAsBase64(file);
+                        text = await performOcrWithGemini(base64, file.type, apiKey);
+                    }
+                } else if (file.name.toLowerCase().endsWith('.odt')) {
+                    text = await extractTextFromODT(file);
+                } else if (file.name.toLowerCase().endsWith('.udf')) {
+                    text = await extractTextFromUDF(file);
+                } else if (file.type === 'application/pdf') {
+                    // existing PDF logic (if any) or text extraction
+                    // If extractTextFromPDF is available:
+                    if (typeof extractTextFromPDF === 'function') {
+                        text = await extractTextFromPDF(file);
+                    } else {
+                        // Fallback to text
+                        text = await readFileAsText(file);
+                    }
                 } else {
                     text = await readFileAsText(file);
                 }

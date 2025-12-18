@@ -247,4 +247,55 @@ function generateUUID() {
         return v.toString(16);
     });
 }
+
+// ==========================================
+// New File Format Support (ODT, UDF, TIFF)
+// ==========================================
+
+async function extractTextFromODT(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    const contentXml = await zip.file("content.xml").async("string");
+
+    // Simple XML text extraction
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(contentXml, "text/xml");
+    return doc.body.textContent || "";
+}
+
+async function extractTextFromUDF(file) {
+    // UDF is often a zipped XML structure similar to ODT in UYAP context
+    const arrayBuffer = await file.arrayBuffer();
+    try {
+        const zip = await JSZip.loadAsync(arrayBuffer);
+        const contentXml = await zip.file("content.xml").async("string");
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(contentXml, "text/xml");
+        return doc.body.textContent || "";
+    } catch (e) {
+        console.warn("UDF zip parse failed, trying raw text...", e);
+        return await readFileAsText(file); // Fallback
+    }
+}
+
+async function convertTiffToBase64(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const ifds = UTIF.decode(arrayBuffer);
+    UTIF.decodeImage(arrayBuffer, ifds[0]);
+    const rgba = UTIF.toRGBA8(ifds[0]);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = ifds[0].width;
+    canvas.height = ifds[0].height;
+
+    const ctx = canvas.getContext("2d");
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    for (let i = 0; i < rgba.length; i++) {
+        imageData.data[i] = rgba[i];
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    return canvas.toDataURL("image/jpeg", 0.9).split(',')[1]; // Return base64 part
+}
+
 // End of utils.js

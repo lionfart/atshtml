@@ -210,7 +210,17 @@ async function uploadDocument(fileCaseId, file, aiData = null) {
 }
 async function createNote(fileCaseId, lawyerId, content) { await supabase.from('notes').insert([{ file_case_id: fileCaseId, lawyer_id: lawyerId, content }]); }
 async function getNotes(fileCaseId) { return await supabase.from('notes').select(`*, lawyers(name)`).eq('file_case_id', fileCaseId).order('created_at', { ascending: false }); }
-async function getSystemSettings() { const { data, error } = await supabase.from('system_settings').select('*').single(); if (error) return { last_assignment_index: -1, catchup_burst_limit: 2 }; return data; }
+async function getSystemSettings() {
+    const { data: settings } = await supabase.from('system_settings').select('*').limit(1).maybeSingle();
+
+    // Default Fallback (Config.js)
+    if ((!settings || !settings.gemini_api_key) && typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DEFAULT_GEMINI_KEY) {
+        const fallback = settings || {};
+        return { ...fallback, gemini_api_key: APP_CONFIG.DEFAULT_GEMINI_KEY };
+    }
+
+    return settings || { last_assignment_index: -1, catchup_burst_limit: 2 };
+}
 async function updateSystemSettings(updates) {
     const { data: existing } = await supabase.from('system_settings').select('id').single();
     if (existing) return await supabase.from('system_settings').update(updates).eq('id', existing.id);

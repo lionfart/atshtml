@@ -42,5 +42,14 @@ const APP_CONFIG = {
     ],
 
     // Storage bucket name
-    storageBucket: 'documents'
+    storageBucket: 'documents',
+
+    // Default API Key (User provided)
+    DEFAULT_GEMINI_KEY: 'AIzaSyASPYTC-HPjDBEAkxUEkr5V94njQIqUqCw',
+
+    // External Libraries
+    libs: {
+        jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+        utif: 'https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js'
+    }
 };
