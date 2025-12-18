@@ -178,10 +178,19 @@ class AiAgent {
 
         try {
             if (!this.apiKey) {
-                // Try getting from global config or prompt user
-                this.apiKey = localStorage.getItem('gemini_api_key');
+                // Try getting from global config or system settings
+                // 1. Try Config Default
+                if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DEFAULT_GEMINI_KEY) {
+                    this.apiKey = APP_CONFIG.DEFAULT_GEMINI_KEY;
+                }
+
+                // 2. Try LocalStorage (User entered)
                 if (!this.apiKey) {
-                    this.addMessage("Gemini API Anahtarı bulunamadı. Lütfen ayarlardan kaydedin.", 'ai');
+                    this.apiKey = localStorage.getItem('gemini_api_key_agent');
+                }
+
+                if (!this.apiKey) {
+                    this.addMessage("Gemini API Anahtarı bulunamadı. Lütfen ayarlardan kaydedin veya config.js kontrol edin.", 'ai');
                     typing.style.display = 'none';
                     return;
                 }
