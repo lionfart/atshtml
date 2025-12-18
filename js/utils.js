@@ -94,7 +94,7 @@ async function convertPDFPageToImage(file) {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const page = await pdf.getPage(1);
-    const viewport = page.getViewport({ scale: 2.0 });
+    const viewport = page.getViewport({ scale: 1.5 }); // Reduced from 2.0 to avoid memory limits
 
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');

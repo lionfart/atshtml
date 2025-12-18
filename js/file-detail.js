@@ -478,9 +478,32 @@ async function handleDocumentUpload(file) {
                     // existing PDF logic (if any) or text extraction
                     // If extractTextFromPDF is available:
                     if (typeof extractTextFromPDF === 'function') {
-                        text = await extractTextFromPDF(file);
+                        try {
+                            text = await extractTextFromPDF(file);
+                        } catch (e) {
+                            console.warn("PDF extraction failed:", e);
+                            text = "";
+                        }
+
+                        // Fallback logic (Threshold 150)
+                        if ((!text || text.length < 150) && typeof convertPDFPageToImage === 'function') {
+                            showToast('Metin bulunamadı, OCR (Görsel Tarama) yapılıyor...', 'info');
+                            try {
+                                const imageBlob = await convertPDFPageToImage(file);
+                                const base64 = await readFileAsBase64(imageBlob);
+                                if (apiKey) {
+                                    const ocrText = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
+                                    // Only replace if OCR result is substantial
+                                    if (ocrText && ocrText.length > (text ? text.length : 0)) {
+                                        text = ocrText;
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn("OCR fallback failed:", e);
+                                showToast('OCR Başarısız: ' + e.message, 'error');
+                            }
+                        }
                     } else {
-                        // Fallback to text
                         text = await readFileAsText(file);
                     }
                 } else {
@@ -608,3 +631,5 @@ window.deleteDocumentConfirm = deleteDocumentConfirm;
 window.openDeleteModal = openDeleteModal;
 window.closeDeleteModal = closeDeleteModal;
 window.confirmDeleteFile = confirmDeleteFile;
+window.handleAddTag = handleAddTag;
+window.removeTag = removeTag;

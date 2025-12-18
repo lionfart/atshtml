@@ -182,6 +182,35 @@
                     </div>
                 </div>
 
+                <!-- Tags Card -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="tag"></i>
+                            Etiketler / Konu
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                            <!-- Tags will be injected here -->
+                            <span class="text-muted" style="font-size: 0.9em;">Etiket yok.</span>
+                        </div>
+
+                        <div class="form-group" style="display: flex; gap: 8px;">
+                            <select id="new-tag-select" class="form-control" style="flex:1;">
+                                <option value="">Etiket Seç...</option>
+                                <option value="Çevre">Çevre</option>
+                                <option value="Şehircilik">Şehircilik</option>
+                                <option value="Görüş">Görüş</option>
+                                <option value="Deprem Tazminat">Deprem Tazminat</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="handleAddTag()">
+                                <i data-lucide="plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Documents Card -->
                 <div class="card">
                     <div class="card-header">
@@ -234,6 +263,41 @@
         <p>Adalet Takip Sistemi © 2024</p>
     </footer>
 
+    <!-- Drafting Modal -->
+    <div id="drafting-modal" class="modal">
+        <div class="modal-overlay" onclick="closeDraftingModal()"></div>
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i data-lucide="pen-tool"></i> Dilekçe Taslağı Oluştur</h3>
+                <button class="icon-btn" onclick="closeDraftingModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div style="padding: 20px;">
+                <p class="text-muted" style="margin-bottom: 15px;">
+                    Yapay zeka, seçili evrakın analizine dayanarak bir taslak oluşturacaktır.
+                </p>
+                <div class="form-group">
+                    <label>Dilekçe Türü</label>
+                    <select id="draft-type" class="form-control">
+                        <option value="CEVAP">Cevap Dilekçesi</option>
+                        <option value="ITIRAZ">İtiraz Dilekçesi</option>
+                        <option value="BEYAN">Beyan Dilekçesi</option>
+                        <option value="SAVUNMA">Savunma Dilekçesi</option>
+                        <option value="ISTINAF">İstinaf Dilekçesi</option>
+                        <option value="TEMYIZ">Temyiz Dilekçesi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ek Talimatlar (Opsiyonel)</label>
+                    <textarea id="draft-instructions" class="form-control" rows="3"
+                        placeholder="Örn: Zamanaşımı itirazını vurgula..."></textarea>
+                </div>
+                <button class="btn btn-primary w-full" onclick="startDrafting()">
+                    <i data-lucide="sparkles"></i> Taslağı Oluştur ve İndir (.docx)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
@@ -242,9 +306,15 @@
     <script src="js/toast.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
+
+    <!-- DOCX & FileSaver -->
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <script src="js/utils.js"></script>
     <script src="js/ui-modals.js"></script>
     <script src="js/file-detail.js"></script>
+    <script src="js/drafting.js"></script>
 
     <script>
         // Initialize Lucide icons

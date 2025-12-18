@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takvim - Adalet Takip Sistemi</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .calendar-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            min-height: 600px;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fc-event:hover {
+            transform: scale(1.02);
+            z-index: 5;
+        }
+
+        .fc-toolbar-title {
+            font-size: 1.5em !important;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .fc-button-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .fc-button-active {
+            background-color: var(--primary-hover) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="scale"></i>
+                </div>
+                <h1>Adalet Takip Sistemi</h1>
+            </div>
+            <div class="header-right">
+                <div class="ai-model-selector" title="Kullanılan Yapay Zeka Modeli">
+                    <i data-lucide="cpu" style="width:16px; opacity:0.7;"></i>
+                    <select id="header-model-select" class="model-select-dropdown"></select>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <span>Av. Yönetici</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-item">
+                    <i data-lucide="folder"></i>
+                    <span>Dosyalar</span>
+                </a>
+                <a href="lawyers.html" class="nav-item">
+                    <i data-lucide="users"></i>
+                    <span>Avukatlar</span>
+                </a>
+                <a href="calendar.html" class="nav-item active">
+                    <i data-lucide="calendar"></i>
+                    <span>Takvim</span>
+                </a>
+                <a href="dashboard.html" class="nav-item">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Raporlar</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Raporlar</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="settings"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area">
+            <div class="page-header">
+                <h2>Duruşma ve İş Takvimi</h2>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="window.location.reload()">
+                        <i data-lucide="refresh-cw"></i> Yenile
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-container" id="calendar"></div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/calendar.js"></script>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    <!-- AI Agent -->
+    <script src="js/agent.js"></script>
+</body>
+
+</html>

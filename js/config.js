@@ -50,6 +50,12 @@ const APP_CONFIG = {
     // External Libraries
     libs: {
         jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-        utif: 'https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js'
+        utif: 'https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js',
+        fullCalendarItems: [
+            'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'
+        ],
+        docx: 'https://unpkg.com/docx@7.1.0/build/index.js',
+        fileSaver: 'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js',
+        chartJs: 'https://cdn.jsdelivr.net/npm/chart.js'
     }
 };

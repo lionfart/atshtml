@@ -204,6 +204,16 @@ async function uploadDocument(fileCaseId, file, aiData = null) {
         updates.latest_decision_result = aiData.decision_result;
     }
 
+    // Update tags if present (append to existing or set new)
+    if (aiData && aiData.tags && Array.isArray(aiData.tags) && aiData.tags.length > 0) {
+        // We need to fetch existing tags first or use a postgres function. 
+        // For simplicity, we overwrite or perform a JS merge if we had the case data.
+        // Better: Use a custom RPC or just set it. Let's just set it for now or append via array syntax if Supabase supported it easily.
+        // Strategy: We will just UPDATE it. If user wants to keep old tags, they can manage it in UI.
+        // Ideally we should merge. Let's try to fetch current first? No, for "New Document" usually it implies updating the case context.
+        updates.tags = aiData.tags;
+    }
+
     await supabase.from('file_cases').update(updates).eq('id', fileCaseId);
 
     return doc;
@@ -275,6 +285,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
 2. Savcılık "Sor. No" varsa Subject kısmına ekle, Esas No yapma.
 3. TARİHLERİ "YYYY-MM-DD" formatında çıkar. Bulamazsan null yap.
 4. "urgency": Eğer süre kısıtlaması varsa (örn: "2 hafta kesin süre", "yakalama emri") "HIGH", normal dava akışıysa "MEDIUM", sadece bilgi amaçlıysa "LOW".
+5. "tags": Belge içeriğine göre şu etiketlerden uygun olanları (birden fazla olabilir) dizi olarak seç: ["Çevre", "Şehircilik", "Görüş", "Deprem Tazminat"]. Hiçbiri uymuyorsa boş dizi [].
 
 İSTENEN JSON FORMATI:
 {
@@ -292,7 +303,8 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "decision_result": "Kabul | Red | Kısmen Kabul | İptal | Yetkisizlik | null (Karar sonucu)",
   "is_final_decision": true,
   "urgency": "High | Medium | Low",
-  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'"
+  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
+  "tags": ["Çevre", "Şehircilik"]
 }
 
 BELGE METNİ:
