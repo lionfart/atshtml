@@ -123,12 +123,15 @@
 
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
-    <script src="js/toast.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/toast.js"></script>
     <script src="js/calendar.js"></script>
 
     <script>
-        lucide.createIcons();
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
     </script>
     <!-- AI Agent -->
     <script src="js/agent.js"></script>
