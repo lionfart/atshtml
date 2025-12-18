@@ -145,9 +145,19 @@
         <div class="upload-body" id="upload-queue-list"></div>
     </div>
 
+    <div id="toast-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/toast.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/app.js"></script>
     <script>

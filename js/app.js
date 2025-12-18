@@ -114,11 +114,24 @@ async function analyzeFileContent(file) {
     } catch (e) { }
 
     // Text Extraction
+    // Text Extraction
+    const lowerName = file.name.toLowerCase();
     if (file.type === 'application/pdf') {
-        // PDF Logic (dummy for now unless pdf.js loaded)
+        if (typeof extractTextFromPDF === 'function') text = await extractTextFromPDF(file);
+    } else if (lowerName.endsWith('.odt')) {
+        text = await extractTextFromODT(file);
+    } else if (lowerName.endsWith('.udf')) {
+        text = await extractTextFromUDF(file);
+    } else if (lowerName.endsWith('.tiff') || lowerName.endsWith('.tif')) {
+        if (apiKey) {
+            const base64 = await convertTiffToBase64(file);
+            text = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
+        }
     } else if (file.type.startsWith('image/') && apiKey) {
         text = await performOcrWithGemini(await readFileAsBase64(file), file.type, apiKey);
-    } else { text = await readFileAsText(file); }
+    } else {
+        text = await readFileAsText(file);
+    }
 
     if (!text || text.length < 5) throw new Error('Metin okunamadı.');
     if (apiKey) return await analyzeWithGemini(text, apiKey);
