@@ -216,21 +216,21 @@
         <div class="card" style="margin-bottom: var(--space-6);">
             <div class="card-content" style="padding: 15px;">
                 <div class="flex gap-4 responsive-controls"
-                    style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
-                    <div class="search-input-wrapper" style="flex: 1; min-width: 180px; position:relative;">
+                    style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+                    <div class="search-input-wrapper" style="flex: 2; min-width: 200px; position:relative;">
                         <i data-lucide="search"
-                            style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:18px;"></i>
-                        <input type="text" id="search-input" placeholder="Dosya no, davacı, davalı, konu ara..."
-                            class="form-control" style="padding-left:40px;" oninput="handleSearchDebounced()">
+                            style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:18px; z-index:1;"></i>
+                        <input type="text" id="search-input" placeholder="Dosya no, davacı, davalı ara..."
+                            class="form-control" style="padding-left:40px; width:100%;"
+                            oninput="handleSearchDebounced()">
                     </div>
 
-                    <div style="flex: 1; min-width: 130px;">
-                        <select id="filter-status" class="form-control" onchange="loadFiles()">
-                            <option value="">Tüm Durumlar</option>
-                            <option value="OPEN">Açık Dosyalar</option>
-                            <option value="CLOSED">Kapalı Dosyalar</option>
-                        </select>
-                    </div>
+                    <select id="filter-status" class="form-control" onchange="loadFiles()"
+                        style="flex:0 0 auto; min-width:130px;">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="OPEN">Açık Dosyalar</option>
+                        <option value="CLOSED">Kapalı Dosyalar</option>
+                    </select>
 
                     <div style="flex: 1; min-width: 130px;">
                         <select id="filter-sort" class="form-control" onchange="loadFiles()">
