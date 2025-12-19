@@ -46,10 +46,7 @@
             border-bottom: 2px solid var(--border-color);
             user-select: none;
             white-space: nowrap;
-            overflow: hidden;
-            /* Prevent text overflow */
-            text-overflow: ellipsis;
-            /* Show ... for overflowing text */
+            /* overflow must be visible for resize handle to work */
         }
 
         .advanced-table th.sortable-ghost {
@@ -64,16 +61,13 @@
 
         .advanced-table th .resize-handle {
             position: absolute;
-            right: -8px;
-            /* Extend beyond the th boundary */
+            right: 0;
             top: 0;
             bottom: 0;
-            width: 16px;
-            /* Much wider hit area */
+            width: 10px;
             cursor: col-resize;
             background: transparent;
             z-index: 100;
-            /* Higher z-index to ensure it's on top */
         }
 
         .advanced-table th:hover .resize-handle {
