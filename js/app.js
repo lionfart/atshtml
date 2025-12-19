@@ -198,7 +198,26 @@ function openReviewModal(itemId) {
         <div class="review-grid">
             <div class="review-section">
                 <h3><i data-lucide="file-text"></i> Analiz</h3>
-                <div class="review-field"><label>Tip</label><input type="text" id="review-type" value="${data.type || ''}" class="form-control"></div>
+                <div class="review-field"><label>Tip</label>
+                    <select id="review-type" class="form-control">
+                        <option value="">Seçiniz</option>
+                        <option value="Dava Dilekçesi" ${data.type === 'Dava Dilekçesi' ? 'selected' : ''}>Dava Dilekçesi</option>
+                        <option value="Savunma Dilekçesi" ${data.type === 'Savunma Dilekçesi' ? 'selected' : ''}>Savunma Dilekçesi</option>
+                        <option value="Cevap Dilekçesi" ${data.type === 'Cevap Dilekçesi' ? 'selected' : ''}>Cevap Dilekçesi</option>
+                        <option value="Savunmaya Cevap Dilekçesi" ${data.type === 'Savunmaya Cevap Dilekçesi' ? 'selected' : ''}>Savunmaya Cevap Dilekçesi</option>
+                        <option value="Ara Karar" ${data.type === 'Ara Karar' ? 'selected' : ''}>Ara Karar</option>
+                        <option value="Bilirkişi Raporu" ${data.type === 'Bilirkişi Raporu' ? 'selected' : ''}>Bilirkişi Raporu</option>
+                        <option value="Bilirkişi Raporuna İtiraz" ${data.type === 'Bilirkişi Raporuna İtiraz' ? 'selected' : ''}>Bilirkişi Raporuna İtiraz</option>
+                        <option value="Karar" ${data.type === 'Karar' ? 'selected' : ''}>Karar</option>
+                        <option value="İstinaf Talebi" ${data.type === 'İstinaf Talebi' ? 'selected' : ''}>İstinaf Talebi</option>
+                        <option value="İstinafa Cevap" ${data.type === 'İstinafa Cevap' ? 'selected' : ''}>İstinafa Cevap</option>
+                        <option value="İstinaf Kararı" ${data.type === 'İstinaf Kararı' ? 'selected' : ''}>İstinaf Kararı</option>
+                        <option value="Temyiz Talebi" ${data.type === 'Temyiz Talebi' ? 'selected' : ''}>Temyiz Talebi</option>
+                        <option value="Temyize Cevap" ${data.type === 'Temyize Cevap' ? 'selected' : ''}>Temyize Cevap</option>
+                        <option value="Temyiz Kararı" ${data.type === 'Temyiz Kararı' ? 'selected' : ''}>Temyiz Kararı</option>
+                        <option value="Diğer" ${data.type === 'Diğer' || !data.type ? 'selected' : ''}>Diğer</option>
+                    </select>
+                </div>
                 <div class="review-field"><label>Mahkeme</label><input type="text" id="review-court" value="${data.court_name || ''}" class="form-control"></div>
                 <div class="review-field"><label>Esas No</label><input type="text" id="review-esas" value="${data.court_case_number || ''}" class="form-control"></div>
                 <div class="review-field"><label>Karar No</label><input type="text" id="review-decision" value="${data.court_decision_number || ''}" class="form-control" placeholder="Varsa"></div>
@@ -207,9 +226,7 @@ function openReviewModal(itemId) {
                          <option value="">Seçiniz</option>
                          <option value="Çevre" ${data.primary_tag === 'Çevre' ? 'selected' : ''}>Çevre</option>
                          <option value="Şehircilik" ${data.primary_tag === 'Şehircilik' ? 'selected' : ''}>Şehircilik</option>
-                         <option value="İmar" ${data.primary_tag === 'İmar' ? 'selected' : ''}>İmar</option>
-                         <option value="İdare" ${data.primary_tag === 'İdare' ? 'selected' : ''}>İdare</option>
-                         <option value="Ceza" ${data.primary_tag === 'Ceza' ? 'selected' : ''}>Ceza</option>
+                         <option value="Mevzuat" ${data.primary_tag === 'Mevzuat' ? 'selected' : ''}>Mevzuat</option>
                          <option value="Diğer" ${data.primary_tag === 'Diğer' ? 'selected' : ''}>Diğer</option>
                     </select>
                 </div>

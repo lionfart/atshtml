@@ -353,16 +353,21 @@ Sen Türk Hukuk Sistemine hakim uzman bir avukat asistanısın. Bu belgeyi anali
 AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri değil, avukatın yapması gerekenleri ve takvimi çıkar.
 
 ÖNEMLİ KURALLAR:
-1. "court_case_number" (Esas) vs "court_decision_number" (Karar) farkına dikkat et.
-2. Savcılık "Sor. No" varsa Subject kısmına ekle, Esas No yapma.
-3. TARİHLERİ "YYYY-MM-DD" formatında çıkar. Bulamazsan null yap.
-4. "urgency": Eğer süre kısıtlaması varsa (örn: "2 hafta kesin süre", "yakalama emri") "HIGH", normal dava akışıysa "MEDIUM", sadece bilgi amaçlıysa "LOW".
-5. "primary_tag": Dosyanın ANA konusunu belirle. BUNLAR BİRBİRİNİ DIŞLAR: "Çevre" varsa "Şehircilik" olamaz. Örnekler: "Çevre", "Şehircilik", "İmar", "İdare", "Ceza", "Diğer".
-6. "secondary_tags": Dosyanın içerdiği diğer tüm konular (örn: "Deprem", "Tazminat", "Hasar"). Birden fazla olabilir.
+1. "type": SADECE bu listeden biri olmalı (En uygununu seç):
+   - "Dava Dilekçesi", "Savunma Dilekçesi", "Cevap Dilekçesi", "Savunmaya Cevap Dilekçesi"
+   - "Ara Karar", "Bilirkişi Raporu", "Bilirkişi Raporuna İtiraz", "Karar"
+   - "İstinaf Talebi", "İstinafa Cevap", "İstinaf Kararı"
+   - "Temyiz Talebi", "Temyize Cevap", "Temyiz Kararı", "Diğer"
+2. "primary_tag": Dosyanın ANA konusunu belirle. BUNLAR BİRBİRİNİ DIŞLAR. Sadece biri seçilebilir:
+   - "Çevre", "Şehircilik", "Mevzuat", "Diğer"
+3. "secondary_tags": Dosyanın içerdiği diğer tüm konular. Birden fazla olabilir.
+   - Örnekler: "Adli", "Deprem", "Tazminat", "Hasar", "Tespit", "Görüş", "Kamulaştırma", "İdari Para Cezası", "Yıkım"
+4. TARİHLERİ "YYYY-MM-DD" formatında çıkar.
+5. "urgency": "HIGH" (Süre kısıtı var), "MEDIUM" (Normal), "LOW" (Bilgi).
 
 İSTENEN JSON FORMATI:
 {
-  "type": "Dilekçe | Mahkeme Kararı | Tensip Zaptı | Bilirkişi Raporu | Diğer",
+  "type": "STANDART LİSTEDEN BİRİ",
   "plaintiff": "Davacı Adı",
   "defendant": "Davalı Adı",
   "court_name": "Mahkeme Adı",
@@ -374,11 +379,11 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
   "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi)",
   "decision_result": "Kabul | Red | Kısmen Kabul | İptal | Yetkisizlik | null (Karar sonucu)",
-  "is_final_decision": true,
+  "is_final_decision": true (Nihai kararsa),
   "urgency": "High | Medium | Low",
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
-  "primary_tag": "BİRİNİ SEÇ: Çevre | Şehircilik | İmar | İdare | Ceza | Diğer (En uygun olan ana kategori)",
-  "secondary_tags": ["Deprem", "Tazminat", "Hasar", "Tespit", "Görüş", "Kamulaştırma"] (Uygun olan diğerleri veya boş dizi)
+  "primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",
+  "secondary_tags": ["Deprem", "Tazminat", "Adli"] (Dizi olarak)
 }
 
 BELGE METNİ:
