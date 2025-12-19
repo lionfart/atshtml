@@ -298,13 +298,13 @@ async function approveNewCase() {
     const btn = document.getElementById('btn-approve-new');
     if (!item) return;
 
-    // Validation
+    // Validation (Relaxed: allow empty, but strict format if filled)
     const esasNo = document.getElementById('review-esas').value.trim();
     const kararNo = document.getElementById('review-decision').value.trim();
     const courtName = document.getElementById('review-court').value.trim();
     const formatRegex = /^\d{4}\/\d+$/;
 
-    if (!formatRegex.test(esasNo)) {
+    if (esasNo && !formatRegex.test(esasNo)) {
         showToast('Esas No formatı hatalı! (Örn: 2024/1458)', 'error');
         return;
     }
@@ -312,10 +312,19 @@ async function approveNewCase() {
         showToast('Karar No formatı hatalı! (Örn: 2024/55)', 'error');
         return;
     }
-    // Basic Court Name Validation (at least 2 words)
-    if (courtName.split(' ').length < 2) {
-        showToast('Mahkeme adı eksik gibi görünüyor. (Örn: Ankara 2. İdare)', 'warning');
-        // Warning only, allow proceed
+
+    // Strict Court Name Validation (Must contain 'daire' or 'mahkeme')
+    if (courtName) {
+        const lowerCourt = courtName.toLowerCase();
+        if (!lowerCourt.includes('mahkeme') && !lowerCourt.includes('daire')) {
+            showToast('Mahkeme adı geçersiz! "Mahkemesi" veya "Dairesi" kelimelerini içermeli.', 'error');
+            // Strict blocking
+            return;
+        }
+        if (courtName.split(' ').length < 2) {
+            showToast('Mahkeme adı çok kısa. (Örn: Ankara 2. İdare Mahkemesi)', 'warning');
+            // Warning only allow proceed
+        }
     }
 
     btn.disabled = true; btn.innerHTML = 'Oluşturuluyor...';

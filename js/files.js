@@ -51,7 +51,7 @@ else initPage();
 
 function initTableFeatures() {
     initColumnDragging();
-    initColumnResizing();
+    initTableResizing();
     initRowClicks();
     applyColumnOrder(); // Apply saved order on init
 }
@@ -81,43 +81,51 @@ function initColumnDragging() {
     });
 }
 
-function initColumnResizing() {
+// Rename to match usage in loadFiles
+function initTableResizing() {
     const headers = document.querySelectorAll('th');
+    console.log('[Resizing] Initializing for', headers.length, 'headers');
 
     headers.forEach(th => {
         const handle = th.querySelector('.resize-handle');
         if (!handle) return;
 
+        // Remove old listener to prevent duplicates (cloning)
+        const newHandle = handle.cloneNode(true);
+        handle.parentNode.replaceChild(newHandle, handle);
+
         let startX, startWidth;
 
-        handle.addEventListener('mousedown', function (e) {
+        newHandle.addEventListener('mousedown', function (e) {
             e.preventDefault();
             e.stopPropagation(); // Stop sorting
 
             startX = e.pageX;
             startWidth = th.offsetWidth;
+            console.log('[Resizing] Started on', th.getAttribute('data-id'), 'width:', startWidth);
 
-            handle.classList.add('active');
+            newHandle.classList.add('active');
             document.body.style.cursor = 'col-resize';
 
             function onMouseMove(e) {
                 const diff = e.pageX - startX;
-                // Min width 50px
                 const newWidth = Math.max(50, startWidth + diff);
                 th.style.width = newWidth + 'px';
-                th.style.minWidth = newWidth + 'px'; // Enforce
+                th.style.minWidth = newWidth + 'px';
             }
 
             function onMouseUp() {
+                console.log('[Resizing] Ended. New width:', th.style.width);
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
-                handle.classList.remove('active');
+                newHandle.classList.remove('active');
                 document.body.style.cursor = '';
 
                 // Save widths to localStorage
                 const widths = {};
-                document.querySelectorAll('th').forEach(th => {
-                    widths[th.getAttribute('data-id')] = th.style.width;
+                document.querySelectorAll('th').forEach(h => {
+                    const id = h.getAttribute('data-id');
+                    if (id) widths[id] = h.style.width;
                 });
                 localStorage.setItem('filesColumnWidths', JSON.stringify(widths));
             }
@@ -126,6 +134,18 @@ function initColumnResizing() {
             document.addEventListener('mouseup', onMouseUp);
         });
     });
+
+    // Apply saved widths
+    const savedWidths = JSON.parse(localStorage.getItem('filesColumnWidths'));
+    if (savedWidths) {
+        headers.forEach(th => {
+            const id = th.getAttribute('data-id');
+            if (savedWidths[id]) {
+                th.style.width = savedWidths[id];
+                th.style.minWidth = savedWidths[id];
+            }
+        });
+    }
 }
 
 function applyColumnOrder() {
@@ -178,6 +198,15 @@ function getCellContent(file, colId) {
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
         case 'col-parties': return `<div style="font-weight:500;">${esc(file.plaintiff || '-')}</div><div style="font-size:0.8em; opacity:0.7;">vs ${esc(file.defendant || '-')}</div>`;
         case 'col-subject': return `<div class="cell-truncate" title="${esc(file.subject)}">${esc(file.subject || '-')}</div>`;
+        case 'col-tags':
+            let tagsHtml = '';
+            if (file.primary_tag) tagsHtml += `<span class="badge" style="background:var(--accent-primary); color:white; font-size:0.7em; margin-right:4px;">${esc(file.primary_tag)}</span>`;
+            if (file.tags && Array.isArray(file.tags)) {
+                file.tags.forEach(t => {
+                    tagsHtml += `<span class="badge" style="background:#e5e7eb; color:#374151; font-size:0.7em; margin-right:2px;">${esc(t)}</span>`;
+                });
+            }
+            return tagsHtml || '<span style="opacity:0.4">-</span>';
         case 'col-amount': return `<span style="font-family:monospace;">${esc(file.claim_amount || '-')}</span>`;
         case 'col-status':
             const sClass = file.status === 'OPEN' ? 'badge-active' : 'badge-inactive';
@@ -244,24 +273,62 @@ async function loadFiles(retryCount = 0) {
     }
 
     try {
-        const searchTerm = document.getElementById('search-input')?.value || '';
-        const statusFilter = document.getElementById('filter-status')?.value || '';
-        const sortFilter = document.getElementById('filter-sort')?.value || 'date-desc';
+        let query = supabase
+            .from('file_cases')
+            .select(`
+                *,
+                lawyers (id, name, status)
+            `)
+            .order('created_at', { ascending: false });
 
-        const files = await getFileCases({ search: searchTerm, status: statusFilter, sort: sortFilter });
+        const { data, error } = await query;
+        if (error) throw error;
 
-        loadedFilesData = files; // Cache data
+        // Client-side filtering for search (simpler than complex OR query)
+        let filteredData = data;
+        if (searchTerm) {
+            const lowerTerm = searchTerm.toLowerCase();
+            filteredData = data.filter(item => {
+                const searchableFields = [
+                    item.court_case_number,
+                    item.plaintiff,
+                    item.defendant,
+                    item.subject,
+                    item.court_name,
+                    item.primary_tag,
+                    ...(item.tags || [])
+                ];
+                return searchableFields.some(field => field && String(field).toLowerCase().includes(lowerTerm));
+            });
+        }
+
+        if (statusFilter) {
+            filteredData = filteredData.filter(item => item.status === statusFilter);
+        }
+
+        // Sorting
+        filteredData.sort((a, b) => {
+            const dateA = new Date(a.created_at || 0);
+            const dateB = new Date(b.created_at || 0);
+            if (sortFilter === 'date-asc') return dateA - dateB;
+            if (sortFilter === 'date-desc') return dateB - dateA;
+            // Add more sort options if needed
+            return 0;
+        });
+
+        loadedFilesData = filteredData; // Cache data
 
         // Update count
         if (document.getElementById('file-count-info'))
-            document.getElementById('file-count-info').textContent = `Toplam: ${files.length} dosya`;
+            document.getElementById('file-count-info').textContent = `Toplam: ${filteredData.length} dosya`;
 
-        if (files.length === 0) {
+        if (filteredData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding: 40px;"><p style="opacity:0.7;">Dosya bulunamadı.</p></td></tr>`;
             return;
         }
 
         renderTableRows(); // Render using stored column order
+        initTableResizing(); // Re-init resizing after render
 
     } catch (error) {
         console.error('[Files] Load Error:', error);

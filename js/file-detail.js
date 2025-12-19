@@ -179,9 +179,10 @@ function setupDetailsForm() {
         try {
             const courtCaseNumber = document.getElementById('edit-reg-number').value.trim();
             const courtDecisionNumber = document.getElementById('edit-decision-number').value.trim();
+            const courtName = document.getElementById('edit-court').value.trim();
             const formatRegex = /^\d{4}\/\d+$/;
 
-            if (!formatRegex.test(courtCaseNumber)) {
+            if (courtCaseNumber && !formatRegex.test(courtCaseNumber)) {
                 showToast('Dosya/Esas No formatı hatalı! (Örn: 2024/1458)', 'error');
                 throw new Error('Validation failed');
             }
@@ -190,10 +191,19 @@ function setupDetailsForm() {
                 throw new Error('Validation failed');
             }
 
+            // Court Name Validation
+            if (courtName) {
+                const lowerCourt = courtName.toLowerCase();
+                if (!lowerCourt.includes('mahkeme') && !lowerCourt.includes('daire')) {
+                    showToast('Mahkeme adı geçersiz! "Mahkemesi" veya "Dairesi" kelimelerini içermeli.', 'error');
+                    throw new Error('Validation failed');
+                }
+            }
+
             const updates = {
                 plaintiff: document.getElementById('edit-plaintiff').value,
                 defendant: document.getElementById('edit-defendant').value,
-                court_name: document.getElementById('edit-court').value,
+                court_name: courtName,
                 claim_amount: document.getElementById('edit-amount').value,
                 court_case_number: courtCaseNumber,
                 // Also update registration number to match if user edited it
