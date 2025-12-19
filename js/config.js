@@ -53,7 +53,7 @@ const APP_CONFIG = {
     DEFAULT_GEMINI_KEY: 'AIzaSyASPYTC-HPjDBEAkxUEkr5V94njQIqUqCw',
 
     // OpenRouter Configuration
-    OPENROUTER_API_KEY: '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',
+    OPENROUTER_API_KEY: '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',
     openRouterModels: [
         'google/gemini-2.0-flash-exp:free',
         'google/gemini-exp-1206:free',
