@@ -52,6 +52,15 @@ const APP_CONFIG = {
     // Default API Key (User provided)
     DEFAULT_GEMINI_KEY: 'AIzaSyASPYTC-HPjDBEAkxUEkr5V94njQIqUqCw',
 
+    // OpenRouter Configuration
+    OPENROUTER_API_KEY: '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',
+    openRouterModels: [
+        'google/gemini-2.0-flash-exp:free',
+        'google/gemini-exp-1206:free',
+        'meta-llama/llama-3.2-11b-vision-instruct:free',
+        'qwen/qwen-2-7b-instruct:free'
+    ],
+
     // External Libraries
     libs: {
         jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',

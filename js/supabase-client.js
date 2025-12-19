@@ -263,52 +263,62 @@ async function deleteDocument(docId) {
 // ==========================================
 // AI Analysis (Prompt Updated for Decision No & Workflow)
 // ==========================================
-async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
-    // Model Priority: 2.0 Flash (Fast/Smart) -> 1.5 Flash (Reliable) -> 1.5 Pro (Fallback)
-    const models = APP_CONFIG.geminiModels || ['gemini-2.0-flash-exp', 'gemini-1.5-flash'];
+async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, useOpenRouter = false) {
+    const googleModels = APP_CONFIG.geminiModels || ['gemini-2.0-flash-exp', 'gemini-1.5-flash'];
+    const openRouterModels = APP_CONFIG.openRouterModels || ['google/gemini-2.0-flash-exp:free'];
 
-    if (modelIndex >= models.length) throw new Error('Tüm AI modelleri denendi fakat başarısız oldu.');
+    if (!useOpenRouter && modelIndex >= googleModels.length) {
+        console.log('Google API models exhausted. Switching to OpenRouter...');
+        const routerKey = APP_CONFIG.OPENROUTER_API_KEY;
+        if (routerKey) return await callGeminiWithFallback(routerKey, contentBody, 0, true);
+        throw new Error('Google API başarısız ve OpenRouter Key bulunamadı.');
+    }
 
-    const currentModel = models[modelIndex];
-    console.log(`AI Model Deneniyor (${modelIndex + 1}/${models.length}): ${currentModel}`);
+    if (useOpenRouter && modelIndex >= openRouterModels.length) {
+        throw new Error('Bütün AI modelleri denendi fakat sonuç alınamadı.');
+    }
+
+    const currentModel = useOpenRouter ? openRouterModels[modelIndex] : googleModels[modelIndex];
+    console.log(`AI Model Deneniyor (${useOpenRouter ? 'OpenRouter' : 'Google'} ${modelIndex + 1}): ${currentModel}`);
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(contentBody)
-        });
-
-        // Handle HTTP Failures
-        if (!response.ok) {
-            console.warn(`Model ${currentModel} failed with status ${response.status}`);
-
-            // Rate limit check
-            if (response.status === 429) {
-                console.warn('Rate limit hit (429), waiting 10s before retry...');
-                await new Promise(r => setTimeout(r, 10000));
-                // Retry the SAME model because it exists, just busy
-                return await callGeminiWithFallback(apiKey, contentBody, modelIndex);
+        if (useOpenRouter) {
+            const promptText = contentBody.contents[0].parts.map(p => p.text).join('\n');
+            const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': window.location.href,
+                    'X-Title': 'Adalet Takip Sistemi'
+                },
+                body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: promptText }] })
+            });
+            if (!resp.ok) throw new Error(`OpenRouter Error: ${resp.status}`);
+            const data = await resp.json();
+            return data.choices[0].message.content;
+        } else {
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(contentBody)
+            });
+            if (!resp.ok) {
+                if (resp.status === 429) {
+                    console.warn('Rate limit hatası, 10s bekleniyor...');
+                    await new Promise(r => setTimeout(r, 10000));
+                    return await callGeminiWithFallback(apiKey, contentBody, modelIndex, useOpenRouter);
+                }
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
             }
-
-            // Retry with next model
-            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+            const data = await resp.json();
+            if (!data.candidates || !data.candidates[0].content) return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
+            return data.candidates[0].content.parts[0].text;
         }
-
-        const data = await response.json();
-
-        // Validate Response Structure
-        if (!data.candidates || !data.candidates.length || !data.candidates[0].content) {
-            console.warn(`Model ${currentModel} returned invalid data format.`);
-            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
-        }
-
-        return data.candidates[0].content.parts[0].text;
     } catch (e) {
-        console.error(`Model ${currentModel} exception:`, e);
-        // Wait minor delay before switching to prevent rapid spam if network is slightly flaky
+        console.error(`${currentModel} error:`, e);
         await new Promise(r => setTimeout(r, 1000));
-        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
     }
 }
 
