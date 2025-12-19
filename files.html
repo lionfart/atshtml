@@ -133,12 +133,15 @@
             width: 200px;
         }
 
-        /* Subject column - flexible text wrapping */
+        /* Subject column - max 5 lines with ellipsis */
         .col-subject .cell-subject {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            line-clamp: 5;
+            overflow: hidden;
             font-size: 0.8rem;
             line-height: 1.35;
-            word-break: break-word;
-            /* No line-clamp - text wraps as needed based on column width */
         }
 
         .col-tags {
