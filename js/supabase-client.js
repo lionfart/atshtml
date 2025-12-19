@@ -303,6 +303,13 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, useOp
             });
             if (!resp.ok) {
                 const errText = await resp.text();
+                console.warn(`OpenRouter Model ${currentModel} failed: ${resp.status} - ${errText}`);
+
+                // If rate limited or model not found, try next one
+                if (resp.status === 429 || resp.status === 404 || resp.status === 400) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
+                }
                 throw new Error(`OpenRouter Error: ${resp.status} - ${errText}`);
             }
             const data = await resp.json();
