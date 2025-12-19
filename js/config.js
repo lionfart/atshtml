@@ -60,7 +60,15 @@ const APP_CONFIG = {
         'google/gemma-3-12b-it:free',
         'mistralai/mistral-small-3.1-24b-instruct:free',
         'qwen/qwen-2.5-vl-7b-instruct:free',
-        'nvidia/nemotron-nano-12b-v2-vl:free'
+        'nvidia/nemotron-nano-12b-v2-vl:free',
+        'sourceful/riverflow-v2-max-preview',
+        'sourceful/riverflow-v2-standard-preview',
+        'sourceful/riverflow-v2-fast-preview',
+        'allenai/olmo-3.1-32b-think:free',
+        'xiaomi/mimo-v2-flash:free',
+        'nvidia/nemotron-3-nano-30b-a3b:free',
+        'mistralai/devstral-2512:free',
+        'nex-agi/deepseek-v3.1-nex-n1:free'
     ],
 
     // External Libraries
