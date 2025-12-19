@@ -66,6 +66,7 @@ function initColumnDragging() {
         dragClass: 'sortable-drag',
         handle: 'th', // Drag by whole header
         filter: '.resize-handle', // Don't drag when resizing
+        preventOnFilter: true, // CRITICAL: Prevent drag when clicking resize handle
         onEnd: function (evt) {
             // Update column order array based on DOM
             const newOrder = [];
@@ -99,6 +100,7 @@ function initTableResizing() {
         newHandle.addEventListener('mousedown', function (e) {
             e.preventDefault();
             e.stopPropagation(); // Stop sorting
+            e.stopImmediatePropagation(); // CRITICAL: Block SortableJS completely
 
             startX = e.pageX;
             startWidth = th.offsetWidth;
