@@ -95,15 +95,14 @@
             padding: 10px 6px;
             border-bottom: 1px solid var(--border-color);
             vertical-align: top;
-            word-wrap: break-word;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            white-space: normal !important;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            line-clamp: 5;
             overflow: hidden;
+            text-overflow: ellipsis;
             font-size: 0.85rem;
             line-height: 1.4;
-            max-height: 100px;
-            /* Approx 5 lines max */
         }
 
         .advanced-table tr:hover td {
@@ -217,12 +216,11 @@
             <div class="card-content" style="padding: 15px;">
                 <div class="flex gap-4 responsive-controls"
                     style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-                    <div class="search-input-wrapper" style="flex: 2; min-width: 200px; position:relative;">
+                    <div class="search-input-wrapper" style="flex: 0 0 auto; width: 180px; position:relative;">
                         <i data-lucide="search"
-                            style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:18px; z-index:1;"></i>
-                        <input type="text" id="search-input" placeholder="Dosya no, davacı, davalı ara..."
-                            class="form-control" style="padding-left:40px; width:100%;"
-                            oninput="handleSearchDebounced()">
+                            style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:16px; z-index:1;"></i>
+                        <input type="text" id="search-input" placeholder="Ara..." class="form-control"
+                            style="padding-left:32px; width:100%;" oninput="handleSearchDebounced()">
                     </div>
 
                     <select id="filter-status" class="form-control" onchange="loadFiles()"
