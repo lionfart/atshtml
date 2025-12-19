@@ -97,10 +97,11 @@ function initTableResizing() {
 
         let startX, startWidth;
 
+        // Use CAPTURE phase to intercept event BEFORE SortableJS
         newHandle.addEventListener('mousedown', function (e) {
             e.preventDefault();
-            e.stopPropagation(); // Stop sorting
-            e.stopImmediatePropagation(); // CRITICAL: Block SortableJS completely
+            e.stopPropagation();
+            e.stopImmediatePropagation();
 
             startX = e.pageX;
             startWidth = th.offsetWidth;
@@ -108,8 +109,10 @@ function initTableResizing() {
 
             newHandle.classList.add('active');
             document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none'; // Prevent text selection while dragging
 
             function onMouseMove(e) {
+                e.preventDefault();
                 const diff = e.pageX - startX;
                 const newWidth = Math.max(50, startWidth + diff);
                 th.style.width = newWidth + 'px';
@@ -122,6 +125,7 @@ function initTableResizing() {
                 document.removeEventListener('mouseup', onMouseUp);
                 newHandle.classList.remove('active');
                 document.body.style.cursor = '';
+                document.body.style.userSelect = '';
 
                 // Save widths to localStorage
                 const widths = {};
@@ -134,7 +138,7 @@ function initTableResizing() {
 
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
-        });
+        }, true); // CAPTURE PHASE - runs before SortableJS bubble phase
     });
 
     // Apply saved widths

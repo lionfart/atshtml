@@ -64,18 +64,21 @@
 
         .advanced-table th .resize-handle {
             position: absolute;
-            right: 0;
+            right: -8px;
+            /* Extend beyond the th boundary */
             top: 0;
             bottom: 0;
-            width: 8px;
-            /* Wider hit area */
+            width: 16px;
+            /* Much wider hit area */
             cursor: col-resize;
             background: transparent;
-            z-index: 10;
+            z-index: 100;
+            /* Higher z-index to ensure it's on top */
         }
 
         .advanced-table th:hover .resize-handle {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(59, 130, 246, 0.3);
+            /* More visible blue tint */
         }
 
         .advanced-table th .resize-handle:hover,
