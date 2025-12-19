@@ -305,9 +305,10 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, useOp
             });
             if (!resp.ok) {
                 if (resp.status === 429) {
-                    console.warn('Rate limit hatası, 10s bekleniyor...');
-                    await new Promise(r => setTimeout(r, 10000));
-                    return await callGeminiWithFallback(apiKey, contentBody, modelIndex, useOpenRouter);
+                    console.warn(`Rate limit (429) for ${currentModel}. Skipping to next model...`);
+                    // Don't retry same model, move to next to reach OpenRouter faster
+                    await new Promise(r => setTimeout(r, 2000));
+                    return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
                 }
                 return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
             }
