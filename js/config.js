@@ -56,9 +56,11 @@ const APP_CONFIG = {
     OPENROUTER_API_KEY: '',
     openRouterModels: [
         'google/gemini-2.0-flash-exp:free',
-        'google/gemini-exp-1206:free',
-        'meta-llama/llama-3.2-11b-vision-instruct:free',
-        'qwen/qwen-2-7b-instruct:free'
+        'google/gemma-3-27b-it:free',
+        'google/gemma-3-12b-it:free',
+        'mistralai/mistral-small-3.1-24b-instruct:free',
+        'qwen/qwen-2.5-vl-7b-instruct:free',
+        'nvidia/nemotron-nano-12b-v2-vl:free'
     ],
 
     // External Libraries
