@@ -285,8 +285,10 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
 
             // Rate limit check
             if (response.status === 429) {
-                console.warn('Rate limit hit, waiting 4s...');
-                await new Promise(r => setTimeout(r, 4000));
+                console.warn('Rate limit hit (429), waiting 10s before retry...');
+                await new Promise(r => setTimeout(r, 10000));
+                // Retry the SAME model because it exists, just busy
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex);
             }
 
             // Retry with next model
