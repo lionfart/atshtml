@@ -177,15 +177,28 @@ function setupDetailsForm() {
         btn.innerHTML = '<div class="spinner"></div> Kaydediliyor...';
 
         try {
+            const courtCaseNumber = document.getElementById('edit-reg-number').value.trim();
+            const courtDecisionNumber = document.getElementById('edit-decision-number').value.trim();
+            const formatRegex = /^\d{4}\/\d+$/;
+
+            if (!formatRegex.test(courtCaseNumber)) {
+                showToast('Dosya/Esas No formatı hatalı! (Örn: 2024/1458)', 'error');
+                throw new Error('Validation failed');
+            }
+            if (courtDecisionNumber && !formatRegex.test(courtDecisionNumber)) {
+                showToast('Karar No formatı hatalı! (Örn: 2024/55)', 'error');
+                throw new Error('Validation failed');
+            }
+
             const updates = {
                 plaintiff: document.getElementById('edit-plaintiff').value,
                 defendant: document.getElementById('edit-defendant').value,
                 court_name: document.getElementById('edit-court').value,
                 claim_amount: document.getElementById('edit-amount').value,
-                court_case_number: document.getElementById('edit-reg-number').value,
+                court_case_number: courtCaseNumber,
                 // Also update registration number to match if user edited it
-                registration_number: document.getElementById('edit-reg-number').value,
-                court_decision_number: document.getElementById('edit-decision-number').value,
+                registration_number: courtCaseNumber,
+                court_decision_number: courtDecisionNumber,
                 subject: document.getElementById('edit-subject').value
             };
 

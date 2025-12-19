@@ -296,13 +296,35 @@ function openReviewModal(itemId) {
 async function approveNewCase() {
     const item = uploadQueue.find(i => i.id === currentReviewItemId);
     const btn = document.getElementById('btn-approve-new');
-    if (!item) return; btn.disabled = true; btn.innerHTML = 'Oluşturuluyor...';
+    if (!item) return;
+
+    // Validation
+    const esasNo = document.getElementById('review-esas').value.trim();
+    const kararNo = document.getElementById('review-decision').value.trim();
+    const courtName = document.getElementById('review-court').value.trim();
+    const formatRegex = /^\d{4}\/\d+$/;
+
+    if (!formatRegex.test(esasNo)) {
+        showToast('Esas No formatı hatalı! (Örn: 2024/1458)', 'error');
+        return;
+    }
+    if (kararNo && !formatRegex.test(kararNo)) {
+        showToast('Karar No formatı hatalı! (Örn: 2024/55)', 'error');
+        return;
+    }
+    // Basic Court Name Validation (at least 2 words)
+    if (courtName.split(' ').length < 2) {
+        showToast('Mahkeme adı eksik gibi görünüyor. (Örn: Ankara 2. İdare)', 'warning');
+        // Warning only, allow proceed
+    }
+
+    btn.disabled = true; btn.innerHTML = 'Oluşturuluyor...';
     try {
         const newData = {
             type: document.getElementById('review-type').value,
-            court_name: document.getElementById('review-court').value,
-            court_case_number: document.getElementById('review-esas').value,
-            court_decision_number: document.getElementById('review-decision').value,
+            court_name: courtName,
+            court_case_number: esasNo,
+            court_decision_number: kararNo,
             plaintiff: document.getElementById('review-plaintiff').value,
             defendant: document.getElementById('review-defendant').value,
             claim_amount: document.getElementById('review-amount').value,

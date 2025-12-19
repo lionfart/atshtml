@@ -362,20 +362,23 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    - "Çevre", "Şehircilik", "Mevzuat", "Diğer"
 3. "secondary_tags": Dosyanın içerdiği diğer tüm konular. Birden fazla olabilir.
    - Örnekler: "Adli", "Deprem", "Tazminat", "Hasar", "Tespit", "Görüş", "Kamulaştırma", "İdari Para Cezası", "Yıkım"
-4. TARİHLERİ "YYYY-MM-DD" formatında çıkar.
-5. "urgency": "HIGH" (Süre kısıtı var), "MEDIUM" (Normal), "LOW" (Bilgi).
+4. FORMAT ZORUNLULUKLARI (KESİN UYULACAK):
+   - "court_case_number" (Esas No) ve "court_decision_number" (Karar No): SADECE "YYYY/SAYI" formatında olmalı. Asla "E.", "K." veya yazı içermemeli. Örn: "2024/1458".
+   - "court_name" (Mahkeme): "İL", "DAİRE/MAHKEME SAYISI", "TÜRÜ" formatında olmalı. 
+     - Örn: "Ankara 2. İdare Mahkemesi", "Bursa Bölge İdare Mahkemesi 2. İdari Dava Dairesi", "Danıştay 6. Daire".
+5. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
 
 İSTENEN JSON FORMATI:
 {
   "type": "STANDART LİSTEDEN BİRİ",
   "plaintiff": "Davacı Adı",
   "defendant": "Davalı Adı",
-  "court_name": "Mahkeme Adı",
-  "court_case_number": "2023/123 E.",
-  "court_decision_number": "2024/55 K. (Yoksa null)",
+  "court_name": "Şehir No Tür (Örn: Ankara 2. İdare)",
+  "court_case_number": "YYYY/NUM (Örn: 2023/123)",
+  "court_decision_number": "YYYY/NUM (Örn: 2024/55 - Yoksa null)",
   "claim_amount": "100.000 TL (Yoksa null)",
   "subject": "Dava Konusu",
-  "summary": "2 cümlelik özet.",
+  "summary": "Çok detaylı özet (en az 8-10 cümle).",
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
   "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi)",
   "decision_result": "Kabul | Red | Kısmen Kabul | İptal | Yetkisizlik | null (Karar sonucu)",
