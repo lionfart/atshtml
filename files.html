@@ -44,7 +44,8 @@
             border-bottom: 2px solid var(--border-color);
             user-select: none;
             white-space: nowrap;
-            /* Allow drag but keep cursor correct */
+            position: relative;
+            /* CRITICAL: Enables absolute positioning of resize-handle */
         }
 
         .advanced-table th.sortable-ghost {
