@@ -314,6 +314,35 @@ function closeSettingsModal() {
     document.getElementById('settings-modal').classList.remove('active');
 }
 
-async function loadSettingsData() { try { const s = await getSystemSettings(); document.getElementById('gemini-api-key').value = s.gemini_api_key || ''; document.getElementById('burst-limit').value = s.catchup_burst_limit || 2; const p = localStorage.getItem('preferredGeminiModel'); if (p) document.getElementById('gemini-model-select').value = p; } catch (e) { } }
-async function saveSettings() { try { await updateSystemSettings({ gemini_api_key: document.getElementById('gemini-api-key').value.trim(), catchup_burst_limit: parseInt(document.getElementById('burst-limit').value) }); localStorage.setItem('preferredGeminiModel', document.getElementById('gemini-model-select').value); showToast('Kaydedildi', 'success'); closeSettingsModal(); } catch (e) { showToast('Hata', 'error'); } }
+async function loadSettingsData() {
+    try {
+        const s = await getSystemSettings();
+        document.getElementById('gemini-api-key').value = s.gemini_api_key || '';
+        document.getElementById('burst-limit').value = s.catchup_burst_limit || 2;
+
+        // Load OpenRouter Key from LocalStorage
+        const orKey = localStorage.getItem('openrouter_api_key');
+        if (orKey) document.getElementById('openrouter-api-key').value = orKey;
+
+        const p = localStorage.getItem('preferredGeminiModel');
+        if (p) document.getElementById('gemini-model-select').value = p;
+    } catch (e) { }
+}
+async function saveSettings() {
+    try {
+        await updateSystemSettings({
+            gemini_api_key: document.getElementById('gemini-api-key').value.trim(),
+            catchup_burst_limit: parseInt(document.getElementById('burst-limit').value)
+        });
+
+        // Save OpenRouter Key to LocalStorage
+        const orKey = document.getElementById('openrouter-api-key').value.trim();
+        if (orKey) localStorage.setItem('openrouter_api_key', orKey);
+        else localStorage.removeItem('openrouter_api_key');
+
+        localStorage.setItem('preferredGeminiModel', document.getElementById('gemini-model-select').value);
+        showToast('Ayarlar ve Anahtarlar Kaydedildi', 'success');
+        closeSettingsModal();
+    } catch (e) { showToast('Hata: ' + e.message, 'error'); }
+}
 window.openSettingsModal = openSettingsModal; window.closeSettingsModal = closeSettingsModal; window.saveSettings = saveSettings; window.openReviewModal = openReviewModal; window.closeReviewModal = closeReviewModal; window.approveNewCase = approveNewCase; window.linkToExistingCase = linkToExistingCase; window.linkToSpecificCase = linkToSpecificCase; window.toggleUploadManager = toggleUploadManager; window.removeFromQueue = removeFromQueue;
