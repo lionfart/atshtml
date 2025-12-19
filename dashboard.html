@@ -9,8 +9,9 @@
 
     <!-- Scripts (Loaded early) -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
@@ -18,173 +19,226 @@
     <script src="js/dashboard.js"></script>
 
     <style>
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .chart-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            min-height: 350px;
-        }
-
-        .chart-header {
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .summary-cards {
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        .summary-card {
-            background: white;
-            padding: 20px;
+        .stat-card {
+            background: var(--bg-card);
+            padding: 24px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
             text-align: center;
         }
 
-        .summary-value {
-            font-size: 2em;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 10px 0;
+        .stat-card .stat-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 12px;
+            color: var(--accent-primary);
         }
 
-        .summary-label {
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 8px 0;
+        }
+
+        .stat-card .stat-label {
             color: var(--text-secondary);
-            font-size: 0.9em;
+            font-size: 0.9rem;
+        }
+
+        .data-table-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .data-table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-table-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .export-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .export-btn:hover {
+            background: #059669;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
         }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo-area">
-                <div class="logo-icon">
-                    <i data-lucide="scale"></i>
-                </div>
-                <h1>Adalet Takip Sistemi</h1>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Main App -->
+    <main class="container">
+        <!-- Header -->
+        <header class="header mb-6">
+            <div class="header-left">
+                <div style="font-weight:800; font-size:1.2rem; margin-right:20px; color:var(--accent-primary);">⚖️
+                    Adalet Takip</div>
+                <nav class="nav-links">
+                    <a href="index.html">Evrak Yükle</a>
+                    <a href="files.html">Dosya Listesi</a>
+                    <a href="lawyers.html">Avukat Yönetimi</a>
+                    <a href="calendar.html">Takvim</a>
+                    <a href="dashboard.html" class="active">Raporlar</a>
+                </nav>
             </div>
             <div class="header-right">
-                <div class="ai-model-selector" title="Kullanılan Yapay Zeka Modeli">
-                    <i data-lucide="cpu" style="width:16px; opacity:0.7;"></i>
-                    <select id="header-model-select" class="model-select-dropdown"></select>
-                </div>
-                <div class="user-profile">
-                    <div class="avatar">
-                        <i data-lucide="user"></i>
-                    </div>
-                    <span>Av. Yönetici</span>
-                </div>
+                <select id="header-model-select" class="form-control"
+                    style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
+                </select>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <div class="main-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <nav class="nav-menu">
-                <a href="index.html" class="nav-item">
-                    <i data-lucide="folder"></i>
-                    <span>Dosyalar</span>
-                </a>
-                <a href="lawyers.html" class="nav-item">
-                    <i data-lucide="users"></i>
-                    <span>Avukatlar</span>
-                </a>
-                <a href="calendar.html" class="nav-item">
-                    <i data-lucide="calendar"></i>
-                    <span>Takvim</span>
-                </a>
-                <a href="dashboard.html" class="nav-item active">
-                    <i data-lucide="bar-chart-2"></i>
-                    <span>Raporlar</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <i data-lucide="settings"></i>
-                    <span>Ayarlar</span>
-                </a>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="content-area">
-            <div class="page-header">
-                <h2>İstatistik ve Raporlar</h2>
+        <!-- Page Title -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-content"
+                style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin:0; display:flex; align-items:center; gap:10px;">
+                    <i data-lucide="bar-chart-3" style="width:24px;"></i>
+                    İstatistik ve Raporlar
+                </h2>
                 <div class="header-actions">
-                    <button class="btn btn-primary" onclick="window.location.reload()">
-                        <i data-lucide="refresh-cw"></i> Verileri Güncelle
+                    <button class="export-btn" onclick="exportToExcel()">
+                        <i data-lucide="download" style="width:18px;"></i>
+                        Excel'e Aktar
+                    </button>
+                    <button class="btn btn-outline" onclick="loadDashboardData()">
+                        <i data-lucide="refresh-cw" style="width:16px;"></i>
+                        Yenile
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Summary Cards -->
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <i data-lucide="folder" style="color:var(--primary-color); width:24px; height:24px;"></i>
-                    <div class="summary-value" id="total-files">0</div>
-                    <div class="summary-label">Toplam Dosya</div>
-                </div>
-                <div class="summary-card">
-                    <i data-lucide="check-circle" style="color:#10b981; width:24px; height:24px;"></i>
-                    <div class="summary-value" id="closed-files">0</div>
-                    <div class="summary-label">Karara Çıkan</div>
-                </div>
-                <div class="summary-card">
-                    <i data-lucide="clock" style="color:#f59e0b; width:24px; height:24px;"></i>
-                    <div class="summary-value" id="active-files">0</div>
-                    <div class="summary-label">Devam Eden</div>
-                </div>
+        <!-- Summary Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i data-lucide="folder" class="stat-icon"></i>
+                <div class="stat-value" id="total-files">-</div>
+                <div class="stat-label">Toplam Dosya</div>
             </div>
-
-            <!-- Graphs -->
-            <div class="charts-grid">
-                <!-- Tag Stats -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i data-lucide="tag"></i>
-                        Konu Dağılımı (Etiketler)
-                    </div>
-                    <canvas id="tagsChart"></canvas>
-                </div>
-
-                <!-- Status Stats -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i data-lucide="pie-chart"></i>
-                        Dosya Durum Analizi
-                    </div>
-                    <canvas id="statusChart"></canvas>
-                </div>
-
-                <!-- Lawyer Workload -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i data-lucide="users"></i>
-                        Avukat İş Yükü
-                    </div>
-                    <canvas id="lawyerChart"></canvas>
-                </div>
+            <div class="stat-card">
+                <i data-lucide="folder-open" class="stat-icon" style="color:#f59e0b;"></i>
+                <div class="stat-value" id="active-files">-</div>
+                <div class="stat-label">Devam Eden</div>
             </div>
+            <div class="stat-card">
+                <i data-lucide="check-circle" class="stat-icon" style="color:#10b981;"></i>
+                <div class="stat-value" id="closed-files">-</div>
+                <div class="stat-label">Tamamlanan</div>
+            </div>
+            <div class="stat-card">
+                <i data-lucide="users" class="stat-icon" style="color:#6366f1;"></i>
+                <div class="stat-value" id="total-lawyers">-</div>
+                <div class="stat-label">Avukat Sayısı</div>
+            </div>
+        </div>
 
-        </main>
-    </div>
+        <!-- Tag Distribution Table -->
+        <div class="data-table-card">
+            <div class="data-table-header">
+                <h3><i data-lucide="tag" style="width:18px;"></i> Konu Dağılımı (Birincil Etiketler)</h3>
+            </div>
+            <table class="data-table" id="tags-table">
+                <thead>
+                    <tr>
+                        <th>Etiket</th>
+                        <th>Dosya Sayısı</th>
+                        <th>Yüzde</th>
+                    </tr>
+                </thead>
+                <tbody id="tags-table-body">
+                    <tr>
+                        <td colspan="3" style="text-align:center; opacity:0.6;">Yükleniyor...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Lawyer Workload Table -->
+        <div class="data-table-card">
+            <div class="data-table-header">
+                <h3><i data-lucide="briefcase" style="width:18px;"></i> Avukat İş Yükü</h3>
+            </div>
+            <table class="data-table" id="lawyers-table">
+                <thead>
+                    <tr>
+                        <th>Avukat</th>
+                        <th>Aktif Dosya</th>
+                        <th>Tamamlanan</th>
+                        <th>Toplam</th>
+                    </tr>
+                </thead>
+                <tbody id="lawyers-table-body">
+                    <tr>
+                        <td colspan="4" style="text-align:center; opacity:0.6;">Yükleniyor...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
 
     <!-- Scripts -->
     <script>

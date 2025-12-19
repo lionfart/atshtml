@@ -1,3 +1,9 @@
+// ==========================================
+// Dashboard - Adalet Takip Sistemi
+// ==========================================
+
+let dashboardData = { files: [], lawyers: [] };
+
 document.addEventListener('DOMContentLoaded', async () => {
     initSupabase();
     initHeader(); // AI model
@@ -7,118 +13,155 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadDashboardData() {
     try {
         // 1. Fetch File Cases
-        const { data: files, error } = await supabase.from('file_cases').select('*');
+        const { data: files, error } = await supabase.from('file_cases').select('*, lawyers(id, name)');
         if (error) throw error;
 
-        // 2. Fetch Lawyers (for names)
+        // 2. Fetch Lawyers
         const { data: lawyers } = await supabase.from('lawyers').select('*');
-        const lawyerMap = {};
-        if (lawyers) lawyers.forEach(l => lawyerMap[l.id] = l.full_name);
+
+        dashboardData.files = files || [];
+        dashboardData.lawyers = lawyers || [];
 
         // --- Calculate Summary ---
         const total = files.length;
         const closed = files.filter(f => f.status === 'CLOSED' || f.decision_result).length;
         const active = total - closed;
+        const lawyerCount = lawyers ? lawyers.length : 0;
 
         document.getElementById('total-files').textContent = total;
         document.getElementById('closed-files').textContent = closed;
         document.getElementById('active-files').textContent = active;
+        document.getElementById('total-lawyers').textContent = lawyerCount;
 
-        // --- Calculate Tags ---
+        // --- Calculate Primary Tags ---
         const tagCounts = {};
         files.forEach(f => {
-            if (f.tags && Array.isArray(f.tags)) {
-                f.tags.forEach(t => {
-                    tagCounts[t] = (tagCounts[t] || 0) + 1;
-                });
-            }
+            const tag = f.primary_tag || 'Belirsiz';
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
         });
 
-        // --- Calculate Lawyers ---
-        const lawyerCounts = {};
+        // --- Calculate Lawyer Workload ---
+        const lawyerStats = {};
+        lawyers?.forEach(l => {
+            lawyerStats[l.id] = { name: l.name || l.full_name, active: 0, closed: 0 };
+        });
+        lawyerStats['unassigned'] = { name: 'Atanmamış', active: 0, closed: 0 };
+
         files.forEach(f => {
-            if (f.assigned_lawyer_id) {
-                const name = lawyerMap[f.assigned_lawyer_id] || 'Bilinmeyen';
-                lawyerCounts[name] = (lawyerCounts[name] || 0) + 1;
+            const lawyerId = f.lawyers?.id || f.assigned_lawyer_id || 'unassigned';
+            if (!lawyerStats[lawyerId]) {
+                lawyerStats[lawyerId] = { name: f.lawyers?.name || 'Bilinmeyen', active: 0, closed: 0 };
+            }
+            if (f.status === 'CLOSED' || f.decision_result) {
+                lawyerStats[lawyerId].closed++;
             } else {
-                lawyerCounts['Atanmamış'] = (lawyerCounts['Atanmamış'] || 0) + 1;
+                lawyerStats[lawyerId].active++;
             }
         });
 
-        // --- Render Charts ---
-        renderTagsChart(tagCounts);
-        renderStatusChart(active, closed);
-        renderLawyerChart(lawyerCounts);
+        // --- Render Tables ---
+        renderTagsTable(tagCounts, total);
+        renderLawyersTable(lawyerStats);
+
+        lucide.createIcons();
 
     } catch (e) {
         console.error('Dashboard load failed:', e);
     }
 }
 
-function renderTagsChart(data) {
-    const ctx = document.getElementById('tagsChart').getContext('2d');
-    const labels = Object.keys(data);
-    const values = Object.values(data);
+function renderTagsTable(data, total) {
+    const tbody = document.getElementById('tags-table-body');
+    if (!tbody) return;
 
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Dosya Sayısı',
-                data: values,
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
-    });
+    const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+    if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; opacity:0.6;">Veri bulunamadı</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = sorted.map(([tag, count]) => {
+        const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+        return `<tr>
+            <td><span class="badge" style="background:var(--accent-primary); color:white;">${escapeHtml(tag)}</span></td>
+            <td><strong>${count}</strong></td>
+            <td>${percent}%</td>
+        </tr>`;
+    }).join('');
 }
 
-function renderStatusChart(active, closed) {
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Devam Eden', 'Karara Çıkan'],
-            datasets: [{
-                data: [active, closed],
-                backgroundColor: ['#f59e0b', '#10b981'],
-                hoverOffset: 4
-            }]
-        }
-    });
+function renderLawyersTable(data) {
+    const tbody = document.getElementById('lawyers-table-body');
+    if (!tbody) return;
+
+    const sorted = Object.values(data)
+        .filter(l => l.active + l.closed > 0)
+        .sort((a, b) => (b.active + b.closed) - (a.active + a.closed));
+
+    if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; opacity:0.6;">Veri bulunamadı</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = sorted.map(lawyer => {
+        return `<tr>
+            <td><strong>${escapeHtml(lawyer.name)}</strong></td>
+            <td>${lawyer.active}</td>
+            <td>${lawyer.closed}</td>
+            <td><strong>${lawyer.active + lawyer.closed}</strong></td>
+        </tr>`;
+    }).join('');
 }
 
-function renderLawyerChart(data) {
-    const ctx = document.getElementById('lawyerChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(data),
-            datasets: [{
-                data: Object.values(data),
-                backgroundColor: [
-                    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'
-                ]
-            }]
-        }
-    });
+// Excel Export using SheetJS
+function exportToExcel() {
+    try {
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: Summary
+        const summaryData = [
+            ['Toplam Dosya', dashboardData.files.length],
+            ['Devam Eden', dashboardData.files.filter(f => f.status !== 'CLOSED' && !f.decision_result).length],
+            ['Tamamlanan', dashboardData.files.filter(f => f.status === 'CLOSED' || f.decision_result).length],
+            ['Avukat Sayısı', dashboardData.lawyers.length]
+        ];
+        const ws1 = XLSX.utils.aoa_to_sheet([['Metrik', 'Değer'], ...summaryData]);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Özet');
+
+        // Sheet 2: Tag Distribution
+        const tagCounts = {};
+        dashboardData.files.forEach(f => {
+            const tag = f.primary_tag || 'Belirsiz';
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+        const tagData = Object.entries(tagCounts).map(([tag, count]) => [tag, count]);
+        const ws2 = XLSX.utils.aoa_to_sheet([['Etiket', 'Dosya Sayısı'], ...tagData]);
+        XLSX.utils.book_append_sheet(wb, ws2, 'Etiket Dağılımı');
+
+        // Sheet 3: All Files
+        const fileRows = dashboardData.files.map(f => [
+            f.court_case_number || f.registration_number || '-',
+            f.plaintiff || '-',
+            f.defendant || '-',
+            f.court_name || '-',
+            f.primary_tag || '-',
+            f.status || '-',
+            f.lawyers?.name || 'Atanmamış'
+        ]);
+        const ws3 = XLSX.utils.aoa_to_sheet([
+            ['Dosya No', 'Davacı', 'Davalı', 'Mahkeme', 'Etiket', 'Durum', 'Avukat'],
+            ...fileRows
+        ]);
+        XLSX.utils.book_append_sheet(wb, ws3, 'Tüm Dosyalar');
+
+        // Download
+        const fileName = `Adalet_Takip_Rapor_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+
+        showToast('Excel dosyası indirildi!', 'success');
+    } catch (e) {
+        console.error('Excel export error:', e);
+        showToast('Excel dışa aktarma hatası: ' + e.message, 'error');
+    }
 }

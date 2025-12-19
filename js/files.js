@@ -206,7 +206,7 @@ function getCellContent(file, colId) {
     switch (colId) {
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
         case 'col-parties': return `<div style="font-weight:500;">${esc(file.plaintiff || '-')}</div><div style="font-size:0.8em; opacity:0.7;">vs ${esc(file.defendant || '-')}</div>`;
-        case 'col-subject': return `<div class="cell-truncate" title="${esc(file.subject)}">${esc(file.subject || '-')}</div>`;
+        case 'col-subject': return `<div class="cell-subject" title="${esc(file.subject)}">${esc(file.subject || '-')}</div>`;
         case 'col-tags':
             let tagsHtml = '';
             if (file.primary_tag) tagsHtml += `<span class="badge" style="background:var(--accent-primary); color:white; font-size:0.7em; margin-right:4px;">${esc(file.primary_tag)}</span>`;
@@ -272,6 +272,26 @@ function renderTableRows() {
     lucide.createIcons();
 }
 
+// Helper to populate lawyer dropdown
+function populateLawyerDropdown(data) {
+    const dropdown = document.getElementById('filter-lawyer');
+    if (!dropdown || dropdown.options.length > 1) return; // Already populated
+
+    const uniqueLawyers = {};
+    data.forEach(item => {
+        if (item.lawyers?.id && item.lawyers?.name) {
+            uniqueLawyers[item.lawyers.id] = item.lawyers.name;
+        }
+    });
+
+    Object.entries(uniqueLawyers).forEach(([id, name]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = name;
+        dropdown.appendChild(option);
+    });
+}
+
 async function loadFiles(retryCount = 0) {
     const tbody = document.getElementById('files-table-body');
     if (!tbody) return;
@@ -285,6 +305,8 @@ async function loadFiles(retryCount = 0) {
         const searchTerm = document.getElementById('search-input')?.value || '';
         const statusFilter = document.getElementById('filter-status')?.value || '';
         const sortFilter = document.getElementById('filter-sort')?.value || 'date-desc';
+        const lawyerFilter = document.getElementById('filter-lawyer')?.value || '';
+        const primaryTagFilter = document.getElementById('filter-primary-tag')?.value || '';
 
         let query = supabase
             .from('file_cases')
@@ -296,6 +318,9 @@ async function loadFiles(retryCount = 0) {
 
         const { data, error } = await query;
         if (error) throw error;
+
+        // Populate lawyer dropdown once
+        populateLawyerDropdown(data);
 
         // Client-side filtering for search (simpler than complex OR query)
         let filteredData = data;
@@ -319,13 +344,30 @@ async function loadFiles(retryCount = 0) {
             filteredData = filteredData.filter(item => item.status === statusFilter);
         }
 
+        // Lawyer filter
+        if (lawyerFilter) {
+            filteredData = filteredData.filter(item => item.lawyers?.id === lawyerFilter);
+        }
+
+        // Primary tag filter
+        if (primaryTagFilter) {
+            filteredData = filteredData.filter(item => item.primary_tag === primaryTagFilter);
+        }
+
         // Sorting
         filteredData.sort((a, b) => {
             const dateA = new Date(a.created_at || 0);
             const dateB = new Date(b.created_at || 0);
             if (sortFilter === 'date-asc') return dateA - dateB;
             if (sortFilter === 'date-desc') return dateB - dateA;
-            // Add more sort options if needed
+            if (sortFilter === 'plaintiff-asc') return (a.plaintiff || '').localeCompare(b.plaintiff || '');
+            if (sortFilter === 'hearing-asc') {
+                const hA = a.next_hearing_date ? new Date(a.next_hearing_date) : new Date('9999-12-31');
+                const hB = b.next_hearing_date ? new Date(b.next_hearing_date) : new Date('9999-12-31');
+                return hA - hB;
+            }
+            if (sortFilter === 'amount-desc') return (parseFloat(b.claim_amount) || 0) - (parseFloat(a.claim_amount) || 0);
+            if (sortFilter === 'reg-desc') return (b.court_case_number || '').localeCompare(a.court_case_number || '');
             return 0;
         });
 

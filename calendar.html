@@ -101,13 +101,60 @@
         <div class="page-header"
             style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
             <h2 style="font-size:1.5rem; font-weight:600;">Duruşma ve İş Takvimi</h2>
-            <button class="btn btn-outline" onclick="window.location.reload()">
-                <i data-lucide="refresh-cw"></i> Yenile
-            </button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-primary" onclick="openNewEventModal()">
+                    <i data-lucide="plus"></i> Yeni Etkinlik
+                </button>
+                <button class="btn btn-outline" onclick="window.location.reload()">
+                    <i data-lucide="refresh-cw"></i> Yenile
+                </button>
+            </div>
         </div>
 
         <div class="calendar-container" id="calendar"></div>
     </main>
+
+    <!-- New Event Modal -->
+    <div id="new-event-modal" class="modal" style="display:none;">
+        <div class="modal-overlay" onclick="closeNewEventModal()"></div>
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h3><i data-lucide="calendar-plus" style="width:20px;"></i> Yeni Etkinlik Ekle</h3>
+                <button class="modal-close" onclick="closeNewEventModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="event-date">Tarih *</label>
+                    <input type="date" id="event-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="event-time">Saat</label>
+                    <input type="time" id="event-time" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="event-lawyer">Avukat</label>
+                    <select id="event-lawyer" class="form-control">
+                        <option value="">-- Seçiniz --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-title">Etkinlik Başlığı *</label>
+                    <input type="text" id="event-title" class="form-control"
+                        placeholder="Duruşma, Toplantı, Hatırlatma..." required>
+                </div>
+                <div class="form-group">
+                    <label for="event-notes">Notlar</label>
+                    <textarea id="event-notes" class="form-control" rows="3" placeholder="Ek bilgiler..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px;">
+                <button class="btn btn-outline" onclick="closeNewEventModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveNewEvent()">
+                    <i data-lucide="save" style="width:16px;"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>

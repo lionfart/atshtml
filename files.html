@@ -121,7 +121,17 @@
         }
 
         .col-subject {
-            width: 150px;
+            width: 200px;
+        }
+
+        /* Subject column - 2 lines max */
+        .col-subject .cell-subject {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            white-space: normal;
+            line-height: 1.4;
         }
 
         .col-tags {
@@ -197,7 +207,7 @@
             <div class="card-content" style="padding: 15px;">
                 <div class="flex gap-4 responsive-controls"
                     style="display:flex; flex-wrap:wrap; gap:15px; align-items:center;">
-                    <div class="search-input-wrapper" style="flex: 2; min-width: 250px; position:relative;">
+                    <div class="search-input-wrapper" style="flex: 1; min-width: 180px; position:relative;">
                         <i data-lucide="search"
                             style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:18px;"></i>
                         <input type="text" id="search-input" placeholder="Dosya no, davacı, davalı, konu ara..."
@@ -218,6 +228,24 @@
                             <option value="date-asc">En Eski</option>
                             <option value="amount-desc">Miktar (Azalan)</option>
                             <option value="reg-desc">Dosya No (Z-A)</option>
+                            <option value="plaintiff-asc">Davacı (A-Z)</option>
+                            <option value="hearing-asc">Duruşma Tarihi</option>
+                        </select>
+                    </div>
+
+                    <div style="flex: 1; min-width: 120px;">
+                        <select id="filter-lawyer" class="form-control" onchange="loadFiles()">
+                            <option value="">Tüm Avukatlar</option>
+                        </select>
+                    </div>
+
+                    <div style="flex: 1; min-width: 120px;">
+                        <select id="filter-primary-tag" class="form-control" onchange="loadFiles()">
+                            <option value="">Tüm Etiketler</option>
+                            <option value="Çevre">Çevre</option>
+                            <option value="Şehircilik">Şehircilik</option>
+                            <option value="Mevzuat">Mevzuat</option>
+                            <option value="Diğer">Diğer</option>
                         </select>
                     </div>
 
