@@ -99,6 +99,9 @@ function initTableResizing() {
 
         // Use CAPTURE phase to intercept event BEFORE SortableJS
         newHandle.addEventListener('mousedown', function (e) {
+            // Only respond to LEFT click (button 0)
+            if (e.button !== 0) return;
+
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
