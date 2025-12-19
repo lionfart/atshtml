@@ -57,11 +57,6 @@ function initTableFeatures() {
 }
 
 function initColumnDragging() {
-    // TEMPORARILY DISABLED to fix resizing conflict
-    // SortableJS was intercepting resize handle clicks
-    console.log('[Dragging] Column dragging disabled for resize testing');
-    return;
-
     const headerRow = document.getElementById('table-headers');
     if (!headerRow) return;
 
@@ -69,9 +64,7 @@ function initColumnDragging() {
         animation: 150,
         ghostClass: 'sortable-ghost',
         dragClass: 'sortable-drag',
-        handle: 'th', // Drag by whole header
-        filter: '.resize-handle', // Don't drag when resizing
-        preventOnFilter: true, // CRITICAL: Prevent drag when clicking resize handle
+        handle: '.drag-handle', // ONLY drag by the ⋮ handle, not the whole th
         onEnd: function (evt) {
             // Update column order array based on DOM
             const newOrder = [];

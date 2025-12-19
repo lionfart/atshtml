@@ -59,6 +59,17 @@
             opacity: 1;
         }
 
+        .advanced-table th .drag-handle {
+            cursor: grab;
+            opacity: 0.4;
+            margin-right: 4px;
+            font-size: 0.7rem;
+        }
+
+        .advanced-table th .drag-handle:hover {
+            opacity: 1;
+        }
+
         .advanced-table th .resize-handle {
             position: absolute;
             right: 0;
@@ -260,18 +271,28 @@
                 <table class="advanced-table" id="files-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr id="table-headers">
-                            <th class="col-no" data-id="col-no">Dosya No <span class="resize-handle"></span></th>
-                            <th class="col-parties" data-id="col-parties">Taraflar <span class="resize-handle"></span>
+                            <th class="col-no" data-id="col-no"><span class="drag-handle">⋮</span> Dosya No <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-parties" data-id="col-parties"><span class="drag-handle">⋮</span> Taraflar
+                                <span class="resize-handle"></span>
                             </th>
-                            <th class="col-subject" data-id="col-subject">Konu <span class="resize-handle"></span></th>
-                            <th class="col-tags" data-id="col-tags">Etiketler <span class="resize-handle"></span></th>
-                            <th class="col-amount" data-id="col-amount">Miktar <span class="resize-handle"></span></th>
-                            <th class="col-status" data-id="col-status">Durum <span class="resize-handle"></span></th>
-                            <th class="col-decision" data-id="col-decision">Karar <span class="resize-handle"></span>
+                            <th class="col-subject" data-id="col-subject"><span class="drag-handle">⋮</span> Konu <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-tags" data-id="col-tags"><span class="drag-handle">⋮</span> Etiketler <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-amount" data-id="col-amount"><span class="drag-handle">⋮</span> Miktar <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-status" data-id="col-status"><span class="drag-handle">⋮</span> Durum <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-decision" data-id="col-decision"><span class="drag-handle">⋮</span> Karar
+                                <span class="resize-handle"></span>
                             </th>
-                            <th class="col-doc" data-id="col-doc">Son Evrak <span class="resize-handle"></span></th>
-                            <th class="col-lawyer" data-id="col-lawyer">Avukat <span class="resize-handle"></span></th>
-                            <th class="col-date" data-id="col-date">Tarih <span class="resize-handle"></span></th>
+                            <th class="col-doc" data-id="col-doc"><span class="drag-handle">⋮</span> Son Evrak <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-lawyer" data-id="col-lawyer"><span class="drag-handle">⋮</span> Avukat <span
+                                    class="resize-handle"></span></th>
+                            <th class="col-date" data-id="col-date"><span class="drag-handle">⋮</span> Tarih <span
+                                    class="resize-handle"></span></th>
                         </tr>
                     </thead>
                     <tbody id="files-table-body">
