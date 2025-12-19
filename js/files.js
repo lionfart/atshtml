@@ -57,6 +57,11 @@ function initTableFeatures() {
 }
 
 function initColumnDragging() {
+    // TEMPORARILY DISABLED to fix resizing conflict
+    // SortableJS was intercepting resize handle clicks
+    console.log('[Dragging] Column dragging disabled for resize testing');
+    return;
+
     const headerRow = document.getElementById('table-headers');
     if (!headerRow) return;
 
