@@ -267,14 +267,47 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
     // Model Priority: 2.0 Flash (Fast/Smart) -> 1.5 Flash (Reliable) -> 1.5 Pro (Fallback)
     const models = APP_CONFIG.geminiModels || ['gemini-2.0-flash-exp', 'gemini-1.5-flash'];
 
-    if (modelIndex >= models.length) throw new Error('AI analizi başarısız.');
+    if (modelIndex >= models.length) throw new Error('Tüm AI modelleri denendi fakat başarısız oldu.');
+
     const currentModel = models[modelIndex];
+    console.log(`AI Model Deneniyor (${modelIndex + 1}/${models.length}): ${currentModel}`);
+
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contentBody) });
-        if (!response.ok) { let wait = 1000; if (response.status === 429) wait = 3000; await new Promise(r => setTimeout(r, wait)); return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1); }
-        const data = await response.json(); if (!data.candidates || !data.candidates.length) return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(contentBody)
+        });
+
+        // Handle HTTP Failures
+        if (!response.ok) {
+            console.warn(`Model ${currentModel} failed with status ${response.status}`);
+
+            // Rate limit check
+            if (response.status === 429) {
+                console.warn('Rate limit hit, waiting 4s...');
+                await new Promise(r => setTimeout(r, 4000));
+            }
+
+            // Retry with next model
+            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+        }
+
+        const data = await response.json();
+
+        // Validate Response Structure
+        if (!data.candidates || !data.candidates.length || !data.candidates[0].content) {
+            console.warn(`Model ${currentModel} returned invalid data format.`);
+            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+        }
+
         return data.candidates[0].content.parts[0].text;
-    } catch (e) { await new Promise(r => setTimeout(r, 1500)); if (modelIndex < models.length - 1) return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1); throw e; }
+    } catch (e) {
+        console.error(`Model ${currentModel} exception:`, e);
+        // Wait minor delay before switching to prevent rapid spam if network is slightly flaky
+        await new Promise(r => setTimeout(r, 1000));
+        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+    }
 }
 
 async function analyzeWithGemini(text, apiKey) {

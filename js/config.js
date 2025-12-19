@@ -30,10 +30,17 @@ const APP_CONFIG = {
     // Updated to currently available models
     // Gemini Models (Fallback Priority List)
     // using only stable versions to prevent 404s
+    // Gemini Models (Fallback Priority List)
+    // Updated as strictly requested by user (v3.0 first)
     geminiModels: [
-        'gemini-1.5-flash',
+        'gemini-3.0-pro',
+        'gemini-3.0-flash',
+        'gemini-2.0-pro-exp',
+        'gemini-2.0-flash-exp',
         'gemini-1.5-pro',
-        'gemini-2.0-flash-exp' // Keep one exp as backup/fast option if available
+        'gemini-1.5-flash',
+        'gemini-1.5-pro-002',
+        'gemini-1.5-flash-002'
     ],
 
     // Storage bucket name
