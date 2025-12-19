@@ -283,18 +283,27 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, useOp
 
     try {
         if (useOpenRouter) {
+            const safeKey = apiKey.trim();
+            console.log(`OpenRouter Key Debug: Length=${safeKey.length}, Prefix=${safeKey.substring(0, 10)}...`);
+
             const promptText = contentBody.contents[0].parts.map(p => p.text).join('\n');
             const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${safeKey}`,
                     'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.href,
+                    'HTTP-Referer': 'https://adalettakip-local.app', // Hardcoded for local dev to satisfy OpenRouter
                     'X-Title': 'Adalet Takip Sistemi'
                 },
-                body: JSON.stringify({ model: currentModel, messages: [{ role: 'user', content: promptText }] })
+                body: JSON.stringify({
+                    model: currentModel,
+                    messages: [{ role: 'user', content: promptText }]
+                })
             });
-            if (!resp.ok) throw new Error(`OpenRouter Error: ${resp.status}`);
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`OpenRouter Error: ${resp.status} - ${errText}`);
+            }
             const data = await resp.json();
             return data.choices[0].message.content;
         } else {
