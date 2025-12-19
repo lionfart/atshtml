@@ -99,11 +99,11 @@
             word-break: break-word;
             overflow-wrap: break-word;
             white-space: normal !important;
-            /* CRITICAL: Override any nowrap */
             overflow: hidden;
-            /* Prevent overflow into adjacent columns */
             font-size: 0.85rem;
             line-height: 1.4;
+            max-height: 100px;
+            /* Approx 5 lines max */
         }
 
         .advanced-table tr:hover td {
