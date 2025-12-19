@@ -125,6 +125,11 @@ async function loadFileDetails(retryCount = 0) {
         // Render Tags
         renderTags(currentFile.tags || []);
 
+        // [NEW] Populate Primary Tag
+        if (currentFile.primary_tag && document.getElementById('primary-tag-select')) {
+            document.getElementById('primary-tag-select').value = currentFile.primary_tag;
+        }
+
         lucide.createIcons();
 
     } catch (error) {
@@ -645,6 +650,17 @@ async function handleAddTag() {
         showToast('Etiket eklenemedi.', 'error');
     }
 }
+
+// PRIMARY TAG LISTENER
+document.getElementById('primary-tag-select')?.addEventListener('change', async (e) => {
+    const newPrimary = e.target.value;
+    try {
+        await supabase.from('file_cases').update({ primary_tag: newPrimary }).eq('id', fileId);
+        showToast('Konu güncellendi.', 'success');
+    } catch (e) {
+        showToast('Konu güncellenemedi.', 'error');
+    }
+});
 
 
 async function removeTag(tagToRemove) {

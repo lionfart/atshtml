@@ -351,7 +351,8 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
 2. Savcılık "Sor. No" varsa Subject kısmına ekle, Esas No yapma.
 3. TARİHLERİ "YYYY-MM-DD" formatında çıkar. Bulamazsan null yap.
 4. "urgency": Eğer süre kısıtlaması varsa (örn: "2 hafta kesin süre", "yakalama emri") "HIGH", normal dava akışıysa "MEDIUM", sadece bilgi amaçlıysa "LOW".
-5. "tags": Belge içeriğine göre şu etiketlerden uygun olanları (birden fazla olabilir) dizi olarak seç: ["Çevre", "Şehircilik", "Görüş", "Deprem Tazminat"]. Hiçbiri uymuyorsa boş dizi [].
+5. "primary_tag": Dosyanın ANA konusunu belirle. BUNLAR BİRBİRİNİ DIŞLAR: "Çevre" varsa "Şehircilik" olamaz. Örnekler: "Çevre", "Şehircilik", "İmar", "İdare", "Ceza", "Diğer".
+6. "secondary_tags": Dosyanın içerdiği diğer tüm konular (örn: "Deprem", "Tazminat", "Hasar"). Birden fazla olabilir.
 
 İSTENEN JSON FORMATI:
 {
@@ -370,7 +371,8 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "is_final_decision": true,
   "urgency": "High | Medium | Low",
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
-  "tags": ["Çevre", "Şehircilik"]
+  "primary_tag": "BİRİNİ SEÇ: Çevre | Şehircilik | İmar | İdare | Ceza | Diğer (En uygun olan ana kategori)",
+  "secondary_tags": ["Deprem", "Tazminat", "Hasar", "Tespit", "Görüş", "Kamulaştırma"] (Uygun olan diğerleri veya boş dizi)
 }
 
 BELGE METNİ:

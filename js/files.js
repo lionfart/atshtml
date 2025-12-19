@@ -114,7 +114,12 @@ function initColumnResizing() {
                 handle.classList.remove('active');
                 document.body.style.cursor = '';
 
-                // Save widths (optional - for now just resizing session based)
+                // Save widths to localStorage
+                const widths = {};
+                document.querySelectorAll('th').forEach(th => {
+                    widths[th.getAttribute('data-id')] = th.style.width;
+                });
+                localStorage.setItem('filesColumnWidths', JSON.stringify(widths));
             }
 
             document.addEventListener('mousemove', onMouseMove);

@@ -202,12 +202,24 @@ function openReviewModal(itemId) {
                 <div class="review-field"><label>Mahkeme</label><input type="text" id="review-court" value="${data.court_name || ''}" class="form-control"></div>
                 <div class="review-field"><label>Esas No</label><input type="text" id="review-esas" value="${data.court_case_number || ''}" class="form-control"></div>
                 <div class="review-field"><label>Karar No</label><input type="text" id="review-decision" value="${data.court_decision_number || ''}" class="form-control" placeholder="Varsa"></div>
+                <div class="review-field"><label>Konu (Tag)</label>
+                    <select id="review-primary-tag" class="form-control">
+                         <option value="">Seçiniz</option>
+                         <option value="Çevre" ${data.primary_tag === 'Çevre' ? 'selected' : ''}>Çevre</option>
+                         <option value="Şehircilik" ${data.primary_tag === 'Şehircilik' ? 'selected' : ''}>Şehircilik</option>
+                         <option value="İmar" ${data.primary_tag === 'İmar' ? 'selected' : ''}>İmar</option>
+                         <option value="İdare" ${data.primary_tag === 'İdare' ? 'selected' : ''}>İdare</option>
+                         <option value="Ceza" ${data.primary_tag === 'Ceza' ? 'selected' : ''}>Ceza</option>
+                         <option value="Diğer" ${data.primary_tag === 'Diğer' ? 'selected' : ''}>Diğer</option>
+                    </select>
+                </div>
             </div>
             <div class="review-section">
                 <h3><i data-lucide="users"></i> Taraflar</h3>
                 <div class="review-field"><label>Davacı</label><input type="text" id="review-plaintiff" value="${data.plaintiff || ''}" class="form-control"></div>
                 <div class="review-field"><label>Davalı</label><input type="text" id="review-defendant" value="${data.defendant || ''}" class="form-control"></div>
                 <div class="review-field"><label>Değer</label><input type="text" id="review-amount" value="${data.claim_amount || ''}" class="form-control"></div>
+                <div class="review-field"><label>Ek Etiketler</label><input type="text" id="review-tags" value="${(data.secondary_tags || data.tags || []).join(', ')}" class="form-control" placeholder="Virgülle ayır"></div>
             </div>
             <div class="review-section" style="border-left: 2px solid var(--accent-warning); padding-left: 10px;">
                 <h3><i data-lucide="calendar-clock"></i> İş Akışı</h3>
@@ -279,6 +291,9 @@ async function approveNewCase() {
             claim_amount: document.getElementById('review-amount').value,
             summary: document.getElementById('review-summary').value,
             subject: document.getElementById('review-summary').value,
+            // [NEW] Primary and Secondary Tags
+            primary_tag: document.getElementById('review-primary-tag').value,
+            tags: document.getElementById('review-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
             // Workflow fields (mapped to schema)
             next_hearing_date: document.getElementById('review-hearing').value || null,
             case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value}] [Urgency: ${document.getElementById('review-urgency').value}]`
