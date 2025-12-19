@@ -273,6 +273,10 @@ async function loadFiles(retryCount = 0) {
     }
 
     try {
+        const searchTerm = document.getElementById('search-input')?.value || '';
+        const statusFilter = document.getElementById('filter-status')?.value || '';
+        const sortFilter = document.getElementById('filter-sort')?.value || 'date-desc';
+
         let query = supabase
             .from('file_cases')
             .select(`
