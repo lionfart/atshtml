@@ -165,8 +165,10 @@ async function createFileCase(fileData, file = null) {
         claim_amount: fileData.claim_amount,
         subject: fileData.subject,
         lawyer_id: selectedLawyerId,
-        primary_tag: fileData.primary_tag, // [FIX] Save Primary Tag
-        tags: fileData.tags,               // [FIX] Save Secondary Tags
+        primary_tag: fileData.primary_tag,
+        tags: fileData.tags,
+        next_hearing_date: fileData.next_hearing_date,
+        case_status_notes: fileData.case_status_notes,
         status: 'OPEN'
     }]).select().single();
 

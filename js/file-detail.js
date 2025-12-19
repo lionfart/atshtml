@@ -128,8 +128,19 @@ async function loadFileDetails(retryCount = 0) {
 
         // Update documents list
         updateDocumentsList(currentFile.documents || []);
-        // Render Tags
-        renderTags(currentFile.tags || []);
+        // Render Tags (Robust Parsing)
+        let tagsArray = currentFile.tags;
+        if (typeof tagsArray === 'string') {
+            // Check for Postgres array format "{tag1,tag2}"
+            if (tagsArray.startsWith('{') && tagsArray.endsWith('}')) {
+                tagsArray = tagsArray.slice(1, -1).split(',').map(t => t.replace(/"/g, '').trim());
+            } else if (tagsArray.includes(',')) {
+                tagsArray = tagsArray.split(',').map(t => t.trim());
+            } else {
+                tagsArray = [tagsArray];
+            }
+        }
+        renderTags(tagsArray || []);
 
         // [NEW] Populate Primary Tag
         if (currentFile.primary_tag && document.getElementById('primary-tag-select')) {
