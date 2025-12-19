@@ -269,9 +269,10 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, useOp
 
     if (!useOpenRouter && modelIndex >= googleModels.length) {
         console.log('Google API models exhausted. Switching to OpenRouter...');
-        const routerKey = APP_CONFIG.OPENROUTER_API_KEY;
+        // Try localStorage first to avoid git exposure issues
+        const routerKey = localStorage.getItem('openrouter_api_key') || APP_CONFIG.OPENROUTER_API_KEY;
         if (routerKey) return await callGeminiWithFallback(routerKey, contentBody, 0, true);
-        throw new Error('Google API başarısız ve OpenRouter Key bulunamadı.');
+        throw new Error('Google API başarısız ve OpenRouter Key bulunamadı (localStorage: openrouter_api_key).');
     }
 
     if (useOpenRouter && modelIndex >= openRouterModels.length) {
