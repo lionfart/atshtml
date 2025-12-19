@@ -87,9 +87,12 @@
             word-wrap: break-word;
             word-break: break-word;
             overflow-wrap: break-word;
+            white-space: normal !important;
+            /* CRITICAL: Override any nowrap */
+            overflow: hidden;
+            /* Prevent overflow into adjacent columns */
             font-size: 0.85rem;
             line-height: 1.4;
-            /* Text wraps to multiple lines as column narrows */
         }
 
         .advanced-table tr:hover td {
@@ -101,10 +104,9 @@
         }
 
         .cell-truncate {
-            max-width: 150px;
+            max-width: 100%;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            /* Text wraps, no truncation */
         }
 
         /* Column widths - these are initial widths, resizing can override */
