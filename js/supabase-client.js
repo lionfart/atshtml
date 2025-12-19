@@ -319,8 +319,20 @@ ${text.slice(0, 30000)}
     const contentBody = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
     try {
         const responseText = await callGeminiWithFallback(apiKey, contentBody);
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) return JSON.parse(jsonMatch[0]);
+
+        // CLEANUP: Extract JSON from Markdown code blocks if present
+        let cleanedText = responseText.trim();
+        // Remove ```json and ``` wrapping
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+        // Find first '{' and last '}'
+        const firstOpen = cleanedText.indexOf('{');
+        const lastClose = cleanedText.lastIndexOf('}');
+        if (firstOpen !== -1 && lastClose !== -1) {
+            cleanedText = cleanedText.substring(firstOpen, lastClose + 1);
+        }
+
+        return JSON.parse(cleanedText);
     } catch (e) {
         console.warn("JSON parsing failed, retrying with simple prompt...");
         const simpleBody = { contents: [{ parts: [{ text: prompt }] }] };
