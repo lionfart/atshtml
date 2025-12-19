@@ -300,10 +300,11 @@ async function approveNewCase() {
         };
         const newCase = await createFileCase(newData, item.file);
 
-        // [NEW] Upload the initial document immediately
-        if (item.file) {
+        // [FIX] uploadDocument is already called inside createFileCase
+        // Removing duplicate call.
+        /* if (item.file) {
             await uploadDocument(newCase.id, item.file, item.analysisData);
-        }
+        } */
 
         item.status = 'SUCCESS'; item.result = newCase; item.log = `Yeni: ${newCase.registration_number}`;
         closeReviewModal(); saveQueueToStorage(); updateQueueItemUI(item); loadLawyers(); showToast('Yeni dosya oluşturuldu.', 'success');

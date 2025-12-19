@@ -115,7 +115,13 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-amount')) document.getElementById('edit-amount').value = currentFile.claim_amount || '';
         if (document.getElementById('edit-reg-number')) document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
+        if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
+
+        // [NEW] Populate AI Suggestion
+        if (document.getElementById('ai-suggestion-box')) {
+            document.getElementById('ai-suggestion-box').textContent = currentFile.case_status_notes || 'Henüz öneri yok.';
+        }
 
         // Update status card
         updateStatusCard(currentFile);

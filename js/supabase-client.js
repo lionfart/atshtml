@@ -159,16 +159,20 @@ async function createFileCase(fileData, file = null) {
         registration_number: finalRegNumber,
         court_name: fileData.court_name,
         court_case_number: fileData.court_case_number,
-        court_decision_number: fileData.court_decision_number, // NEW FIELD
+        court_decision_number: fileData.court_decision_number,
         plaintiff: fileData.plaintiff,
         defendant: fileData.defendant,
         claim_amount: fileData.claim_amount,
         subject: fileData.subject,
         lawyer_id: selectedLawyerId,
+        primary_tag: fileData.primary_tag, // [FIX] Save Primary Tag
+        tags: fileData.tags,               // [FIX] Save Secondary Tags
         status: 'OPEN'
     }]).select().single();
 
     if (error) throw error;
+    // [FIX] Duplicate upload removed from here ? No, keeping it here is better for encapsulation.
+    // I will remove the external call in app.js instead.
     if (file) await uploadDocument(newFile.id, file, { summary: fileData.summary, type: fileData.type, viz_text: fileData.viz_text });
     return newFile;
 }
