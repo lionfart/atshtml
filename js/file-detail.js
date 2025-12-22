@@ -831,6 +831,129 @@ async function addNoteFromModal() {
     }
 }
 
+// ==========================================
+// Status Toggle Function
+// ==========================================
+
+async function toggleFileStatus() {
+    if (!currentFile) return;
+
+    const newStatus = currentFile.status === 'OPEN' ? 'CLOSED' : 'OPEN';
+    const btn = document.getElementById('status-toggle-btn');
+    const originalText = btn.innerHTML;
+
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;"></div>';
+
+        const { error } = await supabase
+            .from('file_cases')
+            .update({ status: newStatus })
+            .eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast(`Dosya durumu ${newStatus === 'OPEN' ? 'Açık' : 'Kapalı'} olarak güncellendi`, 'success');
+        loadFileDetails(); // Refresh to show new status
+    } catch (err) {
+        console.error('Status toggle error:', err);
+        showToast('Durum güncellenemedi: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+// ==========================================
+// Collapsible Notes Section
+// ==========================================
+
+let notesLoaded = false;
+
+function toggleNotesSection() {
+    const content = document.getElementById('notes-section-content');
+    const icon = document.getElementById('notes-toggle-icon');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.setAttribute('data-lucide', 'chevron-up');
+        if (!notesLoaded) {
+            loadInlineNotes();
+            notesLoaded = true;
+        }
+    } else {
+        content.style.display = 'none';
+        icon.setAttribute('data-lucide', 'chevron-down');
+    }
+    lucide.createIcons();
+}
+
+async function loadInlineNotes() {
+    const container = document.getElementById('inline-notes-list');
+    try {
+        const { data, error } = await supabase
+            .from('activities')
+            .select('*')
+            .eq('file_case_id', fileId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p class="text-muted" style="font-size:0.9rem;">Henüz not veya işlem kaydı yok.</p>';
+            return;
+        }
+
+        container.innerHTML = data.map(item => {
+            const isNote = item.activity_type === 'NOTE';
+            const icon = isNote ? 'message-square' : 'file-text';
+            const date = new Date(item.created_at).toLocaleString('tr-TR');
+            return `
+                <div style="padding:8px 0; border-bottom:1px solid var(--border-color);">
+                    <div style="display:flex; align-items:flex-start; gap:8px;">
+                        <i data-lucide="${icon}" style="width:14px; flex-shrink:0; margin-top:2px; color:var(--text-muted);"></i>
+                        <div>
+                            <div style="font-size:0.85rem;">${escapeHtml(item.summary || item.activity_type)}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${date}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        lucide.createIcons();
+    } catch (err) {
+        console.error('Inline notes load error:', err);
+        container.innerHTML = '<p class="text-muted">Notlar yüklenirken hata oluştu.</p>';
+    }
+}
+
+async function addNoteInline() {
+    const input = document.getElementById('inline-note-input');
+    const content = input.value.trim();
+    if (!content) {
+        showToast('Not içeriği boş olamaz.', 'error');
+        return;
+    }
+
+    try {
+        const { error } = await supabase.from('activities').insert({
+            file_case_id: fileId,
+            activity_type: 'NOTE',
+            summary: content,
+            content: content
+        });
+
+        if (error) throw error;
+
+        input.value = '';
+        showToast('Not eklendi.', 'success');
+        loadInlineNotes();
+        loadNotes();
+    } catch (err) {
+        console.error('Add note error:', err);
+        showToast('Not eklenemedi: ' + err.message, 'error');
+    }
+}
+
 // Window Exports
 window.viewDocument = viewDocument;
 window.renameDocumentPrompt = renameDocumentPrompt;
@@ -843,5 +966,8 @@ window.removeTag = removeTag;
 window.openNotesModal = openNotesModal;
 window.closeNotesModal = closeNotesModal;
 window.addNoteFromModal = addNoteFromModal;
+window.toggleFileStatus = toggleFileStatus;
+window.toggleNotesSection = toggleNotesSection;
+window.addNoteInline = addNoteInline;
 
 console.log('file-detail.js loaded successfully');

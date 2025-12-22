@@ -93,19 +93,20 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             }
         });
 
-        // Fetch manual events
+        // Fetch manual events with lawyer info
         const { data: manualEvents } = await supabase
             .from('calendar_events')
-            .select('*');
+            .select('*, lawyers(name)');
 
         manualEvents?.forEach(evt => {
+            const lawyerName = evt.lawyers?.name ? ` (${evt.lawyers.name})` : '';
             events.push({
                 id: 'manual-' + evt.id,
-                title: evt.title,
+                title: evt.title + lawyerName,
                 start: evt.event_date + (evt.event_time ? 'T' + evt.event_time : ''),
                 backgroundColor: '#10b981', // Green for manual
                 borderColor: '#059669',
-                extendedProps: { type: 'manual', notes: evt.notes }
+                extendedProps: { type: 'manual', notes: evt.notes, lawyer: evt.lawyers?.name }
             });
         });
 

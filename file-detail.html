@@ -227,6 +227,7 @@
             <!-- Right Column - Status & Documents -->
             <div class="grid-column">
                 <!-- Status + Tags Row (Side by Side) -->
+                <!-- Status + Tags Row (Side by Side) -->
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     <!-- Status Card -->
                     <div class="card">
@@ -242,6 +243,12 @@
                                     <div class="spinner"></div>
                                 </div>
                             </div>
+                            <!-- Status Toggle Button -->
+                            <button id="status-toggle-btn" class="btn btn-sm" style="width:100%; margin-top:10px;"
+                                onclick="toggleFileStatus()">
+                                <i data-lucide="refresh-cw" style="width:14px;"></i>
+                                <span>Durumu Değiştir</span>
+                            </button>
                         </div>
                     </div>
 
@@ -282,11 +289,39 @@
                     </div>
                 </div>
 
-                <!-- Notes & History Button -->
-                <button class="btn btn-outline" style="width:100%; margin-top:15px;" onclick="openNotesModal()">
-                    <i data-lucide="notebook-text"></i>
-                    <span>Notlar ve İşlem Geçmişi</span>
-                </button>
+                <!-- Notes & History Collapsible Section -->
+                <div class="card" style="margin-top:15px;">
+                    <div class="card-header" style="cursor:pointer; padding:10px 15px;" onclick="toggleNotesSection()">
+                        <h2 class="card-title" style="font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+                            <i data-lucide="notebook-text" style="width:16px;"></i>
+                            Notlar ve İşlem Geçmişi
+                            <i id="notes-toggle-icon" data-lucide="chevron-down"
+                                style="width:16px; margin-left:auto;"></i>
+                        </h2>
+                    </div>
+                    <div id="notes-section-content" style="display:none;">
+                        <div class="card-content" style="padding:15px;">
+                            <!-- Add Note Section -->
+                            <div style="margin-bottom:15px;">
+                                <textarea id="inline-note-input" rows="2" class="form-control"
+                                    placeholder="Not yazın..."></textarea>
+                                <button class="btn btn-primary btn-sm" style="margin-top:8px;"
+                                    onclick="addNoteInline()">
+                                    <i data-lucide="plus" style="width:14px;"></i> Not Ekle
+                                </button>
+                            </div>
+                            <hr style="border-color:var(--border-color); margin:10px 0;">
+                            <!-- Notes List -->
+                            <div id="inline-notes-list" style="max-height:250px; overflow-y:auto;">
+                                <div class="loading-placeholder">
+                                    <div class="spinner"></div>
+                                    <span>Yükleniyor...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- Documents Card -->
                 <div class="card">

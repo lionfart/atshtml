@@ -262,7 +262,7 @@ function getCellContent(file, colId) {
         case 'col-status':
             const sClass = file.status === 'OPEN' ? 'badge-active' : 'badge-inactive';
             const sText = file.status === 'OPEN' ? 'Açık' : 'Kapalı';
-            return `<span class="badge ${sClass} status-toggle" data-file-id="${file.id}" data-current-status="${file.status}" style="cursor:pointer;" title="Durumu değiştirmek için tıklayın">${sText}</span>`;
+            return `<span class="badge ${sClass}">${sText}</span>`;
         case 'col-decision':
             if (file.latest_decision_result) {
                 const color = file.latest_decision_result.toLowerCase().includes('red') ? 'var(--accent-danger)' :

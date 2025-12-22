@@ -18,13 +18,12 @@
 
     <style>
         .calendar-container {
-            background: white;
+            background: var(--bg-card);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             min-height: 700px;
-            color: #1f2937;
-            /* Force dark text for visibility on white bg */
+            color: var(--text-primary);
         }
 
         .fc-header-toolbar {
@@ -47,17 +46,24 @@
             background-color: var(--accent-primary-hover) !important;
         }
 
-        /* Fix grid text colors */
+        /* Calendar grid text - light colors for dark theme */
         .fc-col-header-cell-cushion,
         .fc-daygrid-day-number {
-            color: #374151;
-            /* Dark gray for dates */
+            color: var(--text-secondary);
             text-decoration: none !important;
         }
 
         .fc-col-header-cell-cushion:hover,
         .fc-daygrid-day-number:hover {
             color: var(--accent-primary);
+        }
+
+        .fc-daygrid-day {
+            background: var(--bg-card);
+        }
+
+        .fc-daygrid-day.fc-day-today {
+            background: rgba(59, 130, 246, 0.15) !important;
         }
 
         .fc-event {
