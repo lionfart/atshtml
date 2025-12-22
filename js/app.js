@@ -61,6 +61,13 @@ function saveQueueToStorage() {
 // ... (handleFiles, processQueueItem) ... //
 function handleFiles(files) {
     if (!files.length) return;
+
+    // Admin check - only admins can create new cases via upload
+    if (typeof isAdmin === 'function' && !isAdmin()) {
+        showToast('Evrak girişi (yeni dosya oluşturma) için admin yetkisi gerekli! Ayarlar menüsünden giriş yapın.', 'error');
+        return;
+    }
+
     const manager = document.getElementById('upload-manager');
     manager.classList.remove('hidden');
     manager.classList.remove('minimized');

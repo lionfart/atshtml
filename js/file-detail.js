@@ -492,11 +492,7 @@ function setupDocumentUpload() {
 }
 
 async function handleDocumentUpload(file) {
-    // Admin check for document upload
-    if (typeof isAdmin === 'function' && !isAdmin()) {
-        showToast('Evrak yüklemek için admin yetkisi gerekli!', 'error');
-        return;
-    }
+    // File-detail uploads are available for all users
 
     if (file.size > APP_CONFIG.maxFileSize) {
         showToast('Dosya çok büyük. Maksimum 20MB.', 'error');
