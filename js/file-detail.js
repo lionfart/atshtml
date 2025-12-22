@@ -286,6 +286,11 @@ function updateDocumentsList(documents) {
     const container = document.getElementById('documents-list');
     const countEl = document.getElementById('documents-count');
 
+    // Ensure documents is an array
+    if (!Array.isArray(documents)) {
+        documents = [];
+    }
+
     countEl.textContent = `(${documents.length})`;
 
     if (documents.length === 0) {
