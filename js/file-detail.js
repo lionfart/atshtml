@@ -950,6 +950,22 @@ async function addNoteInline() {
     }
 }
 
+// Toggle Notes Panel (collapsible)
+function toggleNotesPanel() {
+    const content = document.getElementById('notes-panel-content');
+    const icon = document.getElementById('notes-panel-icon');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.setAttribute('data-lucide', 'chevron-up');
+        loadNotes(); // Load notes when opened
+    } else {
+        content.style.display = 'none';
+        icon.setAttribute('data-lucide', 'chevron-down');
+    }
+    lucide.createIcons();
+}
+
 // Window Exports
 window.viewDocument = viewDocument;
 window.renameDocumentPrompt = renameDocumentPrompt;
@@ -965,5 +981,6 @@ window.addNoteFromModal = addNoteFromModal;
 window.toggleFileStatus = toggleFileStatus;
 window.toggleNotesSection = toggleNotesSection;
 window.addNoteInline = addNoteInline;
+window.toggleNotesPanel = toggleNotesPanel;
 
 console.log('file-detail.js loaded successfully');

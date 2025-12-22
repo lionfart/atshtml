@@ -123,100 +123,103 @@
         <div class="main-grid">
             <!-- Left Column - Details & Notes -->
             <div class="grid-column" style="grid-column: span 2;">
-                <!-- Tabs -->
+                <!-- Details Card (No Tabs) -->
                 <div class="card">
-                    <div class="tabs">
-                        <div class="tabs-list" style="margin: var(--space-4);">
-                            <button class="tab-trigger active" onclick="switchTab('details')">Dosya Bilgileri</button>
-                            <button class="tab-trigger" onclick="switchTab('notes')">Süreç & Notlar</button>
-                        </div>
-
-                        <!-- Details Tab -->
-                        <div class="tab-content active" id="tab-details">
-                            <div class="card-content">
-                                <form id="file-details-form">
-                                    <div class="grid-2-col"
-                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
-                                        <div class="form-group">
-                                            <label for="edit-plaintiff">Davacı</label>
-                                            <input type="text" id="edit-plaintiff" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="edit-defendant">Davalı</label>
-                                            <input type="text" id="edit-defendant">
-                                        </div>
-                                    </div>
-
-                                    <div class="grid-2-col"
-                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
-                                        <div class="form-group">
-                                            <label for="edit-plaintiff-attorney">Davacı Vekili</label>
-                                            <input type="text" id="edit-plaintiff-attorney" placeholder="Av. ...">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="edit-defendant-attorney">Davalı Vekili</label>
-                                            <input type="text" id="edit-defendant-attorney" placeholder="Av. ...">
-                                        </div>
-                                    </div>
-
-                                    <div class="grid-2-col"
-                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
-                                        <div class="form-group">
-                                            <label for="edit-court">Mahkeme</label>
-                                            <input type="text" id="edit-court">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="edit-amount">Dava Değeri</label>
-                                            <input type="text" id="edit-amount">
-                                        </div>
-                                    </div>
-
-                                    <div class="grid-2-col"
-                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
-                                        <div class="form-group">
-                                            <label for="edit-reg-number">Esas No</label>
-                                            <input type="text" id="edit-reg-number">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="edit-decision-number">Karar No</label>
-                                            <input type="text" id="edit-decision-number" placeholder="Örn: 2024/55 K.">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="edit-subject">Dava Konusu</label>
-                                        <textarea id="edit-subject" rows="4" style="resize: vertical;"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary" id="save-details-btn">
-                                        <i data-lucide="save"></i>
-                                        <span>Değişiklikleri Kaydet</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Notes Tab -->
-                        <div class="tab-content" id="tab-notes">
-                            <div class="card-content">
-                                <h3 style="margin-bottom: var(--space-4);">Notlar ve İşlem Geçmişi</h3>
-                                <p class="card-description" style="margin-bottom: var(--space-4);">Bu dosyaya dair
-                                    alınan notlar ve sistem kayıtları.</p>
-
-                                <!-- Add Note Form -->
-                                <div class="flex gap-2 mb-4">
-                                    <input type="text" id="new-note-input" placeholder="Yeni not ekle..."
-                                        style="flex: 1;">
-                                    <button class="btn btn-primary" onclick="addNote()">
-                                        <i data-lucide="send"></i>
-                                    </button>
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i data-lucide="file-text"></i>
+                            Dosya Bilgileri
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <form id="file-details-form">
+                            <div class="grid-2-col"
+                                style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                <div class="form-group">
+                                    <label for="edit-plaintiff">Davacı</label>
+                                    <input type="text" id="edit-plaintiff" required>
                                 </div>
+                                <div class="form-group">
+                                    <label for="edit-defendant">Davalı</label>
+                                    <input type="text" id="edit-defendant">
+                                </div>
+                            </div>
 
-                                <!-- Notes List -->
-                                <div class="notes-list" id="notes-list">
-                                    <div class="loading-placeholder">
-                                        <div class="spinner"></div>
-                                        <span>Notlar yükleniyor...</span>
-                                    </div>
+                            <div class="grid-2-col"
+                                style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                <div class="form-group">
+                                    <label for="edit-plaintiff-attorney">Davacı Vekili</label>
+                                    <input type="text" id="edit-plaintiff-attorney" placeholder="Av. ...">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-defendant-attorney">Davalı Vekili</label>
+                                    <input type="text" id="edit-defendant-attorney" placeholder="Av. ...">
+                                </div>
+                            </div>
+
+                            <div class="grid-2-col"
+                                style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                <div class="form-group">
+                                    <label for="edit-court">Mahkeme</label>
+                                    <input type="text" id="edit-court">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-amount">Dava Değeri</label>
+                                    <input type="text" id="edit-amount">
+                                </div>
+                            </div>
+
+                            <div class="grid-2-col"
+                                style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                <div class="form-group">
+                                    <label for="edit-reg-number">Esas No</label>
+                                    <input type="text" id="edit-reg-number">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-decision-number">Karar No</label>
+                                    <input type="text" id="edit-decision-number" placeholder="Örn: 2024/55 K.">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit-subject">Dava Konusu</label>
+                                <textarea id="edit-subject" rows="4" style="resize: vertical;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="save-details-btn">
+                                <i data-lucide="save"></i>
+                                <span>Değişiklikleri Kaydet</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notes & History Collapsible Card -->
+                <div class="card" style="margin-top:20px;">
+                    <div class="card-header" style="cursor:pointer;" onclick="toggleNotesPanel()">
+                        <h2 class="card-title" style="display:flex; align-items:center; gap:8px;">
+                            <i data-lucide="notebook-text"></i>
+                            Süreç & Notlar
+                            <i id="notes-panel-icon" data-lucide="chevron-down"
+                                style="margin-left:auto; width:18px;"></i>
+                        </h2>
+                    </div>
+                    <div id="notes-panel-content" style="display:none;">
+                        <div class="card-content">
+                            <p class="text-muted" style="margin-bottom:15px; font-size:0.9rem;">Bu dosyaya dair alınan
+                                notlar ve sistem kayıtları.</p>
+                            <!-- Add Note Form -->
+                            <div style="display:flex; gap:8px; margin-bottom:15px;">
+                                <input type="text" id="new-note-input" class="form-control"
+                                    placeholder="Yeni not ekle..." style="flex:1;">
+                                <button class="btn btn-primary" onclick="addNote()">
+                                    <i data-lucide="send" style="width:16px;"></i>
+                                </button>
+                            </div>
+                            <!-- Notes List -->
+                            <div class="notes-list" id="notes-list">
+                                <div class="loading-placeholder">
+                                    <div class="spinner"></div>
+                                    <span>Notlar yükleniyor...</span>
                                 </div>
                             </div>
                         </div>
