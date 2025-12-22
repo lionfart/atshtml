@@ -250,7 +250,10 @@ function updateStatusCard(file) {
             </div>
         </div>
         <div class="form-group">
-            <span class="badge ${file.status === 'OPEN' ? 'badge-active' : 'badge-inactive'}">
+            <span class="badge ${file.status === 'OPEN' ? 'badge-active' : 'badge-inactive'}" 
+                  style="cursor:pointer;" 
+                  onclick="toggleFileStatus()" 
+                  title="Durumu değiştirmek için tıklayın">
                 ${file.status === 'OPEN' ? 'Açık Dosya' : 'Kapalı'}
             </span>
         </div>
@@ -839,13 +842,8 @@ async function toggleFileStatus() {
     if (!currentFile) return;
 
     const newStatus = currentFile.status === 'OPEN' ? 'CLOSED' : 'OPEN';
-    const btn = document.getElementById('status-toggle-btn');
-    const originalText = btn.innerHTML;
 
     try {
-        btn.disabled = true;
-        btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;"></div>';
-
         const { error } = await supabase
             .from('file_cases')
             .update({ status: newStatus })
@@ -858,8 +856,6 @@ async function toggleFileStatus() {
     } catch (err) {
         console.error('Status toggle error:', err);
         showToast('Durum güncellenemedi: ' + err.message, 'error');
-        btn.disabled = false;
-        btn.innerHTML = originalText;
     }
 }
 
