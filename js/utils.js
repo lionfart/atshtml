@@ -45,6 +45,20 @@ function debounce(func, wait = 300) {
     };
 }
 
+// Normalize Turkish characters for search/comparison
+function normalizeTurkish(text) {
+    if (!text) return '';
+    return text.toString()
+        .replace(/İ/g, 'i')
+        .replace(/I/g, 'ı')
+        .replace(/Ş/g, 'ş')
+        .replace(/Ç/g, 'ç')
+        .replace(/Ö/g, 'ö')
+        .replace(/Ü/g, 'ü')
+        .replace(/Ğ/g, 'ğ')
+        .toLowerCase();
+}
+
 // Read file as base64
 function readFileAsBase64(file) {
     return new Promise((resolve, reject) => {

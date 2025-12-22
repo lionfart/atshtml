@@ -7,16 +7,11 @@
     <title>Raporlar - Adalet Takip Sistemi</title>
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Scripts (Loaded early) -->
+    <!-- Libraries (Loaded early) -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- SheetJS for Excel Export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-
-    <script src="js/config.js"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/dashboard.js"></script>
 
     <style>
         .stats-grid {
@@ -265,12 +260,16 @@
 
     <!-- Scripts -->
     <script src="js/admin.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
     <script>
         // Settings modal functions
         function openSettingsModal() {
             document.getElementById('settings-modal').classList.add('active');
             if (typeof updateAdminUI === 'function') updateAdminUI();
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
         function closeSettingsModal() {
             document.getElementById('settings-modal').classList.remove('active');

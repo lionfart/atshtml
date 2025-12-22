@@ -113,9 +113,9 @@ class AiAgent {
         fab.id = 'ai-agent-fab';
         fab.innerHTML = '<i data-lucide="bot" width="32" height="32"></i>';
 
-        const window = document.createElement('div');
-        window.id = 'ai-agent-window';
-        window.innerHTML = `
+        const agentWindow = document.createElement('div');
+        agentWindow.id = 'ai-agent-window';
+        agentWindow.innerHTML = `
             <div class="agent-header">
                 <span style="font-weight:600;">⚖️ Adalet Asistanı</span>
                 <button id="agent-close-btn" style="background:none;border:none;color:#aaa;cursor:pointer;"><i data-lucide="x"></i></button>
@@ -131,10 +131,10 @@ class AiAgent {
         `;
 
         document.body.appendChild(fab);
-        document.body.appendChild(window);
+        document.body.appendChild(agentWindow);
 
         // Lucide icons might need refresh if script loaded late
-        if (window.lucide) lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     addEventListeners() {

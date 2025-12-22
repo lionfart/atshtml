@@ -353,6 +353,7 @@ Sen Türk Hukuk Sistemine hakim uzman bir avukat asistanısın. Bu belgeyi anali
 AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri değil, avukatın yapması gerekenleri ve takvimi çıkar.
 
 ÖNEMLİ KURALLAR:
+0. KARAKTER KULLANIMI: TÜM METİNLERDE (ÖZELLİKLE ÖZET BÖLÜMÜNDE) TÜRKÇE KARAKTERLERİ (ğ, ü, ş, ı, ö, ç, İ) DOĞRU VE EKSİKSİZ KULLAN. Arama fonksiyonunun çalışması için bu kritiktir.
 1. "type": SADECE bu listeden biri olmalı (En uygununu seç):
    - "Dava Dilekçesi", "Savunma Dilekçesi", "Cevap Dilekçesi", "Savunmaya Cevap Dilekçesi"
    - "Ara Karar", "Bilirkişi Raporu", "Bilirkişi Raporuna İtiraz", "Karar"

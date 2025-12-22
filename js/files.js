@@ -367,18 +367,20 @@ async function loadFiles(retryCount = 0) {
         // Client-side filtering for search (simpler than complex OR query)
         let filteredData = data;
         if (searchTerm) {
-            const lowerTerm = searchTerm.toLowerCase();
+            const normalizedTerm = normalizeTurkish(searchTerm);
             filteredData = data.filter(item => {
                 const searchableFields = [
+                    item.registration_number,
                     item.court_case_number,
                     item.plaintiff,
                     item.defendant,
                     item.subject,
                     item.court_name,
                     item.primary_tag,
-                    ...(item.tags || [])
+                    ...(item.tags || []),
+                    item.lawyers?.name
                 ];
-                return searchableFields.some(field => field && String(field).toLowerCase().includes(lowerTerm));
+                return searchableFields.some(field => field && normalizeTurkish(field).includes(normalizedTerm));
             });
         }
 

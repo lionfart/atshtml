@@ -63,7 +63,7 @@ async function loadDashboardData() {
         renderTagsTable(tagCounts, total);
         renderLawyersTable(lawyerStats);
 
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
     } catch (e) {
         console.error('Dashboard load failed:', e);
