@@ -118,6 +118,10 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
 
+        // Vekil fields
+        if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
+        if (document.getElementById('edit-defendant-attorney')) document.getElementById('edit-defendant-attorney').value = currentFile.defendant_attorney || '';
+
         // [NEW] Populate AI Suggestion
         if (document.getElementById('ai-suggestion-box')) {
             document.getElementById('ai-suggestion-box').textContent = currentFile.case_status_notes || 'Henüz öneri yok.';
@@ -203,6 +207,8 @@ function setupDetailsForm() {
             const updates = {
                 plaintiff: document.getElementById('edit-plaintiff').value,
                 defendant: document.getElementById('edit-defendant').value,
+                plaintiff_attorney: document.getElementById('edit-plaintiff-attorney')?.value || null,
+                defendant_attorney: document.getElementById('edit-defendant-attorney')?.value || null,
                 court_name: courtName,
                 claim_amount: document.getElementById('edit-amount').value,
                 court_case_number: courtCaseNumber,
@@ -740,8 +746,90 @@ async function confirmDeleteFile() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeDeleteModal();
+        closeNotesModal();
     }
 });
+
+// ==========================================
+// Notes Modal Functions
+// ==========================================
+
+function openNotesModal() {
+    const modal = document.getElementById('notes-modal');
+    modal.classList.add('active');
+    loadNotesForModal();
+    lucide.createIcons();
+}
+
+function closeNotesModal() {
+    const modal = document.getElementById('notes-modal');
+    modal.classList.remove('active');
+}
+
+async function loadNotesForModal() {
+    const container = document.getElementById('modal-notes-list');
+    try {
+        const { data, error } = await supabase
+            .from('activities')
+            .select('*')
+            .eq('file_case_id', fileId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p class="text-muted">Henüz not veya işlem kaydı bulunmuyor.</p>';
+            return;
+        }
+
+        container.innerHTML = data.map(item => {
+            const isNote = item.activity_type === 'NOTE';
+            const icon = isNote ? 'message-square' : 'file-text';
+            const date = new Date(item.created_at).toLocaleString('tr-TR');
+            return `
+                <div style="padding:10px; border-bottom:1px solid var(--border-color); display:flex; gap:10px;">
+                    <i data-lucide="${icon}" style="width:18px; color:var(--text-muted);"></i>
+                    <div style="flex:1;">
+                        <div style="font-size:0.85rem; color:var(--text-primary);">${escapeHtml(item.summary || item.activity_type)}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">${date}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        lucide.createIcons();
+    } catch (err) {
+        console.error('Modal notes load error:', err);
+        container.innerHTML = '<p class="text-muted">Notlar yüklenirken hata oluştu.</p>';
+    }
+}
+
+async function addNoteFromModal() {
+    const input = document.getElementById('modal-note-input');
+    const content = input.value.trim();
+    if (!content) {
+        showToast('Not içeriği boş olamaz.', 'error');
+        return;
+    }
+
+    try {
+        const { error } = await supabase.from('activities').insert({
+            file_case_id: fileId,
+            activity_type: 'NOTE',
+            summary: content,
+            content: content
+        });
+
+        if (error) throw error;
+
+        input.value = '';
+        showToast('Not eklendi.', 'success');
+        loadNotesForModal();
+        loadNotes(); // Also refresh main page notes if visible
+    } catch (err) {
+        console.error('Add note error:', err);
+        showToast('Not eklenemedi: ' + err.message, 'error');
+    }
+}
 
 // Window Exports
 window.viewDocument = viewDocument;
@@ -752,5 +840,8 @@ window.closeDeleteModal = closeDeleteModal;
 window.confirmDeleteFile = confirmDeleteFile;
 window.handleAddTag = handleAddTag;
 window.removeTag = removeTag;
+window.openNotesModal = openNotesModal;
+window.closeNotesModal = closeNotesModal;
+window.addNoteFromModal = addNoteFromModal;
 
 console.log('file-detail.js loaded successfully');

@@ -49,6 +49,39 @@
         </div>
     </div>
 
+    <!-- Notes & History Modal -->
+    <div id="notes-modal" class="modal">
+        <div class="modal-overlay" onclick="closeNotesModal()"></div>
+        <div class="modal-content"
+            style="max-width:700px; max-height:80vh; overflow:hidden; display:flex; flex-direction:column;">
+            <div class="modal-header">
+                <h2><i data-lucide="notebook-text" style="width:20px;"></i> Notlar ve İşlem Geçmişi</h2>
+                <button class="icon-btn" onclick="closeNotesModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div style="padding:20px; overflow-y:auto; flex:1;">
+                <!-- Add Note Section -->
+                <div style="margin-bottom:20px;">
+                    <h3 style="font-size:0.95rem; margin-bottom:10px;">Yeni Not Ekle</h3>
+                    <textarea id="modal-note-input" rows="3" class="form-control" placeholder="Not yazın..."></textarea>
+                    <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="addNoteFromModal()">
+                        <i data-lucide="plus" style="width:14px;"></i> Not Ekle
+                    </button>
+                </div>
+                <hr style="border-color:var(--border-color); margin:15px 0;">
+                <!-- Notes List -->
+                <h3 style="font-size:0.95rem; margin-bottom:10px;">Dosya Notları ve Sistem Kayıtları</h3>
+                <div id="modal-notes-list" style="max-height:300px; overflow-y:auto;">
+                    <div class="loading-placeholder">
+                        <div class="spinner"></div>
+                        <span>Yükleniyor...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App -->
     <main class="container">
         <!-- Header -->
@@ -111,6 +144,18 @@
                                         <div class="form-group">
                                             <label for="edit-defendant">Davalı</label>
                                             <input type="text" id="edit-defendant">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid-2-col"
+                                        style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                                        <div class="form-group">
+                                            <label for="edit-plaintiff-attorney">Davacı Vekili</label>
+                                            <input type="text" id="edit-plaintiff-attorney" placeholder="Av. ...">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="edit-defendant-attorney">Davalı Vekili</label>
+                                            <input type="text" id="edit-defendant-attorney" placeholder="Av. ...">
                                         </div>
                                     </div>
 
@@ -181,65 +226,67 @@
 
             <!-- Right Column - Status & Documents -->
             <div class="grid-column">
-                <!-- Status Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i data-lucide="info"></i>
-                            Durum
-                        </h2>
-                    </div>
-                    <div class="card-content">
-                        <div id="status-content">
-                            <div class="loading-placeholder">
-                                <div class="spinner"></div>
+                <!-- Status + Tags Row (Side by Side) -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    <!-- Status Card -->
+                    <div class="card">
+                        <div class="card-header" style="padding:10px 15px;">
+                            <h2 class="card-title" style="font-size:0.9rem;">
+                                <i data-lucide="info" style="width:14px;"></i>
+                                Durum
+                            </h2>
+                        </div>
+                        <div class="card-content" style="padding:10px 15px;">
+                            <div id="status-content">
+                                <div class="loading-placeholder">
+                                    <div class="spinner"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Tags Card -->
-                <div class="card" style="margin-top: 20px;">
-                    <div class="card-header">
-                        <h2 class="card-title">
-                            <i data-lucide="tag"></i>
-                            Etiketler / Konu
-                        </h2>
-                    </div>
-                    <div class="card-content">
-                        <div id="tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
-                            <!-- Tags will be injected here -->
-                            <span class="text-muted" style="font-size: 0.9em;">Etiket yok.</span>
+                    <!-- Tags Card -->
+                    <div class="card">
+                        <div class="card-header" style="padding:10px 15px;">
+                            <h2 class="card-title" style="font-size:0.9rem;">
+                                <i data-lucide="tag" style="width:14px;"></i>
+                                Etiketler
+                            </h2>
                         </div>
-
-                        <div style="margin-bottom:10px;">
-                            <label style="font-size:0.8rem; color:var(--text-secondary);">Konu (Birincil Etiket)</label>
-                            <select id="primary-tag-select" class="form-control" style="width:100%;">
-                                <option value="">Seçiniz</option>
+                        <div class="card-content" style="padding:10px 15px;">
+                            <div id="tags-container"
+                                style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                                <span class="text-muted" style="font-size: 0.85em;">Etiket yok.</span>
+                            </div>
+                            <select id="primary-tag-select" class="form-control" style="width:100%; font-size:0.85rem;">
+                                <option value="">Birincil Etiket</option>
                                 <option value="Çevre">Çevre</option>
                                 <option value="Şehircilik">Şehircilik</option>
                                 <option value="Mevzuat">Mevzuat</option>
                                 <option value="Diğer">Diğer</option>
                             </select>
-                        </div>
-                        <div class="form-group" style="display: flex; gap: 8px;">
-                            <input list="tag-suggestions" id="new-tag-input" class="form-control"
-                                placeholder="Diğer etiket ekle (ikincil)..." style="flex:1;">
-                            <datalist id="tag-suggestions">
-                                <option value="Adli">
-                                <option value="Deprem">
-                                <option value="Tazminat">
-                                <option value="Hasar">
-                                <option value="Tespit">
-                                <option value="Görüş">
-                                <option value="Kamulaştırma">
-                            </datalist>
-                            <button type="button" class="btn btn-primary" onclick="handleAddTag()">
-                                <i data-lucide="plus" style="width: 16px;"></i> Ekle
-                            </button>
+                            <div style="display:flex; gap:6px; margin-top:8px;">
+                                <input list="tag-suggestions" id="new-tag-input" class="form-control"
+                                    placeholder="İkincil etiket..." style="flex:1; font-size:0.85rem;">
+                                <datalist id="tag-suggestions">
+                                    <option value="Adli">
+                                    <option value="Deprem">
+                                    <option value="Tazminat">
+                                    <option value="Hasar">
+                                </datalist>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="handleAddTag()">
+                                    <i data-lucide="plus" style="width:14px;"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Notes & History Button -->
+                <button class="btn btn-outline" style="width:100%; margin-top:15px;" onclick="openNotesModal()">
+                    <i data-lucide="notebook-text"></i>
+                    <span>Notlar ve İşlem Geçmişi</span>
+                </button>
 
                 <!-- Documents Card -->
                 <div class="card">

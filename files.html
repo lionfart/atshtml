@@ -169,6 +169,10 @@
             width: 100px;
         }
 
+        .col-vekil {
+            width: 150px;
+        }
+
         /* Tooltip for document summary */
         [data-tooltip] {
             cursor: help;
@@ -276,6 +280,11 @@
                         </select>
                     </div>
 
+                    <input type="date" id="filter-date-start" class="form-control" onchange="loadFiles()"
+                        style="flex:0 0 auto; width:130px;" title="Başlangıç Tarihi">
+                    <input type="date" id="filter-date-end" class="form-control" onchange="loadFiles()"
+                        style="flex:0 0 auto; width:130px;" title="Bitiş Tarihi">
+
                     <button class="btn btn-outline btn-sm" onclick="loadFiles()" title="Yenile">
                         <i data-lucide="refresh-cw"></i>
                     </button>
@@ -294,6 +303,8 @@
                             <th class="col-parties" data-id="col-parties"><span class="drag-handle">⋮</span> Taraflar
                                 <span class="resize-handle"></span>
                             </th>
+                            <th class="col-vekil" data-id="col-vekil"><span class="drag-handle">⋮</span> Vekiller <span
+                                    class="resize-handle"></span></th>
                             <th class="col-subject" data-id="col-subject"><span class="drag-handle">⋮</span> Konu <span
                                     class="resize-handle"></span></th>
                             <th class="col-tags" data-id="col-tags"><span class="drag-handle">⋮</span> Etiketler <span

@@ -4,7 +4,7 @@
 
 // Global State
 let columnOrder = JSON.parse(localStorage.getItem('filesColumnOrder')) || [
-    'col-no', 'col-parties', 'col-tags', 'col-subject', 'col-amount', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
+    'col-no', 'col-parties', 'col-vekil', 'col-tags', 'col-subject', 'col-amount', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
 ];
 let loadedFilesData = []; // Store data for re-rendering without refetching
 
@@ -244,6 +244,10 @@ function getCellContent(file, colId) {
     switch (colId) {
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
         case 'col-parties': return `<div style="font-weight:500;">${esc(file.plaintiff || '-')}</div><div style="font-size:0.8em; opacity:0.7;">vs ${esc(file.defendant || '-')}</div>`;
+        case 'col-vekil':
+            const pAtty = file.plaintiff_attorney || '-';
+            const dAtty = file.defendant_attorney || '-';
+            return `<div style="font-size:0.8em;">${esc(pAtty)}</div><div style="font-size:0.75em; opacity:0.7;">vs ${esc(dAtty)}</div>`;
         case 'col-subject': return `<div class="cell-subject" title="${esc(file.subject)}">${esc(file.subject || '-')}</div>`;
         case 'col-tags':
             let tagsHtml = '';
@@ -258,7 +262,7 @@ function getCellContent(file, colId) {
         case 'col-status':
             const sClass = file.status === 'OPEN' ? 'badge-active' : 'badge-inactive';
             const sText = file.status === 'OPEN' ? 'Açık' : 'Kapalı';
-            return `<span class="badge ${sClass}">${sText}</span>`;
+            return `<span class="badge ${sClass} status-toggle" data-file-id="${file.id}" data-current-status="${file.status}" style="cursor:pointer;" title="Durumu değiştirmek için tıklayın">${sText}</span>`;
         case 'col-decision':
             if (file.latest_decision_result) {
                 const color = file.latest_decision_result.toLowerCase().includes('red') ? 'var(--accent-danger)' :
@@ -392,6 +396,18 @@ async function loadFiles(retryCount = 0) {
             filteredData = filteredData.filter(item => item.primary_tag === primaryTagFilter);
         }
 
+        // Date range filter
+        const dateStart = document.getElementById('filter-date-start')?.value;
+        const dateEnd = document.getElementById('filter-date-end')?.value;
+        if (dateStart) {
+            filteredData = filteredData.filter(item => new Date(item.created_at) >= new Date(dateStart));
+        }
+        if (dateEnd) {
+            const endDate = new Date(dateEnd);
+            endDate.setHours(23, 59, 59); // Include entire end day
+            filteredData = filteredData.filter(item => new Date(item.created_at) <= endDate);
+        }
+
         // Sorting
         filteredData.sort((a, b) => {
             const dateA = new Date(a.created_at || 0);
@@ -455,3 +471,32 @@ function initRowClicks() {
 
 window.loadFiles = loadFiles;
 window.handleSearchDebounced = handleSearchDebounced;
+
+// Status toggle handler
+document.addEventListener('click', async function (e) {
+    const toggle = e.target.closest('.status-toggle');
+    if (!toggle) return;
+
+    e.stopPropagation(); // Prevent row click
+
+    const fileId = toggle.getAttribute('data-file-id');
+    const currentStatus = toggle.getAttribute('data-current-status');
+    const newStatus = currentStatus === 'OPEN' ? 'CLOSED' : 'OPEN';
+
+    try {
+        toggle.textContent = '...';
+        const { error } = await supabase
+            .from('file_cases')
+            .update({ status: newStatus })
+            .eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast(`Dosya durumu ${newStatus === 'OPEN' ? 'Açık' : 'Kapalı'} olarak güncellendi`, 'success');
+        loadFiles(); // Refresh list
+    } catch (err) {
+        console.error('Status toggle error:', err);
+        showToast('Durum güncellenemedi: ' + err.message, 'error');
+        toggle.textContent = currentStatus === 'OPEN' ? 'Açık' : 'Kapalı';
+    }
+});
