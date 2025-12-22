@@ -53,7 +53,47 @@ function initTableFeatures() {
     initColumnDragging();
     initTableResizing();
     initRowClicks();
+    initTooltips();
     applyColumnOrder(); // Apply saved order on init
+}
+
+// Tooltip system for data-tooltip attributes
+function initTooltips() {
+    let tooltipBox = null;
+
+    document.addEventListener('mouseover', function (e) {
+        const target = e.target.closest('[data-tooltip]');
+        if (!target) return;
+
+        const text = target.getAttribute('data-tooltip');
+        if (!text) return;
+
+        // Create tooltip box if not exists
+        if (!tooltipBox) {
+            tooltipBox = document.createElement('div');
+            tooltipBox.className = 'tooltip-box';
+            document.body.appendChild(tooltipBox);
+        }
+
+        tooltipBox.textContent = text;
+        tooltipBox.style.display = 'block';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (tooltipBox && tooltipBox.style.display === 'block') {
+            tooltipBox.style.left = (e.clientX + 15) + 'px';
+            tooltipBox.style.top = (e.clientY - 40) + 'px';
+        }
+    });
+
+    document.addEventListener('mouseout', function (e) {
+        const target = e.target.closest('[data-tooltip]');
+        if (!target) return;
+
+        if (tooltipBox) {
+            tooltipBox.style.display = 'none';
+        }
+    });
 }
 
 function initColumnDragging() {
