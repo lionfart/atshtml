@@ -159,6 +159,13 @@ function setupFilters() {
 // 4. Actions
 async function toggleLawyerStatus() {
     console.log('[Lawyers] Toggle status clicked. Selected:', selectedLawyerId);
+
+    // Admin check
+    if (typeof isAdmin === 'function' && !isAdmin()) {
+        showToast('Avukat durumu değiştirmek için admin yetkisi gerekli!', 'error');
+        return;
+    }
+
     if (!selectedLawyerId) {
         showToast('Önce bir avukat seçmelisiniz.', 'warning');
         return;

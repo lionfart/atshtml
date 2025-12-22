@@ -6,7 +6,7 @@ const AGENT_STYLES = `
 #ai-agent-fab {
     position: fixed;
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     width: 60px;
     height: 60px;
     background: linear-gradient(135deg, #6366f1, #a855f7);
@@ -25,7 +25,7 @@ const AGENT_STYLES = `
 #ai-agent-window {
     position: fixed;
     bottom: 90px;
-    right: 20px;
+    left: 20px;
     width: 350px;
     height: 500px;
     background: var(--bg-card, #1e1e1e);

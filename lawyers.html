@@ -72,6 +72,30 @@
 </head>
 
 <body>
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-overlay" onclick="closeSettingsModal()"></div>
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2>Ayarlar</h2>
+                <button class="icon-btn" onclick="closeSettingsModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Admin Yetkileri</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button id="admin-toggle-btn" class="btn btn-outline btn-sm" onclick="toggleAdminStatus()">
+                        <i data-lucide="shield" style="width:16px;"></i> Admin Giriş
+                    </button>
+                    <span id="admin-status-text" class="text-muted" style="font-size:0.85rem;"></span>
+                </div>
+                <p style="font-size:0.7em; color:#666; margin-top:5px;">Admin yetkileri: Avukat durumu değiştirme</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSettingsModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
     <main class="container" style="padding-top: var(--space-6);">
         <!-- Header -->
         <header class="header mb-6">
@@ -87,13 +111,12 @@
                 </nav>
             </div>
             <div class="header-right" style="display:flex; gap:10px; align-items:center;">
-                <select id="header-model-select" class="form-control"
-                    style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
-                    <!-- Populated by JS -->
-                </select>
                 <button class="btn btn-primary"
                     onclick="document.getElementById('add-lawyer-modal').classList.add('active')">
                     <i data-lucide="user-plus"></i> Yeni Avukat
+                </button>
+                <button class="icon-btn" onclick="openSettingsModal()">
+                    <i data-lucide="settings"></i>
                 </button>
             </div>
         </header>
@@ -214,8 +237,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/admin.js"></script>
     <script src="js/ui-modals.js"></script>
     <script src="js/lawyers.js"></script>
+    <script>
+        // Settings modal functions
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.add('active');
+            if (typeof updateAdminUI === 'function') updateAdminUI();
+            lucide.createIcons();
+        }
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
+        lucide.createIcons();
+    </script>
     <!-- AI Agent -->
     <script src="js/agent.js"></script>
 </body>
