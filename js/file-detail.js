@@ -492,6 +492,12 @@ function setupDocumentUpload() {
 }
 
 async function handleDocumentUpload(file) {
+    // Admin check for document upload
+    if (typeof isAdmin === 'function' && !isAdmin()) {
+        showToast('Evrak yüklemek için admin yetkisi gerekli!', 'error');
+        return;
+    }
+
     if (file.size > APP_CONFIG.maxFileSize) {
         showToast('Dosya çok büyük. Maksimum 20MB.', 'error');
         return;
@@ -840,6 +846,12 @@ async function addNoteFromModal() {
 
 async function toggleFileStatus() {
     if (!currentFile) return;
+
+    // Admin check
+    if (typeof isAdmin === 'function' && !isAdmin()) {
+        showToast('Bu işlem için admin yetkisi gerekli!', 'error');
+        return;
+    }
 
     const newStatus = currentFile.status === 'OPEN' ? 'CLOSED' : 'OPEN';
 

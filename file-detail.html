@@ -111,7 +111,10 @@
                     </div>
                 </div>
             </div>
-            <div class="header-right">
+            <div class="header-right" style="display:flex; gap:10px;">
+                <button id="admin-toggle-btn" class="btn btn-outline btn-sm" onclick="toggleAdminStatus()">
+                    <i data-lucide="shield" style="width:16px;"></i> Admin Giriş
+                </button>
                 <button class="btn btn-danger" onclick="openDeleteModal()">
                     <i data-lucide="trash-2"></i>
                     <span>Dosyayı Sil</span>
@@ -387,6 +390,7 @@
 
     <script src="js/utils.js"></script>
     <script src="js/ui-modals.js"></script>
+    <script src="js/admin.js"></script>
     <script src="js/file-detail.js"></script>
     <script src="js/drafting.js"></script>
 
