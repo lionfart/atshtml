@@ -128,6 +128,29 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-overlay" onclick="closeSettingsModal()"></div>
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2>Ayarlar</h2>
+                <button class="icon-btn" onclick="closeSettingsModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Admin Yetkileri</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button id="admin-toggle-btn" class="btn btn-outline btn-sm" onclick="toggleAdminStatus()">
+                        <i data-lucide="shield" style="width:16px;"></i> Admin Giriş
+                    </button>
+                    <span id="admin-status-text" class="text-muted" style="font-size:0.85rem;"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSettingsModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App -->
     <main class="container">
         <!-- Header -->
@@ -143,10 +166,10 @@
                     <a href="dashboard.html" class="active">Raporlar</a>
                 </nav>
             </div>
-            <div class="header-right">
-                <select id="header-model-select" class="form-control"
-                    style="width:auto; height:36px; padding:0 10px; font-size:0.85rem;" title="Yapay Zeka Modeli">
-                </select>
+            <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                <button class="icon-btn" onclick="openSettingsModal()">
+                    <i data-lucide="settings"></i>
+                </button>
             </div>
         </header>
 
@@ -241,7 +264,17 @@
     </main>
 
     <!-- Scripts -->
+    <script src="js/admin.js"></script>
     <script>
+        // Settings modal functions
+        function openSettingsModal() {
+            document.getElementById('settings-modal').classList.add('active');
+            if (typeof updateAdminUI === 'function') updateAdminUI();
+            lucide.createIcons();
+        }
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
