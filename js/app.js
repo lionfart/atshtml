@@ -241,7 +241,9 @@ function openReviewModal(itemId) {
             <div class="review-section">
                 <h3><i data-lucide="users"></i> Taraflar</h3>
                 <div class="review-field"><label>Davacı</label><input type="text" id="review-plaintiff" value="${data.plaintiff || ''}" class="form-control"></div>
+                <div class="review-field"><label>Davacı Vekili</label><input type="text" id="review-plaintiff-attorney" value="${data.plaintiff_attorney || ''}" class="form-control" placeholder="Av. ..."></div>
                 <div class="review-field"><label>Davalı</label><input type="text" id="review-defendant" value="${data.defendant || ''}" class="form-control"></div>
+                <div class="review-field"><label>Davalı Vekili</label><input type="text" id="review-defendant-attorney" value="${data.defendant_attorney || ''}" class="form-control" placeholder="Av. ..."></div>
                 <div class="review-field"><label>Değer</label><input type="text" id="review-amount" value="${data.claim_amount || ''}" class="form-control"></div>
                 <div class="review-field"><label>Ek Etiketler</label><input type="text" id="review-tags" value="${(data.secondary_tags || data.tags || []).join(', ')}" class="form-control" placeholder="Virgülle ayır"></div>
             </div>
@@ -342,7 +344,9 @@ async function approveNewCase() {
             court_case_number: esasNo,
             court_decision_number: kararNo,
             plaintiff: document.getElementById('review-plaintiff').value,
+            plaintiff_attorney: document.getElementById('review-plaintiff-attorney').value,
             defendant: document.getElementById('review-defendant').value,
+            defendant_attorney: document.getElementById('review-defendant-attorney').value,
             claim_amount: document.getElementById('review-amount').value,
             summary: document.getElementById('review-summary').value,
             subject: document.getElementById('review-summary').value,

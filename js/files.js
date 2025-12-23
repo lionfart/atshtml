@@ -265,8 +265,21 @@ function getCellContent(file, colId) {
             return `<span class="badge ${sClass}">${sText}</span>`;
         case 'col-decision':
             if (file.latest_decision_result) {
-                const color = file.latest_decision_result.toLowerCase().includes('red') ? 'var(--accent-danger)' :
-                    file.latest_decision_result.toLowerCase().includes('kabul') ? 'var(--accent-success)' : 'var(--text-primary)';
+                const res = file.latest_decision_result.toLowerCase();
+                let color = 'var(--text-primary)';
+
+                if (res.includes('red') || res.includes('bozma')) color = 'var(--accent-danger)';
+                else if (res.includes('kabul') || res.includes('onama')) color = 'var(--accent-success)';
+                else if (res.includes('kısmen')) color = 'var(--accent-warning)';
+                else if (res.includes('iptal')) color = 'var(--accent-danger)'; // İptal is usually against the admin authority but implies success for plaintiff lawyer usually? Context dependent. Assuming Red/Iptal same category of 'End'. Let's stick to Red=Danger.
+                // Actually, for a lawyer:
+                // "Kabul" (Win) -> Green
+                // "Red" (Loss) -> Red
+                // "Kısmen" -> Orange
+                // "Bozma" (Sent back) -> Orange/Red? Let's use Danger for 'Red', Success for 'Kabul/Onama', Warning for others.
+
+                if (res.includes('iptal')) color = 'var(--accent-success)'; // Often 'İptal' means the administrative act is cancelled (Win for plaintiff)
+
                 return `<span style="font-weight:600; color:${color}">${esc(file.latest_decision_result)}</span>`;
             }
             return '<span style="opacity:0.4">-</span>';

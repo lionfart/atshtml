@@ -169,6 +169,8 @@ async function createFileCase(fileData, file = null) {
         tags: fileData.tags,
         next_hearing_date: fileData.next_hearing_date,
         case_status_notes: fileData.case_status_notes,
+        plaintiff_attorney: fileData.plaintiff_attorney,
+        defendant_attorney: fileData.defendant_attorney,
         status: 'OPEN'
     }]).select().single();
 
@@ -204,6 +206,30 @@ async function uploadDocument(fileCaseId, file, aiData = null) {
         latest_activity_summary: aiData?.summary || null,
         latest_activity_date: new Date().toISOString()
     };
+
+    // Auto-Calculate Deadline if Duration is Present but Deadline Date is Missing
+    if (aiData && aiData.action_duration_days && !updates.deadline_date) {
+        const days = parseInt(aiData.action_duration_days);
+        if (!isNaN(days) && days > 0) {
+            const today = new Date();
+            const deadline = new Date(today);
+            deadline.setDate(today.getDate() + days);
+            updates.deadline_date = deadline.toISOString().split('T')[0];
+            console.log(`[Auto-Deadline] Calculated ${updates.deadline_date} from ${days} days duration.`);
+        }
+    }
+
+    // Auto-Calculate Deadline if Duration is Present but Deadline Date is Missing
+    if (aiData && aiData.action_duration_days && !updates.deadline_date) {
+        const days = parseInt(aiData.action_duration_days);
+        if (!isNaN(days) && days > 0) {
+            const today = new Date();
+            const deadline = new Date(today);
+            deadline.setDate(today.getDate() + days);
+            updates.deadline_date = deadline.toISOString().split('T')[0];
+            console.log(`[Auto-Deadline] Calculated ${updates.deadline_date} from ${days} days duration.`);
+        }
+    }
 
     // Update decision result if present
     if (aiData && aiData.decision_result) {
@@ -356,7 +382,8 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
 0. KARAKTER KULLANIMI: TÜM METİNLERDE (ÖZELLİKLE ÖZET BÖLÜMÜNDE) TÜRKÇE KARAKTERLERİ (ğ, ü, ş, ı, ö, ç, İ) DOĞRU VE EKSİKSİZ KULLAN. Arama fonksiyonunun çalışması için bu kritiktir.
 1. "type": SADECE bu listeden biri olmalı (En uygununu seç):
    - "Dava Dilekçesi", "Savunma Dilekçesi", "Cevap Dilekçesi", "Savunmaya Cevap Dilekçesi"
-   - "Ara Karar", "Bilirkişi Raporu", "Bilirkişi Raporuna İtiraz", "Karar"
+   - "Ara Karar", "Bilirkişi Raporu", "Bilirkişi Raporuna İtiraz"
+   - "Red", "İptal", "Tazminat Kabul", "Kısmen Kabul Kısmen Red", "Gönderme", "Onama", "Bozma"
    - "İstinaf Talebi", "İstinafa Cevap", "İstinaf Kararı"
    - "Temyiz Talebi", "Temyize Cevap", "Temyiz Kararı", "Diğer"
 2. "primary_tag": Dosyanın ANA konusunu belirle. BUNLAR BİRBİRİNİ DIŞLAR. Sadece biri seçilebilir:
@@ -367,7 +394,10 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    - "court_case_number" (Esas No) ve "court_decision_number" (Karar No): SADECE "YYYY/SAYI" formatında olmalı. Asla "E.", "K." veya yazı içermemeli. Örn: "2024/1458".
    - "court_name" (Mahkeme): "İL", "DAİRE/MAHKEME SAYISI", "TÜRÜ" formatında olmalı. 
      - Örn: "Ankara 2. İdare Mahkemesi", "Bursa Bölge İdare Mahkemesi 2. İdari Dava Dairesi", "Danıştay 6. Daire".
-5. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
+5. "action_duration_days": Kararda veya belgede belirtilen yasal süre veya işlem süresi (GÜN CİNSİNDEN).
+   - "Ara Karar", "İstinaf", "Temyiz" gibi süreli işlemlerde mutlaka doldur. Örn: "7", "15", "30". Yoksa null.
+6. "plaintiff_attorney" ve "defendant_attorney": Varsa tam isimleri (Av. ...). Yoksa null.
+7. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
 
 İSTENEN JSON FORMATI:
 {
@@ -377,13 +407,16 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "court_name": "Şehir No Tür (Örn: Ankara 2. İdare)",
   "court_case_number": "YYYY/NUM (Örn: 2023/123)",
   "court_decision_number": "YYYY/NUM (Örn: 2024/55 - Yoksa null)",
+  "plaintiff_attorney": "Av. Adı Soyadı | null",
+  "defendant_attorney": "Av. Adı Soyadı | null",
   "claim_amount": "100.000 TL (Yoksa null)",
   "subject": "Dava Konusu",
   "summary": "Çok detaylı özet (en az 8-10 cümle).",
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
-  "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi)",
-  "decision_result": "Kabul | Red | Kısmen Kabul | İptal | Yetkisizlik | null (Karar sonucu)",
-  "is_final_decision": true (Nihai kararsa),
+  "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi. Yoksa null)",
+  "action_duration_days": 15, // Varsa gün sayısı (Örn: 7, 15, 30)
+  "decision_result": "Red | İptal | Tazminat Kabul | Kısmen Kabul Kısmen Red | Gönderme | Onama | Bozma | null",
+  "is_final_decision": true, // Sadece yukarıdaki listeden bir karar verilmişse ve bu nihai ise (Ara karar değil)
   "urgency": "High | Medium | Low",
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
   "primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",

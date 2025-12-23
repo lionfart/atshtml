@@ -586,11 +586,25 @@ async function handleDocumentUpload(file) {
 
         // Auto-Close Prompt
         if (aiData && aiData.is_final_decision === true) {
-            if (await UIModals.confirm(`Bu evrakta KESİN KARAR (${aiData.decision_result || 'Nihai'}) tespit edildi.\nDosya durumu "KAPALI" olarak güncellensin mi?`)) {
-                await supabase.from('file_cases').update({ status: 'CLOSED' }).eq('id', fileId);
-                showToast('Dosya kapatıldı.', 'info');
-                // Refresh status UI if needed or reload
-                setTimeout(() => window.location.reload(), 1000);
+            // Check if decision is one of the final types
+            const finalDecisions = ['Red', 'İptal', 'Tazminat Kabul', 'Kısmen Kabul Kısmen Red', 'Gönderme', 'Onama', 'Bozma'];
+            // Normalize for comparison
+            const decision = aiData.decision_result;
+            const isListed = finalDecisions.some(d => d.toLowerCase() === (decision || '').toLowerCase());
+
+            if (isListed || aiData.decision_result) {
+                const confirmMsg = `Bu evrakta KESİN KARAR (${aiData.decision_result}) tespit edildi.\n\nDosyayı 'KAPALI' statüsüne alıp pasifize etmek ister misiniz?`;
+                if (await UIModals.confirm(confirmMsg)) {
+                    await supabase.from('file_cases').update({ status: 'CLOSED' }).eq('id', fileId);
+                    showToast('Dosya durumu KAPALI olarak güncellendi.', 'success');
+                    // Reload to reflect status change
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('Dosya açık kalmaya devam edecek.', 'info');
+                    updateDocumentsList(fileId);
+                }
+            } else {
+                updateDocumentsList(fileId);
             }
         } else {
             updateDocumentsList(fileId);
