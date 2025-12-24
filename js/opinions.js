@@ -5,6 +5,9 @@ let currentOpinionData = null;
 let currentOpinionFile = null;
 
 async function initOpinions() {
+    // Ensure supabase is initialized
+    if (typeof initSupabase === 'function') await initSupabase();
+
     setupDropZone();
     await loadOpinions();
 }
