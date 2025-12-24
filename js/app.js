@@ -225,6 +225,19 @@ function openReviewModal(itemId) {
                         <option value="Diğer" ${data.type === 'Diğer' || !data.type ? 'selected' : ''}>Diğer</option>
                     </select>
                 </div>
+                <div class="review-field"><label>Sonuç</label>
+                     <select id="review-decision-result" class="form-control">
+                         <option value="">Seçiniz (Varsa)</option>
+                         <option value="Onama" ${data.decision_result === 'Onama' ? 'selected' : ''}>Onama</option>
+                         <option value="Düzelterek Onama" ${data.decision_result === 'Düzelterek Onama' ? 'selected' : ''}>Düzelterek Onama</option>
+                         <option value="Bozma" ${data.decision_result === 'Bozma' ? 'selected' : ''}>Bozma</option>
+                         <option value="Red" ${data.decision_result === 'Red' ? 'selected' : ''}>Red</option>
+                         <option value="İptal" ${data.decision_result === 'İptal' ? 'selected' : ''}>İptal</option>
+                         <option value="Tazminat Kabul" ${data.decision_result === 'Tazminat Kabul' ? 'selected' : ''}>Tazminat Kabul</option>
+                         <option value="Kısmen Kabul Kısmen Red" ${data.decision_result === 'Kısmen Kabul Kısmen Red' ? 'selected' : ''}>Kısmen Kabul Kısmen Red</option>
+                         <option value="Gönderme" ${data.decision_result === 'Gönderme' ? 'selected' : ''}>Gönderme</option>
+                     </select>
+                </div>
                 <div class="review-field"><label>Mahkeme</label><input type="text" id="review-court" value="${data.court_name || ''}" class="form-control"></div>
                 <div class="review-field"><label>Esas No</label><input type="text" id="review-esas" value="${data.court_case_number || ''}" class="form-control"></div>
                 <div class="review-field"><label>Karar No</label><input type="text" id="review-decision" value="${data.court_decision_number || ''}" class="form-control" placeholder="Varsa"></div>
@@ -355,7 +368,8 @@ async function approveNewCase() {
             tags: document.getElementById('review-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
             // Workflow fields (mapped to schema)
             next_hearing_date: document.getElementById('review-hearing').value || null,
-            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value}] [Urgency: ${document.getElementById('review-urgency').value}]`
+            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value}] [Urgency: ${document.getElementById('review-urgency').value}]`,
+            latest_decision_result: document.getElementById('review-decision-result').value || null // [NEW]
         };
         const newCase = await createFileCase(newData, item.file);
 

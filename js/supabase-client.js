@@ -171,6 +171,7 @@ async function createFileCase(fileData, file = null) {
         case_status_notes: fileData.case_status_notes,
         plaintiff_attorney: fileData.plaintiff_attorney,
         defendant_attorney: fileData.defendant_attorney,
+        latest_decision_result: fileData.latest_decision_result,
         status: 'OPEN'
     }]).select().single();
 

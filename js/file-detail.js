@@ -108,6 +108,38 @@ async function loadFileDetails(retryCount = 0) {
         const titleEl = document.querySelector('title');
         if (titleEl) titleEl.textContent = fileNo + ' - Adalet Takip Sistemi';
 
+        // [NEW] Display Decision Result if available
+        const statusContainer = document.getElementById('file-number').parentNode;
+        // Remove old badge if exists
+        const oldBadge = statusContainer.querySelector('.decision-badge');
+        if (oldBadge) oldBadge.remove();
+
+        if (currentFile.latest_decision_result) {
+            const res = currentFile.latest_decision_result;
+            const badge = document.createElement('span');
+            badge.className = 'decision-badge badge';
+            badge.style.fontSize = '0.8rem';
+            badge.style.marginLeft = '10px';
+            badge.style.verticalAlign = 'middle';
+
+            // Colors logic (same as files.js)
+            if (['Kabul', 'Onama', 'Düzelterek Onama', 'İptal', 'Tazminat Kabul'].some(x => res.includes(x))) {
+                badge.className += ' badge-active'; // Greenish
+                badge.style.backgroundColor = 'var(--accent-success)';
+                badge.style.color = '#fff';
+            } else if (['Red', 'Bozma'].some(x => res.includes(x))) {
+                badge.className += ' badge-inactive'; // Redish
+                badge.style.backgroundColor = 'var(--accent-danger)';
+                badge.style.color = '#fff';
+            } else {
+                badge.style.backgroundColor = 'var(--accent-warning)';
+                badge.style.color = '#000';
+            }
+
+            badge.textContent = res;
+            document.getElementById('file-number').appendChild(badge);
+        }
+
         // Update form fields
         if (document.getElementById('edit-plaintiff')) document.getElementById('edit-plaintiff').value = currentFile.plaintiff || '';
         if (document.getElementById('edit-defendant')) document.getElementById('edit-defendant').value = currentFile.defendant || '';
