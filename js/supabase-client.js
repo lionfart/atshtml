@@ -208,27 +208,18 @@ async function uploadDocument(fileCaseId, file, aiData = null) {
         latest_activity_date: new Date().toISOString()
     };
 
-    // Auto-Calculate Deadline if Duration is Present but Deadline Date is Missing
-    if (aiData && aiData.action_duration_days && !updates.deadline_date) {
+    // Auto-Calculate Deadline (Generic for ALL documents with a duration)
+    // Rule: If document has "action_duration_days", Calculate Deadline = Upload Date (Today) + Duration
+    if (aiData && aiData.action_duration_days) {
         const days = parseInt(aiData.action_duration_days);
         if (!isNaN(days) && days > 0) {
             const today = new Date();
             const deadline = new Date(today);
             deadline.setDate(today.getDate() + days);
-            updates.deadline_date = deadline.toISOString().split('T')[0];
-            console.log(`[Auto-Deadline] Calculated ${updates.deadline_date} from ${days} days duration.`);
-        }
-    }
 
-    // Auto-Calculate Deadline if Duration is Present but Deadline Date is Missing
-    if (aiData && aiData.action_duration_days && !updates.deadline_date) {
-        const days = parseInt(aiData.action_duration_days);
-        if (!isNaN(days) && days > 0) {
-            const today = new Date();
-            const deadline = new Date(today);
-            deadline.setDate(today.getDate() + days);
+            // Update logic: Always prefer the calculated deadline if duration exists
             updates.deadline_date = deadline.toISOString().split('T')[0];
-            console.log(`[Auto-Deadline] Calculated ${updates.deadline_date} from ${days} days duration.`);
+            console.log(`[Auto-Deadline] Enforced: ${updates.deadline_date} (Upload + ${days} days).`);
         }
     }
 

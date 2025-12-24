@@ -298,10 +298,15 @@ function updateStatusCard(file) {
                 <label class="text-muted">Son İşlem</label>
                 <div class="font-semibold">${escapeHtml(file.latest_activity_type)}</div>
                 ${file.latest_decision_result ? `
-                    <span class="badge ${getDecisionBadgeClass(file.latest_decision_result)}" style="margin-top: var(--space-2);">
-                        ${escapeHtml(file.latest_decision_result)}
+                    <span class="badge ${getDecisionBadgeClass(file.latest_decision_result)}" 
+                          style="margin-top: var(--space-2); cursor:pointer; border:1px dashed rgba(255,255,255,0.3);" 
+                          onclick="editDecisionResult()"
+                          title="Düzenlemek için tıklayın">
+                        ${escapeHtml(file.latest_decision_result)} <i data-lucide="edit-2" style="width:10px; height:10px; margin-left:4px; opacity:0.7;"></i>
                     </span>
-                ` : ''}
+                ` : `
+                    <button class="btn btn-xs btn-ghost" style="margin-top:5px; font-size:0.7rem; opacity:0.6;" onclick="editDecisionResult()">+ Sonuç Ekle</button>
+                `}
                 ${file.latest_activity_date ? `
                     <div class="text-muted" style="font-size: var(--font-size-xs); margin-top: var(--space-1);">
                         ${formatDate(file.latest_activity_date)}
@@ -312,7 +317,55 @@ function updateStatusCard(file) {
     }
 
     container.innerHTML = html;
+    container.innerHTML = html;
 }
+
+// [NEW] Edit Decision Result via SweetAlert or Prompt
+async function editDecisionResult() {
+    // Determine current result index
+    const options = [
+        "Onama", "Düzelterek Onama", "Bozma", "Red", "İptal",
+        "Tazminat Kabul", "Kısmen Kabul Kısmen Red", "Gönderme"
+    ];
+
+    // Simple Prompt for now (or a custom modal if preferred)
+    // Using a simple prompt loop for robustness without external deps if Swal misses
+    let selection = null;
+
+    // Create a temporary modal for selection
+    const modalId = 'temp-decision-modal';
+    const modalHtml = `
+        <div id="${modalId}" class="modal active" style="z-index:9999;">
+            <div class="modal-content" style="max-width:300px;">
+                <div class="modal-header">
+                    <h3>Karar Sonucu Düzenle</h3>
+                    <button class="icon-btn" onclick="document.getElementById('${modalId}').remove()"><i data-lucide="x"></i></button>
+                </div>
+                <div class="modal-body">
+                    ${options.map(o => `<button class="btn btn-secondary w-full" style="margin-bottom:5px; text-align:left;" onclick="saveDecisionResult('${o}')">${o}</button>`).join('')}
+                    <button class="btn btn-ghost w-full" style="margin-top:10px; color:var(--accent-danger);" onclick="saveDecisionResult(null)">Temizle (Sil)</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    lucide.createIcons();
+}
+
+window.saveDecisionResult = async function (newResult) {
+    document.getElementById('temp-decision-modal').remove();
+
+    try {
+        const { error } = await supabase.from('file_cases').update({ latest_decision_result: newResult }).eq('id', fileId);
+        if (error) throw error;
+        showToast('Karar sonucu güncellendi.', 'success');
+        loadFileDetails(); // Refresh UI
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};
+
+window.editDecisionResult = editDecisionResult; // Export for onclick
 
 function updateDocumentsList(documents) {
     const container = document.getElementById('documents-list');

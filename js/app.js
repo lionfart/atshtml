@@ -201,6 +201,17 @@ function openReviewModal(itemId) {
     const data = item.analysisData;
     const candidates = item.candidates || [];
 
+    // [LOGIC] Enforce "Karar", "İstinaf Kararı", or "Temyiz Kararı" if decision_result exists
+    // But don't overwrite if it's already specific (e.g. Temyiz Kararı)
+    if (data.decision_result && data.decision_result.length > 2) {
+        const currentType = data.type || '';
+        if (!currentType.includes('Karar')) {
+            if (currentType.includes('İstinaf')) data.type = 'İstinaf Kararı';
+            else if (currentType.includes('Temyiz')) data.type = 'Temyiz Kararı';
+            else data.type = 'Karar';
+        }
+    }
+
     const content = `
         <div class="review-grid">
             <div class="review-section">
