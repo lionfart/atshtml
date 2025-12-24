@@ -212,6 +212,18 @@ function openReviewModal(itemId) {
         }
     }
 
+    // [FIX] Calculate deadline_date from action_duration_days if not already set
+    if (data.action_duration_days && !data.deadline_date) {
+        const days = parseInt(data.action_duration_days);
+        if (!isNaN(days) && days > 0) {
+            const today = new Date();
+            const deadline = new Date(today);
+            deadline.setDate(today.getDate() + days);
+            data.deadline_date = deadline.toISOString().split('T')[0];
+            console.log(`[Review Modal] Calculated deadline: ${data.deadline_date} from ${days} days.`);
+        }
+    }
+
     const content = `
         <div class="review-grid">
             <div class="review-section">
