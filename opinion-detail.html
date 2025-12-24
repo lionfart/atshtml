@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adalet Takip Sistemi - Görüş Detayı">
+    <title>Görüş Detayı - Adalet Takip Sistemi</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .urgency-high {
+            color: var(--accent-danger);
+            font-weight: 600;
+        }
+
+        .urgency-medium {
+            color: var(--accent-warning);
+        }
+
+        .urgency-low {
+            color: var(--accent-success);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Görüşü Sil</h2>
+                <button class="icon-btn" onclick="closeDeleteModal()"><i data-lucide="x"></i></button>
+            </div>
+            <p class="modal-description">Bu görüşü ve tüm evraklarını silmek istediğinize emin misiniz?</p>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">İptal</button>
+                <button class="btn btn-danger" onclick="confirmDeleteOpinion()">
+                    <i data-lucide="trash-2"></i> Sil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <main class="container">
+        <!-- Header -->
+        <header class="header" id="page-header">
+            <div class="header-left">
+                <a href="opinions.html" class="btn btn-outline" style="margin-right: var(--space-4);">
+                    <i data-lucide="arrow-left"></i>
+                </a>
+                <div>
+                    <h1 id="opinion-number">Yükleniyor...</h1>
+                    <p id="opinion-created-date" class="text-muted" style="font-size: 0.85rem;"></p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-danger" onclick="openDeleteModal()">
+                    <i data-lucide="trash-2"></i> Görüşü Sil
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Column - Details -->
+            <div class="grid-column">
+                <!-- Opinion Details Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i data-lucide="file-text"></i> Görüş Bilgileri</h2>
+                    </div>
+                    <div class="card-content">
+                        <form id="opinion-details-form">
+                            <div class="form-group">
+                                <label for="edit-institution">Görüş İsteyen Kurum</label>
+                                <input type="text" id="edit-institution" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-subject">Görüş Konusu</label>
+                                <textarea id="edit-subject" rows="4" class="form-control"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-deadline">Kesin Süre</label>
+                                <input type="date" id="edit-deadline" class="form-control">
+                            </div>
+                            <div class="form-group"
+                                style="background: rgba(6, 182, 212, 0.1); padding: 10px; border-radius: 8px;">
+                                <label style="color: var(--accent-secondary);">AI Görüş Önerisi</label>
+                                <p id="display-ai-suggestion" style="font-style: italic; color: var(--text-secondary);">
+                                    -</p>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="save-opinion-btn">
+                                <i data-lucide="save"></i> Kaydet
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Documents Card -->
+                <div class="card" style="margin-top:20px;">
+                    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2 class="card-title"><i data-lucide="folder"></i> Evraklar <span id="docs-count"
+                                class="text-muted">(0)</span></h2>
+                        <label class="btn btn-primary btn-sm" style="cursor:pointer;">
+                            <i data-lucide="upload"></i> Evrak Ekle
+                            <input type="file" id="doc-upload-input" accept=".pdf,.doc,.docx" style="display:none;"
+                                onchange="handleDocUpload(event)">
+                        </label>
+                    </div>
+                    <div class="card-content" id="documents-list" style="max-height:300px; overflow-y:auto;">
+                        <p class="text-muted">Henüz evrak yok.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Status -->
+            <div class="grid-column">
+                <!-- Status Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i data-lucide="info"></i> Durum</h2>
+                    </div>
+                    <div class="card-content" id="status-content">
+                        <div class="form-group">
+                            <label class="text-muted">Atanan Avukat</label>
+                            <div class="font-semibold" id="display-lawyer">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="text-muted">Aciliyet</label>
+                            <div id="display-urgency" class="font-semibold">-</div>
+                        </div>
+                        <div class="form-group">
+                            <span id="status-badge" class="badge badge-active" style="cursor:pointer;"
+                                onclick="toggleOpinionStatus()" title="Değiştirmek için tıklayın">Açık</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/opinion-detail.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initOpinionDetail();
+        });
+    </script>
+</body>
+
+</html>

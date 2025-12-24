@@ -273,8 +273,7 @@ function getUrgencyLabel(urgency) {
 }
 
 function viewOpinion(id) {
-    // For now, just show a toast. Can be expanded to a detail page.
-    showToast('Görüş detay sayfası henüz eklenmedi.', 'info');
+    window.location.href = `opinion-detail.html?id=${id}`;
 }
 
 function formatDate(date) {
