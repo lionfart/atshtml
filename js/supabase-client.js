@@ -172,6 +172,7 @@ async function createFileCase(fileData, file = null) {
         plaintiff_attorney: fileData.plaintiff_attorney,
         defendant_attorney: fileData.defendant_attorney,
         latest_decision_result: fileData.latest_decision_result,
+        deadline_date: fileData.deadline_date, // [FIX] Add explicit deadline column map
         status: 'OPEN'
     }]).select().single();
 
