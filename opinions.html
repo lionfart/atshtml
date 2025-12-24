@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adalet Takip Sistemi - Hukuki Mütalaa (Görüşler)">
+    <title>Görüşler - Adalet Takip Sistemi</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.292.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .opinions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .opinions-table th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .opinions-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .opinions-table tbody tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .drop-zone i {
+            width: 48px;
+            height: 48px;
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+        }
+
+        .urgency-high {
+            color: var(--accent-danger);
+            font-weight: 600;
+        }
+
+        .urgency-medium {
+            color: var(--accent-warning);
+        }
+
+        .urgency-low {
+            color: var(--accent-success);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-overlay" onclick="closeSettingsModal()"></div>
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2>Ayarlar</h2>
+                <button class="icon-btn" onclick="closeSettingsModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Admin Yetkileri</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button id="admin-toggle-btn" class="btn btn-outline btn-sm" onclick="toggleAdminStatus()">
+                        <i data-lucide="shield" style="width:16px;"></i> Admin Giriş
+                    </button>
+                    <span id="admin-status-text" class="text-muted" style="font-size:0.85rem;"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSettingsModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REVIEW MODAL -->
+    <div id="opinion-review-modal" class="modal">
+        <div class="modal-overlay" onclick="closeOpinionReviewModal()"></div>
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <h2><i data-lucide="message-square-text"></i> Görüş Onayı</h2>
+                <button class="icon-btn" onclick="closeOpinionReviewModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" id="opinion-review-content">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeOpinionReviewModal()">İptal</button>
+                <button class="btn btn-primary" onclick="approveOpinion()">
+                    <i data-lucide="check-circle"></i> Onayla ve Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <main class="container">
+        <!-- Header -->
+        <header class="header mb-6">
+            <div class="header-left">
+                <div style="font-weight:800; font-size:1.2rem; margin-right:20px; color:var(--accent-primary);">⚖️
+                    Adalet Takip</div>
+                <nav class="nav-links">
+                    <a href="index.html">Evrak Yükle</a>
+                    <a href="files.html">Dosya Listesi</a>
+                    <a href="opinions.html" class="active">Görüşler</a>
+                    <a href="lawyers.html">Avukat Yönetimi</a>
+                    <a href="calendar.html">Takvim</a>
+                    <a href="dashboard.html">Raporlar</a>
+                </nav>
+            </div>
+            <div class="header-right" style="display:flex; gap:10px; align-items:center;">
+                <button class="icon-btn" onclick="openSettingsModal()">
+                    <i data-lucide="settings"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Page Title & Add Button -->
+        <div class="flex justify-between items-center mb-4"
+            style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="font-size:1.5rem; font-weight:700;">
+                <i data-lucide="message-square-text" style="width:24px; vertical-align:middle;"></i>
+                Hukuki Görüşler
+                <span id="opinions-count" class="text-muted" style="font-size:0.9rem; font-weight:400;"></span>
+            </h1>
+        </div>
+
+        <!-- Drop Zone -->
+        <div class="card" style="margin-bottom:20px;">
+            <div class="card-content">
+                <div class="drop-zone" id="opinion-drop-zone"
+                    onclick="document.getElementById('opinion-file-input').click()">
+                    <i data-lucide="upload-cloud"></i>
+                    <p style="font-weight:600; font-size:1.1rem;">Görüş Ekle</p>
+                    <p class="text-muted" style="font-size:0.85rem;">PDF veya Word dosyasını sürükleyip bırakın veya
+                        tıklayın</p>
+                    <input type="file" id="opinion-file-input" accept=".pdf,.doc,.docx" style="display:none;"
+                        onchange="handleOpinionFile(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Opinions Table -->
+        <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 class="card-title">Görüş Listesi</h2>
+                <select id="filter-status" class="form-control" onchange="loadOpinions()" style="width:auto;">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="OPEN">Açık</option>
+                    <option value="CLOSED">Kapalı</option>
+                </select>
+            </div>
+            <div class="card-content" style="padding:0; overflow-x:auto;">
+                <table class="opinions-table">
+                    <thead>
+                        <tr>
+                            <th style="width:80px;">No</th>
+                            <th style="width:200px;">Kurum</th>
+                            <th>Konu</th>
+                            <th style="width:140px;">Avukat</th>
+                            <th style="width:100px;">Aciliyet</th>
+                            <th style="width:100px;">Durum</th>
+                            <th style="width:100px;">Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody id="opinions-table-body">
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:40px;">
+                                <div class="spinner"></div>
+                                <p class="text-muted">Yükleniyor...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/opinions.js"></script>
+    <script src="js/agent.js"></script>
+    <script>
+        function openSettingsModal() { document.getElementById('settings-modal').classList.add('active'); lucide.createIcons(); }
+        function closeSettingsModal() { document.getElementById('settings-modal').classList.remove('active'); }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initOpinions();
+        });
+    </script>
+</body>
+
+</html>
