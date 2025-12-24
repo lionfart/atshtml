@@ -389,8 +389,12 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
 5. "action_duration_days": Kararda veya belgede belirtilen yasal süre veya işlem süresi (GÜN CİNSİNDEN).
    - ÖZELLİKLE "kararın tebliğini izleyen günden itibaren X gün" gibi ifadeleri ara ve X'i buraya yaz.
    - "Ara Karar", "İstinaf Kararı", "Temyiz Kararı" gibi evraklarda bu süreler kritiktir. Örn: "7", "15", "30". Yoksa null.
+   - DİKKAT: Metin içinde "30 gün içinde istinaf yolu açık" gibi bir ifade varsa MUTLAKA bu süreyi gir (Sadece öneri kısmına yazıp bırakma).
 6. "plaintiff_attorney" ve "defendant_attorney": Varsa tam isimleri (Av. ...). Yoksa null.
 7. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
+8. "urgency" (Aciliyet):
+   - "İptal", "Kısmen İptal", "Tazminat Kabul", "Kısmen Kabul" kararları (aleyhe durumlar) için KESİNLİKLE "HIGH" seç.
+   - Kısa süreli (7 gün altı) işlemler için "HIGH" seç. Diğerleri için "Medium" veya "Low".
 
 İSTENEN JSON FORMATI:
 {
