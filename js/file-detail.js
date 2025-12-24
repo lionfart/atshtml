@@ -154,9 +154,16 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
         if (document.getElementById('edit-defendant-attorney')) document.getElementById('edit-defendant-attorney').value = currentFile.defendant_attorney || '';
 
-        // [NEW] Populate Decision Result Display
-        if (document.getElementById('display-decision-result')) {
-            document.getElementById('display-decision-result').textContent = currentFile.latest_decision_result || 'Henüz belirlenmedi';
+        // [NEW] Populate Decision Result Display (Badge Style)
+        const decisionBadge = document.getElementById('display-decision-result');
+        const decisionText = document.getElementById('decision-result-text');
+        if (decisionBadge && decisionText) {
+            const result = currentFile.latest_decision_result || 'Henüz belirlenmedi';
+            decisionText.textContent = result;
+
+            // Apply color based on result
+            decisionBadge.className = 'badge ' + getDecisionBadgeClass(result);
+            decisionBadge.style.cssText = 'font-size:1rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);';
         }
 
         // [NEW] Populate AI Suggestion
@@ -371,6 +378,7 @@ window.saveDecisionResult = async function (newResult) {
 };
 
 window.editDecisionResult = editDecisionResult; // Export for onclick
+window.editDecisionResultInDetails = editDecisionResult; // Alias for file details section badge
 
 function updateDocumentsList(documents) {
     const container = document.getElementById('documents-list');
