@@ -154,6 +154,11 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
         if (document.getElementById('edit-defendant-attorney')) document.getElementById('edit-defendant-attorney').value = currentFile.defendant_attorney || '';
 
+        // [NEW] Populate Decision Result Display
+        if (document.getElementById('display-decision-result')) {
+            document.getElementById('display-decision-result').textContent = currentFile.latest_decision_result || 'Henüz belirlenmedi';
+        }
+
         // [NEW] Populate AI Suggestion
         if (document.getElementById('ai-suggestion-box')) {
             document.getElementById('ai-suggestion-box').textContent = currentFile.case_status_notes || 'Henüz öneri yok.';

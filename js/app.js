@@ -392,7 +392,7 @@ async function approveNewCase() {
             // Workflow fields (mapped to schema)
             next_hearing_date: document.getElementById('review-hearing').value || null,
             deadline_date: document.getElementById('review-deadline').value || null, // [FIX] Add explicit deadline field
-            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Urgency: ${document.getElementById('review-urgency').value}]`,
+            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value || 'N/A'}] [Urgency: ${document.getElementById('review-urgency').value}]`,
             latest_decision_result: document.getElementById('review-decision-result').value || null // [NEW]
         };
         const newCase = await createFileCase(newData, item.file);
