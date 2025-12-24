@@ -387,7 +387,8 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    - "court_name" (Mahkeme): "İL", "DAİRE/MAHKEME SAYISI", "TÜRÜ" formatında olmalı. 
      - Örn: "Ankara 2. İdare Mahkemesi", "Bursa Bölge İdare Mahkemesi 2. İdari Dava Dairesi", "Danıştay 6. Daire".
 5. "action_duration_days": Kararda veya belgede belirtilen yasal süre veya işlem süresi (GÜN CİNSİNDEN).
-   - "Ara Karar", "İstinaf", "Temyiz" gibi süreli işlemlerde mutlaka doldur. Örn: "7", "15", "30". Yoksa null.
+   - ÖZELLİKLE "kararın tebliğini izleyen günden itibaren X gün" gibi ifadeleri ara ve X'i buraya yaz.
+   - "Ara Karar", "İstinaf Kararı", "Temyiz Kararı" gibi evraklarda bu süreler kritiktir. Örn: "7", "15", "30". Yoksa null.
 6. "plaintiff_attorney" ve "defendant_attorney": Varsa tam isimleri (Av. ...). Yoksa null.
 7. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
 
@@ -406,7 +407,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "summary": "Çok detaylı özet (en az 8-10 cümle).",
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
   "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi. Yoksa null)",
-  "action_duration_days": 15, // Varsa gün sayısı (Örn: 7, 15, 30)
+  "action_duration_days": 15, // Varsa gün sayısı (Örn: "tebliğden itibaren 30 gün" -> 30)
   "decision_result": "Red | İptal | Tazminat Kabul | Kısmen Kabul Kısmen Red | Gönderme | Onama | Bozma | Düzelterek Onama | null",
   "is_final_decision": true, // SADECE dosyanın KAPANMASINI gerektiren nihai kararlar (Onama, Düzelterek Onama, Red, İptal, Tazminat Kabul). "Bozma" veya "Gönderme" durumunda FALSE işaretle (çünkü dosya kapanmaz, devam eder).
   "urgency": "High | Medium | Low",
