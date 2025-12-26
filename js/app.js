@@ -213,13 +213,15 @@ function openReviewModal(itemId) {
     }
 
     // [FIX] Calculate deadline_date from action_duration_days if not already set
-    // Also enforce default duration for decision types
+    // Also enforce default duration for decision types with warning
     const decisionTypes = ['Ara Karar', 'İstinaf Kararı', 'Temyiz Kararı', 'Karar'];
     const isDecisionType = decisionTypes.some(t => (data.type || '').includes(t));
+    let durationWarning = '';
 
     // If it's a decision type and no duration was extracted, default to 30 days
     if (isDecisionType && !data.action_duration_days) {
         data.action_duration_days = 30;
+        durationWarning = '⚠️ Süre metinden okunamadı, otomatik 30 gün eklendi.';
         console.log(`[Review Modal] Applied default duration (30 days) for decision type: ${data.type}`);
     }
 
@@ -296,7 +298,11 @@ function openReviewModal(itemId) {
             <div class="review-section" style="border-left: 2px solid var(--accent-warning); padding-left: 10px;">
                 <h3><i data-lucide="calendar-clock"></i> İş Akışı</h3>
                 <div class="review-field"><label>Duruşma</label><input type="date" id="review-hearing" value="${data.next_hearing_date || ''}" class="form-control"></div>
-                <div class="review-field"><label>Kesin Süre</label><input type="date" id="review-deadline" value="${data.deadline_date || ''}" class="form-control" style="color:var(--accent-danger);"></div>
+                <div class="review-field">
+                    <label>Kesin Süre</label>
+                    <input type="date" id="review-deadline" value="${data.deadline_date || ''}" class="form-control" style="color:var(--accent-danger);">
+                    ${durationWarning ? `<div style="color:var(--accent-warning); font-size:0.75rem; margin-top:4px;">${durationWarning}</div>` : ''}
+                </div>
                 <div class="review-field"><label>Aciliyet</label>
                     <select id="review-urgency" class="form-control">
                         <option value="LOW" ${data.urgency === 'LOW' ? 'selected' : ''}>Düşük</option>
