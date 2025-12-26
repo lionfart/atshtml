@@ -387,13 +387,24 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    - "court_case_number" (Esas No) ve "court_decision_number" (Karar No): SADECE "YYYY/SAYI" formatında olmalı. Asla "E.", "K." veya yazı içermemeli. Örn: "2024/1458".
    - "court_name" (Mahkeme): "İL", "DAİRE/MAHKEME SAYISI", "TÜRÜ" formatında olmalı. 
      - Örn: "Ankara 2. İdare Mahkemesi", "Bursa Bölge İdare Mahkemesi 2. İdari Dava Dairesi", "Danıştay 6. Daire".
-5. "action_duration_days": Kararda veya belgede belirtilen yasal süre veya işlem süresi (GÜN CİNSİNDEN).
-   - ÖZELLİKLE "kararın tebliğini izleyen günden itibaren X gün" gibi ifadeleri ara ve X'i buraya yaz.
-   - "Ara Karar", "İstinaf Kararı", "Temyiz Kararı" gibi evraklarda bu süreler kritiktir. Örn: "7", "15", "30". Yoksa null.
-   - DİKKAT: Metin içinde "30 gün içinde istinaf yolu açık" gibi bir ifade varsa MUTLAKA bu süreyi gir (Sadece öneri kısmına yazıp bırakma).
+5. "action_duration_days": KRİTİK ALAN - SÜRE TESPİTİ ZORUNLU!
+   - Belge tipi "Ara Karar", "İstinaf Kararı", "Temyiz Kararı" veya "Karar" ise SÜRESİZ BIRAKMAK YASAKTIR.
+   - Aşağıdaki kalıpları ara ve sayıyı çıkar:
+     * "tebliğinden itibaren X gün" -> X
+     * "tebliğini izleyen günden itibaren X gün" -> X
+     * "X gün içinde istinaf" -> X
+     * "X gün içinde temyiz" -> X
+     * "X günlük süre" -> X
+     * "istinaf yolu açık olmak üzere" -> Genellikle 30 gün
+   - Varsayılan süreler (metinde süre yoksa bu değerleri kullan):
+     * İstinaf için: 30 gün
+     * Temyiz için: 30 gün
+     * Ara Karar kesin süre: Metinde belirtildiği kadar
+   - MUTLAKA sayı olarak döndür (örn: 30, 15, 7). String değil, integer olmalı.
 6. "plaintiff_attorney" ve "defendant_attorney": Varsa tam isimleri (Av. ...). Yoksa null.
 7. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
 8. "urgency" (Aciliyet):
+   - "Ara Karar", "İstinaf Kararı", "Temyiz Kararı" tiplerinde KESİNLİKLE "HIGH" seç (süre hassasiyeti var).
    - "İptal", "Kısmen İptal", "Tazminat Kabul", "Kısmen Kabul" kararları (aleyhe durumlar) için KESİNLİKLE "HIGH" seç.
    - Kısa süreli (7 gün altı) işlemler için "HIGH" seç. Diğerleri için "Medium" veya "Low".
 

@@ -213,6 +213,16 @@ function openReviewModal(itemId) {
     }
 
     // [FIX] Calculate deadline_date from action_duration_days if not already set
+    // Also enforce default duration for decision types
+    const decisionTypes = ['Ara Karar', 'İstinaf Kararı', 'Temyiz Kararı', 'Karar'];
+    const isDecisionType = decisionTypes.some(t => (data.type || '').includes(t));
+
+    // If it's a decision type and no duration was extracted, default to 30 days
+    if (isDecisionType && !data.action_duration_days) {
+        data.action_duration_days = 30;
+        console.log(`[Review Modal] Applied default duration (30 days) for decision type: ${data.type}`);
+    }
+
     if (data.action_duration_days && !data.deadline_date) {
         const days = parseInt(data.action_duration_days);
         if (!isNaN(days) && days > 0) {
