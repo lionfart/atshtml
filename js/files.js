@@ -295,12 +295,14 @@ function getCellContent(file, colId) {
             else if (lStatus === 'ACTIVE') lStyle = 'color:var(--accent-success); opacity:0.9;'; // Pale green
             return `<span style="${lStyle}">${esc(lName)}</span>`;
         case 'col-date':
-            if (file.next_hearing_date) {
-                return `<div style="color:var(--accent-warning); font-size:0.85em; font-weight:600;"><i data-lucide="calendar" style="width:12px;display:inline;"></i> ${formatDate(file.next_hearing_date)}</div>`;
-            } else if (file.deadline_date) {
-                return `<div style="color:var(--accent-danger); font-size:0.85em; font-weight:600;"><i data-lucide="alarm-clock" style="width:12px;display:inline;"></i> ${formatDate(file.deadline_date)}</div>`;
+            if (file.deadline_date) {
+                const isHearing = file.deadline_type === 'KESIF_DURUSMA';
+                const icon = isHearing ? 'calendar' : 'alarm-clock';
+                const color = isHearing ? 'var(--accent-warning)' : 'var(--accent-danger)';
+                const typeLabel = isHearing ? 'Keşif/Duruşma' : 'İşlem Süresi';
+                return `<span class="badge deadline-badge" style="background:${color}; color:white; cursor:pointer; font-size:0.75em; display:inline-flex; align-items:center; gap:4px;" onclick="editDeadlineFromList('${file.id}', event)" title="${typeLabel} - Düzenle"><i data-lucide="${icon}" style="width:12px;"></i> ${formatDate(file.deadline_date)} <i data-lucide="edit-2" style="width:10px; opacity:0.7;"></i></span>`;
             }
-            return `<span style="font-family:monospace; font-size:0.85em;">${formatDate(file.created_at)}</span>`;
+            return `<span style="font-family:monospace; font-size:0.85em; opacity:0.6;">${formatDate(file.created_at)}</span>`;
         default: return '-';
     }
 }
@@ -515,3 +517,90 @@ document.addEventListener('click', async function (e) {
         toggle.textContent = currentStatus === 'OPEN' ? 'Açık' : 'Kapalı';
     }
 });
+
+// Deadline Edit Modal from List
+window.editDeadlineFromList = async function (fileId, event) {
+    event.stopPropagation();
+
+    // Fetch current deadline info
+    const { data: file, error } = await supabase.from('file_cases').select('deadline_date, deadline_type').eq('id', fileId).single();
+    if (error) {
+        showToast('Hata: ' + error.message, 'error');
+        return;
+    }
+
+    const currentDate = file?.deadline_date ? (file.deadline_date || '').split('T')[0] : '';
+    const currentType = file?.deadline_type || 'ISLEM_SURESI';
+
+    const modalHtml = `
+        <div id="deadline-edit-modal" class="modal active" style="z-index:9999;">
+            <div class="modal-content" style="max-width:350px;">
+                <div class="modal-header">
+                    <h3>Süre Bilgisini Düzenle</h3>
+                    <button class="icon-btn" onclick="closeDeadlineModal()"><i data-lucide="x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Süre Türü</label>
+                        <select id="deadline-type-select" class="form-control">
+                            <option value="ISLEM_SURESI" ${currentType === 'ISLEM_SURESI' ? 'selected' : ''}>İşlem Süresi</option>
+                            <option value="KESIF_DURUSMA" ${currentType === 'KESIF_DURUSMA' ? 'selected' : ''}>Keşif/Duruşma</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" id="deadline-date-input" class="form-control" value="${currentDate}">
+                    </div>
+                </div>
+                <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button class="btn btn-ghost" onclick="clearDeadlineFromList('${fileId}')">Temizle</button>
+                    <button class="btn btn-primary" onclick="saveDeadlineFromList('${fileId}')">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    lucide.createIcons();
+};
+
+window.closeDeadlineModal = function () {
+    const modal = document.getElementById('deadline-edit-modal');
+    if (modal) modal.remove();
+};
+
+window.saveDeadlineFromList = async function (fileId) {
+    const type = document.getElementById('deadline-type-select').value;
+    const date = document.getElementById('deadline-date-input').value || null;
+
+    try {
+        const { error } = await supabase.from('file_cases').update({
+            deadline_type: type,
+            deadline_date: date
+        }).eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast('Süre bilgisi güncellendi.', 'success');
+        closeDeadlineModal();
+        loadFiles();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};
+
+window.clearDeadlineFromList = async function (fileId) {
+    try {
+        const { error } = await supabase.from('file_cases').update({
+            deadline_type: null,
+            deadline_date: null
+        }).eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast('Süre bilgisi temizlendi.', 'success');
+        closeDeadlineModal();
+        loadFiles();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};

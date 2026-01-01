@@ -148,7 +148,9 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-reg-number')) document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
-        if (document.getElementById('edit-deadline')) document.getElementById('edit-deadline').value = (currentFile.deadline_date || '').split('T')[0];
+
+        // Populate Deadline Badge
+        updateDeadlineBadge(currentFile);
 
         // Vekil fields
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
@@ -259,8 +261,8 @@ function setupDetailsForm() {
                 // Also update registration number to match if user edited it
                 registration_number: courtCaseNumber,
                 court_decision_number: courtDecisionNumber,
-                subject: document.getElementById('edit-subject').value,
-                deadline_date: document.getElementById('edit-deadline').value || null
+                subject: document.getElementById('edit-subject').value
+                // Note: deadline is now managed separately via badge
             };
 
             const { error } = await supabase
@@ -433,6 +435,119 @@ window.saveAssignedLawyer = async function (id, name) {
 };
 
 window.editAssignedLawyer = editAssignedLawyer;
+
+// ==========================================
+// Deadline Badge Functions
+// ==========================================
+
+function updateDeadlineBadge(file) {
+    const badge = document.getElementById('display-deadline');
+    const textEl = document.getElementById('deadline-text');
+    const iconEl = document.getElementById('deadline-icon');
+
+    if (!badge || !textEl) return;
+
+    if (file.deadline_date) {
+        const isHearing = file.deadline_type === 'KESIF_DURUSMA';
+        const dateStr = formatDate((file.deadline_date || '').split('T')[0]);
+        const typeLabel = isHearing ? 'Keşif/Duruşma' : 'İşlem Süresi';
+        const color = isHearing ? 'var(--accent-warning)' : 'var(--accent-danger)';
+
+        textEl.textContent = `${typeLabel}: ${dateStr}`;
+        badge.style.background = color;
+        badge.style.color = 'white';
+
+        // Update icon
+        if (iconEl) {
+            iconEl.setAttribute('data-lucide', isHearing ? 'calendar' : 'alarm-clock');
+        }
+    } else {
+        textEl.textContent = 'Belirlenmedi';
+        badge.style.background = 'rgba(255,255,255,0.1)';
+        badge.style.color = 'var(--text-muted)';
+    }
+
+    lucide.createIcons();
+}
+
+async function editDeadlineDate() {
+    const currentDate = currentFile?.deadline_date ? (currentFile.deadline_date || '').split('T')[0] : '';
+    const currentType = currentFile?.deadline_type || 'ISLEM_SURESI';
+
+    const modalHtml = `
+        <div id="deadline-edit-modal" class="modal active" style="z-index:9999;">
+            <div class="modal-content" style="max-width:350px;">
+                <div class="modal-header">
+                    <h3>Süre Bilgisini Düzenle</h3>
+                    <button class="icon-btn" onclick="closeDeadlineEditModal()"><i data-lucide="x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Süre Türü</label>
+                        <select id="deadline-type-select" class="form-control">
+                            <option value="ISLEM_SURESI" ${currentType === 'ISLEM_SURESI' ? 'selected' : ''}>İşlem Süresi</option>
+                            <option value="KESIF_DURUSMA" ${currentType === 'KESIF_DURUSMA' ? 'selected' : ''}>Keşif/Duruşma</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" id="deadline-date-input" class="form-control" value="${currentDate}">
+                    </div>
+                </div>
+                <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button class="btn btn-ghost" onclick="clearDeadlineDate()">Temizle</button>
+                    <button class="btn btn-primary" onclick="saveDeadlineDate()">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    lucide.createIcons();
+}
+
+window.closeDeadlineEditModal = function () {
+    const modal = document.getElementById('deadline-edit-modal');
+    if (modal) modal.remove();
+};
+
+window.saveDeadlineDate = async function () {
+    const type = document.getElementById('deadline-type-select').value;
+    const date = document.getElementById('deadline-date-input').value || null;
+
+    try {
+        const { error } = await supabase.from('file_cases').update({
+            deadline_type: type,
+            deadline_date: date
+        }).eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast('Süre bilgisi güncellendi.', 'success');
+        closeDeadlineEditModal();
+        loadFileDetails();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};
+
+window.clearDeadlineDate = async function () {
+    try {
+        const { error } = await supabase.from('file_cases').update({
+            deadline_type: null,
+            deadline_date: null
+        }).eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast('Süre bilgisi temizlendi.', 'success');
+        closeDeadlineEditModal();
+        loadFileDetails();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};
+
+window.editDeadlineDate = editDeadlineDate;
 
 function updateDocumentsList(documents) {
     const container = document.getElementById('documents-list');
