@@ -225,14 +225,16 @@ function openReviewModal(itemId) {
         console.log(`[Review Modal] Applied default duration (30 days) for decision type: ${data.type}`);
     }
 
-    if (data.action_duration_days && !data.deadline_date) {
+    // [FIX] Force calculation of deadline_date from action_duration_days relative to TODAY
+    // User Requirement: Start date is "Upload Date" (Today), not decision date.
+    if (data.action_duration_days) {
         const days = parseInt(data.action_duration_days);
         if (!isNaN(days) && days > 0) {
             const today = new Date();
             const deadline = new Date(today);
             deadline.setDate(today.getDate() + days);
             data.deadline_date = deadline.toISOString().split('T')[0];
-            console.log(`[Review Modal] Calculated deadline: ${data.deadline_date} from ${days} days.`);
+            console.log(`[Review Modal] Recalculated deadline: ${data.deadline_date} (Today + ${days} days).`);
         }
     }
 
