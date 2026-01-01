@@ -440,6 +440,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi. Yoksa null)",
   "action_duration_days": 15, // Varsa gün sayısı (Örn: "tebliğden itibaren 30 gün" -> 30)
   "decision_result": "Red | İptal | Tazminat Kabul | Kısmen Kabul Kısmen Red | Gönderme | Onama | Bozma | Düzelterek Onama | null",
+  "decision_date": "YYYY-MM-DD (Karar verilme tarihi. Belgede 'Karar Tarihi:' veya 'Tarih:' olarak geçebilir)",
   "is_final_decision": true, // SADECE dosyanın KAPANMASINI gerektiren nihai kararlar (Onama, Düzelterek Onama, Red, İptal, Tazminat Kabul). "Bozma" veya "Gönderme" durumunda FALSE işaretle (çünkü dosya kapanmaz, devam eder).
   "urgency": "High | Medium | Low",
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
