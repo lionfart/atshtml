@@ -312,6 +312,18 @@ function openReviewModal(itemId) {
                         <option value="HIGH" ${data.urgency === 'HIGH' ? 'selected' : ''}>Yüksek (Acil)</option>
                     </select>
                 </div>
+                <div class="review-field" style="background:rgba(6,182,212,0.1); padding:8px; border-radius:6px; margin-top:8px;">
+                    <label style="color:var(--accent-secondary);">Karar Sonucu (Varsa)</label>
+                    <select id="review-decision-result" class="form-control">
+                        <option value="">Karar Yok</option>
+                        <option value="Kabul" ${data.decision_result === 'Kabul' ? 'selected' : ''}>Kabul</option>
+                        <option value="Red" ${data.decision_result === 'Red' ? 'selected' : ''}>Red</option>
+                        <option value="Kısmen Kabul" ${data.decision_result === 'Kısmen Kabul' ? 'selected' : ''}>Kısmen Kabul</option>
+                        <option value="Onama" ${data.decision_result === 'Onama' ? 'selected' : ''}>Onama</option>
+                        <option value="Bozma" ${data.decision_result === 'Bozma' ? 'selected' : ''}>Bozma</option>
+                        <option value="Geri Gönderme" ${data.decision_result === 'Geri Gönderme' ? 'selected' : ''}>Geri Gönderme</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="review-summary">
@@ -415,6 +427,22 @@ async function approveNewCase() {
         };
         const newCase = await createFileCase(newData, item.file);
 
+        // [NEW] Create decision record if decision result was selected
+        const decisionResult = document.getElementById('review-decision-result').value;
+        if (decisionResult && newCase.id) {
+            try {
+                await createDecision({
+                    file_case_id: newCase.id,
+                    decision_type: 'ILK_DERECE', // Default to İlk Derece for document analysis
+                    decision_result: decisionResult,
+                    decision_date: null, // Will be set later if extracted
+                    decision_number: kararNo || null
+                });
+            } catch (decErr) {
+                console.warn('Decision creation failed:', decErr);
+            }
+        }
+
         // [FIX] uploadDocument is already called inside createFileCase
         // Removing duplicate call.
         /* if (item.file) {
@@ -426,7 +454,46 @@ async function approveNewCase() {
     } catch (e) { showToast('Hata: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="check-circle"></i> Onayla'; }
 }
 async function linkToExistingCase() { const reg = document.getElementById('manual-case-id').value.trim(); if (!reg) return showToast('Dosya No girin', 'warning'); const { data: c } = await supabase.from('file_cases').select('id,registration_number').eq('registration_number', reg); if (!c || !c.length) return showToast('Bulunamadı', 'error'); await linkToSpecificCase(c[0].id, c[0].registration_number); }
-async function linkToSpecificCase(cid, cnum) { const item = uploadQueue.find(i => i.id === currentReviewItemId); if (!item) return; try { await uploadDocument(cid, item.file, item.analysisData); item.status = 'SUCCESS'; item.result = { id: cid, registration_number: cnum }; item.log = `Eklendi: ${cnum}`; closeReviewModal(); saveQueueToStorage(); updateQueueItemUI(item); showToast('Eklendi', 'success'); } catch (e) { showToast(e.message, 'error'); } }
+
+async function linkToSpecificCase(cid, cnum) {
+    const item = uploadQueue.find(i => i.id === currentReviewItemId);
+    if (!item) return;
+
+    try {
+        await uploadDocument(cid, item.file, item.analysisData);
+
+        // [NEW] Create decision record if selected
+        const decisionResultEl = document.getElementById('review-decision-result');
+        const decisionResult = decisionResultEl ? decisionResultEl.value : '';
+        const kararNo = document.getElementById('review-decision')?.value || '';
+
+        if (decisionResult) {
+            try {
+                await createDecision({
+                    file_case_id: cid,
+                    decision_type: 'ILK_DERECE',
+                    decision_result: decisionResult,
+                    decision_date: null,
+                    decision_number: kararNo || null
+                });
+                // Update latest_decision_result
+                await supabase.from('file_cases').update({ latest_decision_result: decisionResult }).eq('id', cid);
+            } catch (decErr) {
+                console.warn('Decision creation failed:', decErr);
+            }
+        }
+
+        item.status = 'SUCCESS';
+        item.result = { id: cid, registration_number: cnum };
+        item.log = `Eklendi: ${cnum}`;
+        closeReviewModal();
+        saveQueueToStorage();
+        updateQueueItemUI(item);
+        showToast('Eklendi', 'success');
+    } catch (e) {
+        showToast(e.message, 'error');
+    }
+}
 
 function closeReviewModal() { document.getElementById('review-modal').classList.remove('active'); currentReviewItemId = null; }
 // ... (loadLawyers, Settings SAME) ... //
