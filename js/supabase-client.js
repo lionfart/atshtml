@@ -1,4 +1,26 @@
-// ... (Previous imports SAME) ... //
+// supabase-client.js
+// Initialize Supabase Client
+let supabase;
+
+async function initSupabase() {
+    if (window.supabase) {
+        supabase = window.supabase;
+        return;
+    }
+    if (typeof createClient === 'undefined' || typeof SUPABASE_URL === 'undefined') {
+        console.error('Supabase SDK or Config missing');
+        return;
+    }
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.supabase = supabase;
+    console.log('Supabase initialized.');
+}
+
+// Auto-init attempt
+if (typeof SUPABASE_URL !== 'undefined' && typeof createClient !== 'undefined') {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.supabase = supabase;
+}
 
 // ==========================================
 // File Cases & Smart Matching API (UPDATED)
@@ -584,4 +606,17 @@ ${text.slice(0, 15000)}
         return { requesting_institution: '', subject: '', urgency: 'MEDIUM', ai_suggestion: 'Analiz yapılamadı.' };
     }
 }
+
+// Export Global API
+window.getFileCases = getFileCases;
+window.getFileCaseById = getFileCaseById;
+window.findMatchingCase = findMatchingCase;
+window.createFileCase = createFileCase;
+window.uploadDocument = uploadDocument;
+window.analyzeWithGemini = analyzeWithGemini;
+window.getSystemSettings = getSystemSettings;
+window.updateSystemSettings = updateSystemSettings;
+window.getLawyers = getLawyers;
+window.analyzeOpinionWithGemini = analyzeOpinionWithGemini;
+window.getNotes = getNotes;
 
