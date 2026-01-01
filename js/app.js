@@ -265,14 +265,14 @@ function openReviewModal(itemId) {
                 <div class="review-field"><label>Sonuç</label>
                      <select id="review-decision-result" class="form-control">
                          <option value="">Seçiniz (Varsa)</option>
-                         <option value="Onama" ${data.decision_result === 'Onama' ? 'selected' : ''}>Onama</option>
-                         <option value="Düzelterek Onama" ${data.decision_result === 'Düzelterek Onama' ? 'selected' : ''}>Düzelterek Onama</option>
-                         <option value="Bozma" ${data.decision_result === 'Bozma' ? 'selected' : ''}>Bozma</option>
                          <option value="Red" ${data.decision_result === 'Red' ? 'selected' : ''}>Red</option>
                          <option value="İptal" ${data.decision_result === 'İptal' ? 'selected' : ''}>İptal</option>
-                         <option value="Tazminat Kabul" ${data.decision_result === 'Tazminat Kabul' ? 'selected' : ''}>Tazminat Kabul</option>
+                         <option value="Onama" ${data.decision_result === 'Onama' ? 'selected' : ''}>Onama</option>
+                         <option value="Bozma" ${data.decision_result === 'Bozma' ? 'selected' : ''}>Bozma</option>
                          <option value="Kısmen Kabul Kısmen Red" ${data.decision_result === 'Kısmen Kabul Kısmen Red' ? 'selected' : ''}>Kısmen Kabul Kısmen Red</option>
                          <option value="Gönderme" ${data.decision_result === 'Gönderme' ? 'selected' : ''}>Gönderme</option>
+                         <option value="Kabul" ${data.decision_result === 'Kabul' ? 'selected' : ''}>Kabul</option>
+                         <option value="Diğer" ${data.decision_result === 'Diğer' ? 'selected' : ''}>Diğer</option>
                      </select>
                 </div>
                 <div class="review-field"><label>Mahkeme</label><input type="text" id="review-court" value="${data.court_name || ''}" class="form-control"></div>
