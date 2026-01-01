@@ -576,7 +576,7 @@ const DECISION_TYPES = {
     'TEMYIZ': { label: 'Temyiz', icon: 'landmark', color: 'var(--accent-danger)' }
 };
 
-const DECISION_RESULTS = ['Kabul', 'Red', 'Kısmen Kabul', 'Onama', 'Bozma', 'Geri Gönderme', 'Düşme', 'Feragat'];
+const DECISION_RESULTS = ['Red', 'İptal', 'Onama', 'Düzelterek Onama', 'Bozma', 'Tazminat Kabul', 'Kısmen Kabul Kısmen Red', 'Gönderme', 'Kabul', 'Geri Gönderme', 'Düşme', 'Feragat'];
 
 async function loadDecisions() {
     const decisions = await getDecisionsByFileId(fileId);
