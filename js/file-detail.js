@@ -147,9 +147,8 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-amount')) document.getElementById('edit-amount').value = currentFile.claim_amount || '';
         if (document.getElementById('edit-reg-number')) document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
-        if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
-        if (document.getElementById('edit-deadline')) document.getElementById('edit-deadline').value = currentFile.deadline_date || '';
+        if (document.getElementById('edit-deadline')) document.getElementById('edit-deadline').value = (currentFile.deadline_date || '').split('T')[0];
 
         // Vekil fields
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
@@ -259,7 +258,6 @@ function setupDetailsForm() {
                 court_case_number: courtCaseNumber,
                 // Also update registration number to match if user edited it
                 registration_number: courtCaseNumber,
-                court_decision_number: courtDecisionNumber,
                 court_decision_number: courtDecisionNumber,
                 subject: document.getElementById('edit-subject').value,
                 deadline_date: document.getElementById('edit-deadline').value || null
