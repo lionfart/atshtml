@@ -605,6 +605,53 @@ ${text.slice(0, 15000)}
     }
 }
 
+// ==========================================
+// Decisions API
+// ==========================================
+
+async function getDecisionsByFileId(fileId) {
+    const { data, error } = await supabase
+        .from('decisions')
+        .select('*')
+        .eq('file_case_id', fileId)
+        .order('decision_date', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching decisions:', error);
+        return [];
+    }
+    return data || [];
+}
+
+async function createDecision(data) {
+    const { data: newDecision, error } = await supabase
+        .from('decisions')
+        .insert(data)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return newDecision;
+}
+
+async function updateDecision(id, updates) {
+    const { error } = await supabase
+        .from('decisions')
+        .update(updates)
+        .eq('id', id);
+
+    if (error) throw error;
+}
+
+async function deleteDecision(id) {
+    const { error } = await supabase
+        .from('decisions')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
+}
+
 // Export Global API
 window.getFileCases = getFileCases;
 window.getFileCaseById = getFileCaseById;
@@ -617,4 +664,7 @@ window.updateSystemSettings = updateSystemSettings;
 window.getLawyers = getLawyers;
 window.analyzeOpinionWithGemini = analyzeOpinionWithGemini;
 window.getNotes = getNotes;
-
+window.getDecisionsByFileId = getDecisionsByFileId;
+window.createDecision = createDecision;
+window.updateDecision = updateDecision;
+window.deleteDecision = deleteDecision;

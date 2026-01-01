@@ -156,17 +156,8 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
         if (document.getElementById('edit-defendant-attorney')) document.getElementById('edit-defendant-attorney').value = currentFile.defendant_attorney || '';
 
-        // [NEW] Populate Decision Result Display (Badge Style)
-        const decisionBadge = document.getElementById('display-decision-result');
-        const decisionText = document.getElementById('decision-result-text');
-        if (decisionBadge && decisionText) {
-            const result = currentFile.latest_decision_result || 'Henüz belirlenmedi';
-            decisionText.textContent = result;
 
-            // Apply color based on result
-            decisionBadge.className = 'badge ' + getDecisionBadgeClass(result);
-            decisionBadge.style.cssText = 'font-size:1rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);';
-        }
+        // Note: Decision history is now loaded via loadDecisions() after this function
 
         // [NEW] Populate AI Suggestion
         if (document.getElementById('ai-suggestion-box')) {
@@ -198,6 +189,9 @@ async function loadFileDetails(retryCount = 0) {
         }
 
         lucide.createIcons();
+
+        // Load decision history
+        loadDecisions();
 
     } catch (error) {
         console.error('Failed to load file details:', error);
@@ -571,6 +565,208 @@ window.clearDateFieldDetail = async function (fieldName) {
 
 window.editHearingDate = editHearingDate;
 window.editDeadlineDate = editDeadlineDate;
+
+// ==========================================
+// Decision History Functions
+// ==========================================
+
+const DECISION_TYPES = {
+    'ILK_DERECE': { label: 'İlk Derece', icon: 'building-2', color: 'var(--accent-primary)' },
+    'ISTINAF': { label: 'İstinaf', icon: 'scale', color: 'var(--accent-warning)' },
+    'TEMYIZ': { label: 'Temyiz', icon: 'landmark', color: 'var(--accent-danger)' }
+};
+
+const DECISION_RESULTS = ['Kabul', 'Red', 'Kısmen Kabul', 'Onama', 'Bozma', 'Geri Gönderme', 'Düşme', 'Feragat'];
+
+async function loadDecisions() {
+    const decisions = await getDecisionsByFileId(fileId);
+    renderDecisionsList(decisions);
+}
+
+function renderDecisionsList(decisions) {
+    const container = document.getElementById('decisions-list');
+    if (!container) return;
+
+    if (!decisions || decisions.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); opacity:0.6; padding:15px;">Henüz karar eklenmedi</div>`;
+        return;
+    }
+
+    // Sort by date ascending
+    decisions.sort((a, b) => new Date(a.decision_date || 0) - new Date(b.decision_date || 0));
+
+    const html = decisions.map(d => {
+        const typeInfo = DECISION_TYPES[d.decision_type] || { label: d.decision_type, icon: 'file-text', color: 'var(--text-muted)' };
+        const dateStr = d.decision_date ? formatDate(d.decision_date) : '-';
+        const resultColor = getResultColor(d.decision_result);
+
+        return `
+            <div class="decision-row" style="display:flex; justify-content:space-between; align-items:center; padding:10px; margin-bottom:8px; background:rgba(255,255,255,0.05); border-radius:6px; border-left:3px solid ${typeInfo.color};">
+                <div style="flex:1;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <i data-lucide="${typeInfo.icon}" style="width:14px; color:${typeInfo.color};"></i>
+                        <span style="font-weight:600; color:${typeInfo.color};">${typeInfo.label}</span>
+                        <span style="font-weight:600; color:${resultColor};">${d.decision_result || '-'}</span>
+                    </div>
+                    <div style="font-size:0.8em; color:var(--text-muted);">
+                        ${dateStr}${d.decision_number ? ' | No: ' + d.decision_number : ''}
+                    </div>
+                    ${d.notes ? `<div style="font-size:0.75em; color:var(--text-secondary); margin-top:4px; font-style:italic;">${escapeHtml(d.notes)}</div>` : ''}
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="icon-btn" onclick="editDecision('${d.id}')" title="Düzenle">
+                        <i data-lucide="edit-2" style="width:14px;"></i>
+                    </button>
+                    <button class="icon-btn" onclick="deleteDecisionConfirm('${d.id}')" title="Sil" style="color:var(--accent-danger);">
+                        <i data-lucide="trash-2" style="width:14px;"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+    lucide.createIcons();
+}
+
+function getResultColor(result) {
+    if (!result) return 'var(--text-muted)';
+    const r = result.toLowerCase();
+    if (r.includes('kabul') && !r.includes('kısmen')) return 'var(--accent-success)';
+    if (r.includes('red') || r.includes('bozma')) return 'var(--accent-danger)';
+    if (r.includes('kısmen') || r.includes('onama')) return 'var(--accent-warning)';
+    return 'var(--text-primary)';
+}
+
+function openAddDecisionModal(editData = null) {
+    const isEdit = !!editData;
+    const title = isEdit ? 'Kararı Düzenle' : 'Yeni Karar Ekle';
+
+    const modalHtml = `
+        <div id="decision-modal" class="modal active" style="z-index:9999;">
+            <div class="modal-content" style="max-width:400px;">
+                <div class="modal-header">
+                    <h3><i data-lucide="gavel"></i> ${title}</h3>
+                    <button class="icon-btn" onclick="closeDecisionModal()"><i data-lucide="x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Karar Türü</label>
+                        <select id="decision-type-input" class="form-control">
+                            <option value="ILK_DERECE" ${editData?.decision_type === 'ILK_DERECE' ? 'selected' : ''}>İlk Derece Mahkemesi</option>
+                            <option value="ISTINAF" ${editData?.decision_type === 'ISTINAF' ? 'selected' : ''}>İstinaf Mahkemesi</option>
+                            <option value="TEMYIZ" ${editData?.decision_type === 'TEMYIZ' ? 'selected' : ''}>Temyiz (Yargıtay/Danıştay)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Karar Sonucu</label>
+                        <select id="decision-result-input" class="form-control">
+                            <option value="">Seçiniz</option>
+                            ${DECISION_RESULTS.map(r => `<option value="${r}" ${editData?.decision_result === r ? 'selected' : ''}>${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Karar Tarihi</label>
+                        <input type="date" id="decision-date-input" class="form-control" value="${editData?.decision_date || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Karar Numarası (Opsiyonel)</label>
+                        <input type="text" id="decision-number-input" class="form-control" placeholder="2024/123 K." value="${editData?.decision_number || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Notlar (Opsiyonel)</label>
+                        <textarea id="decision-notes-input" class="form-control" rows="2" placeholder="Kısa açıklama...">${editData?.notes || ''}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button class="btn btn-ghost" onclick="closeDecisionModal()">İptal</button>
+                    <button class="btn btn-primary" onclick="saveDecisionFromModal('${editData?.id || ''}')">${isEdit ? 'Güncelle' : 'Kaydet'}</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    lucide.createIcons();
+}
+
+window.closeDecisionModal = function () {
+    const modal = document.getElementById('decision-modal');
+    if (modal) modal.remove();
+};
+
+window.openAddDecisionModal = openAddDecisionModal;
+
+window.saveDecisionFromModal = async function (editId) {
+    const data = {
+        decision_type: document.getElementById('decision-type-input').value,
+        decision_result: document.getElementById('decision-result-input').value,
+        decision_date: document.getElementById('decision-date-input').value || null,
+        decision_number: document.getElementById('decision-number-input').value || null,
+        notes: document.getElementById('decision-notes-input').value || null
+    };
+
+    if (!data.decision_type || !data.decision_result) {
+        showToast('Karar türü ve sonucu zorunludur.', 'error');
+        return;
+    }
+
+    try {
+        if (editId) {
+            await updateDecision(editId, data);
+            showToast('Karar güncellendi.', 'success');
+        } else {
+            data.file_case_id = fileId;
+            await createDecision(data);
+            showToast('Karar eklendi.', 'success');
+        }
+        closeDecisionModal();
+        loadDecisions();
+
+        // Also update latest_decision_result in file_cases for list display
+        await updateLatestDecision();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};
+
+window.editDecision = async function (id) {
+    const decisions = await getDecisionsByFileId(fileId);
+    const decision = decisions.find(d => d.id === id);
+    if (decision) {
+        openAddDecisionModal(decision);
+    }
+};
+
+window.deleteDecisionConfirm = function (id) {
+    if (confirm('Bu kararı silmek istediğinize emin misiniz?')) {
+        deleteDecisionAction(id);
+    }
+};
+
+async function deleteDecisionAction(id) {
+    try {
+        await deleteDecision(id);
+        showToast('Karar silindi.', 'success');
+        loadDecisions();
+        await updateLatestDecision();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+}
+
+// Update file_cases.latest_decision_result with most recent decision
+async function updateLatestDecision() {
+    const decisions = await getDecisionsByFileId(fileId);
+    let latestResult = null;
+
+    if (decisions.length > 0) {
+        // Get most recent by date
+        decisions.sort((a, b) => new Date(b.decision_date || 0) - new Date(a.decision_date || 0));
+        latestResult = decisions[0].decision_result;
+    }
+
+    await supabase.from('file_cases').update({ latest_decision_result: latestResult }).eq('id', fileId);
+}
 
 function updateDocumentsList(documents) {
     const container = document.getElementById('documents-list');
