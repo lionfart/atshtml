@@ -149,8 +149,8 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
 
-        // Populate Deadline Badge
-        updateDeadlineBadge(currentFile);
+        // Populate Date Badges (Hearing + Deadline)
+        updateDateBadges(currentFile);
 
         // Vekil fields
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
@@ -437,66 +437,63 @@ window.saveAssignedLawyer = async function (id, name) {
 window.editAssignedLawyer = editAssignedLawyer;
 
 // ==========================================
-// Deadline Badge Functions
+// Date Badge Functions (Two Separate Fields)
 // ==========================================
 
-function updateDeadlineBadge(file) {
-    const badge = document.getElementById('display-deadline');
-    const textEl = document.getElementById('deadline-text');
-    const iconEl = document.getElementById('deadline-icon');
-
-    if (!badge || !textEl) return;
-
-    if (file.deadline_date) {
-        const isHearing = file.deadline_type === 'KESIF_DURUSMA';
-        const dateStr = formatDate((file.deadline_date || '').split('T')[0]);
-        const typeLabel = isHearing ? 'Keşif/Duruşma' : 'İşlem Süresi';
-        const color = isHearing ? 'var(--accent-warning)' : 'var(--accent-danger)';
-
-        textEl.textContent = `${typeLabel}: ${dateStr}`;
-        badge.style.background = color;
-        badge.style.color = 'white';
-
-        // Update icon
-        if (iconEl) {
-            iconEl.setAttribute('data-lucide', isHearing ? 'calendar' : 'alarm-clock');
+function updateDateBadges(file) {
+    // Duruşma/Keşif Badge
+    const hearingBadge = document.getElementById('display-hearing');
+    const hearingText = document.getElementById('hearing-text');
+    if (hearingBadge && hearingText) {
+        if (file.next_hearing_date) {
+            hearingText.textContent = formatDate((file.next_hearing_date || '').split('T')[0]);
+            hearingBadge.style.background = 'var(--accent-warning)';
+            hearingBadge.style.color = 'white';
+        } else {
+            hearingText.textContent = 'Belirlenmedi';
+            hearingBadge.style.background = 'rgba(255,255,255,0.1)';
+            hearingBadge.style.color = 'var(--text-muted)';
         }
-    } else {
-        textEl.textContent = 'Belirlenmedi';
-        badge.style.background = 'rgba(255,255,255,0.1)';
-        badge.style.color = 'var(--text-muted)';
+    }
+
+    // İşlem Süresi Badge
+    const deadlineBadge = document.getElementById('display-deadline');
+    const deadlineText = document.getElementById('deadline-text');
+    if (deadlineBadge && deadlineText) {
+        if (file.deadline_date) {
+            deadlineText.textContent = formatDate((file.deadline_date || '').split('T')[0]);
+            deadlineBadge.style.background = 'var(--accent-danger)';
+            deadlineBadge.style.color = 'white';
+        } else {
+            deadlineText.textContent = 'Belirlenmedi';
+            deadlineBadge.style.background = 'rgba(255,255,255,0.1)';
+            deadlineBadge.style.color = 'var(--text-muted)';
+        }
     }
 
     lucide.createIcons();
 }
 
-async function editDeadlineDate() {
-    const currentDate = currentFile?.deadline_date ? (currentFile.deadline_date || '').split('T')[0] : '';
-    const currentType = currentFile?.deadline_type || 'ISLEM_SURESI';
+// Duruşma/Keşif Edit
+async function editHearingDate() {
+    const currentDate = currentFile?.next_hearing_date ? (currentFile.next_hearing_date || '').split('T')[0] : '';
 
     const modalHtml = `
-        <div id="deadline-edit-modal" class="modal active" style="z-index:9999;">
-            <div class="modal-content" style="max-width:350px;">
-                <div class="modal-header">
-                    <h3>Süre Bilgisini Düzenle</h3>
-                    <button class="icon-btn" onclick="closeDeadlineEditModal()"><i data-lucide="x"></i></button>
+        <div id="date-edit-modal" class="modal active" style="z-index:9999;">
+            <div class="modal-content" style="max-width:320px;">
+                <div class="modal-header" style="border-left:3px solid var(--accent-warning);">
+                    <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="calendar" style="color:var(--accent-warning);"></i> Duruşma/Keşif</h3>
+                    <button class="icon-btn" onclick="closeDateEditModal()"><i data-lucide="x"></i></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Süre Türü</label>
-                        <select id="deadline-type-select" class="form-control">
-                            <option value="ISLEM_SURESI" ${currentType === 'ISLEM_SURESI' ? 'selected' : ''}>İşlem Süresi</option>
-                            <option value="KESIF_DURUSMA" ${currentType === 'KESIF_DURUSMA' ? 'selected' : ''}>Keşif/Duruşma</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
                         <label>Tarih</label>
-                        <input type="date" id="deadline-date-input" class="form-control" value="${currentDate}">
+                        <input type="date" id="date-edit-input" class="form-control" value="${currentDate}">
                     </div>
                 </div>
                 <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end;">
-                    <button class="btn btn-ghost" onclick="clearDeadlineDate()">Temizle</button>
-                    <button class="btn btn-primary" onclick="saveDeadlineDate()">Kaydet</button>
+                    <button class="btn btn-ghost" onclick="clearDateFieldDetail('next_hearing_date')">Temizle</button>
+                    <button class="btn btn-primary" onclick="saveDateFieldDetail('next_hearing_date')">Kaydet</button>
                 </div>
             </div>
         </div>
@@ -505,48 +502,74 @@ async function editDeadlineDate() {
     lucide.createIcons();
 }
 
-window.closeDeadlineEditModal = function () {
-    const modal = document.getElementById('deadline-edit-modal');
+// İşlem Süresi Edit
+async function editDeadlineDate() {
+    const currentDate = currentFile?.deadline_date ? (currentFile.deadline_date || '').split('T')[0] : '';
+
+    const modalHtml = `
+        <div id="date-edit-modal" class="modal active" style="z-index:9999;">
+            <div class="modal-content" style="max-width:320px;">
+                <div class="modal-header" style="border-left:3px solid var(--accent-danger);">
+                    <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="alarm-clock" style="color:var(--accent-danger);"></i> İşlem Süresi</h3>
+                    <button class="icon-btn" onclick="closeDateEditModal()"><i data-lucide="x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" id="date-edit-input" class="form-control" value="${currentDate}">
+                    </div>
+                </div>
+                <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button class="btn btn-ghost" onclick="clearDateFieldDetail('deadline_date')">Temizle</button>
+                    <button class="btn btn-primary" onclick="saveDateFieldDetail('deadline_date')">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    lucide.createIcons();
+}
+
+window.closeDateEditModal = function () {
+    const modal = document.getElementById('date-edit-modal');
     if (modal) modal.remove();
 };
 
-window.saveDeadlineDate = async function () {
-    const type = document.getElementById('deadline-type-select').value;
-    const date = document.getElementById('deadline-date-input').value || null;
+window.saveDateFieldDetail = async function (fieldName) {
+    const date = document.getElementById('date-edit-input').value || null;
 
     try {
-        const { error } = await supabase.from('file_cases').update({
-            deadline_type: type,
-            deadline_date: date
-        }).eq('id', fileId);
+        const updates = {};
+        updates[fieldName] = date;
 
+        const { error } = await supabase.from('file_cases').update(updates).eq('id', fileId);
         if (error) throw error;
 
-        showToast('Süre bilgisi güncellendi.', 'success');
-        closeDeadlineEditModal();
+        showToast('Tarih güncellendi.', 'success');
+        closeDateEditModal();
         loadFileDetails();
     } catch (e) {
         showToast('Hata: ' + e.message, 'error');
     }
 };
 
-window.clearDeadlineDate = async function () {
+window.clearDateFieldDetail = async function (fieldName) {
     try {
-        const { error } = await supabase.from('file_cases').update({
-            deadline_type: null,
-            deadline_date: null
-        }).eq('id', fileId);
+        const updates = {};
+        updates[fieldName] = null;
 
+        const { error } = await supabase.from('file_cases').update(updates).eq('id', fileId);
         if (error) throw error;
 
-        showToast('Süre bilgisi temizlendi.', 'success');
-        closeDeadlineEditModal();
+        showToast('Tarih temizlendi.', 'success');
+        closeDateEditModal();
         loadFileDetails();
     } catch (e) {
         showToast('Hata: ' + e.message, 'error');
     }
 };
 
+window.editHearingDate = editHearingDate;
 window.editDeadlineDate = editDeadlineDate;
 
 function updateDocumentsList(documents) {

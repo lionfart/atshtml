@@ -299,9 +299,9 @@ function openReviewModal(itemId) {
             </div>
             <div class="review-section" style="border-left: 2px solid var(--accent-warning); padding-left: 10px;">
                 <h3><i data-lucide="calendar-clock"></i> İş Akışı</h3>
-                <div class="review-field"><label>Duruşma</label><input type="date" id="review-hearing" value="${data.next_hearing_date || ''}" class="form-control"></div>
+                <div class="review-field"><label>Duruşma/Keşif</label><input type="date" id="review-hearing" value="${data.next_hearing_date || ''}" class="form-control"></div>
                 <div class="review-field">
-                    <label>Kesin Süre</label>
+                    <label>İşlem Süresi</label>
                     <input type="date" id="review-deadline" value="${data.deadline_date || ''}" class="form-control" style="color:var(--accent-danger);">
                     ${durationWarning ? `<div style="color:var(--accent-warning); font-size:0.75rem; margin-top:4px;">${durationWarning}</div>` : ''}
                 </div>

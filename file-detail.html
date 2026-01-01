@@ -192,25 +192,41 @@
                                 <textarea id="edit-subject" rows="4" style="resize: vertical;"></textarea>
                             </div>
 
-                            <div class="grid-2-col"
-                                style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4);">
+                            <div class="grid-3-col"
+                                style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:var(--space-4);">
+                                <!-- Duruşma/Keşif Badge -->
+                                <div class="form-group"
+                                    style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-warning);">
+                                    <label style="color: var(--accent-warning);">Duruşma/Keşif</label>
+                                    <span id="display-hearing" class="badge"
+                                        style="font-size: 0.9rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);"
+                                        onclick="editHearingDate()" title="Düzenlemek için tıklayın">
+                                        <i data-lucide="calendar" style="width:14px; color:var(--accent-warning);"></i>
+                                        <span id="hearing-text">Belirlenmedi</span>
+                                        <i data-lucide="edit-2" style="width:12px; height:12px; opacity:0.7;"></i>
+                                    </span>
+                                </div>
+
+                                <!-- İşlem Süresi Badge -->
                                 <div class="form-group"
                                     style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-danger);">
-                                    <label style="color: var(--accent-danger);">Süre Bilgisi</label>
+                                    <label style="color: var(--accent-danger);">İşlem Süresi</label>
                                     <span id="display-deadline" class="badge"
-                                        style="font-size: 1rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);"
+                                        style="font-size: 0.9rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);"
                                         onclick="editDeadlineDate()" title="Düzenlemek için tıklayın">
-                                        <i id="deadline-icon" data-lucide="alarm-clock" style="width:14px;"></i>
+                                        <i data-lucide="alarm-clock"
+                                            style="width:14px; color:var(--accent-danger);"></i>
                                         <span id="deadline-text">Belirlenmedi</span>
                                         <i data-lucide="edit-2" style="width:12px; height:12px; opacity:0.7;"></i>
                                     </span>
                                 </div>
 
+                                <!-- Karar Sonucu Badge -->
                                 <div class="form-group"
-                                    style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-warning);">
-                                    <label style="color: var(--accent-warning);">Karar Sonucu</label>
+                                    style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-secondary);">
+                                    <label style="color: var(--accent-secondary);">Karar Sonucu</label>
                                     <span id="display-decision-result" class="badge"
-                                        style="font-size: 1rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);"
+                                        style="font-size: 0.9rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:5px; border:1px dashed rgba(255,255,255,0.3);"
                                         onclick="editDecisionResultInDetails()" title="Düzenlemek için tıklayın">
                                         <span id="decision-result-text">-</span>
                                         <i data-lucide="edit-2" style="width:12px; height:12px; opacity:0.7;"></i>
