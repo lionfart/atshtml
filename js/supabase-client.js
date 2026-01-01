@@ -1,25 +1,23 @@
 // supabase-client.js
 // Initialize Supabase Client
-let supabase;
+// (Global supabase variable is assumed or created on window)
 
 async function initSupabase() {
-    if (window.supabase) {
-        supabase = window.supabase;
-        return;
-    }
+    if (window.supabase) return;
+
     if (typeof createClient === 'undefined' || typeof SUPABASE_URL === 'undefined') {
         console.error('Supabase SDK or Config missing');
         return;
     }
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabase = supabase;
+    window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('Supabase initialized.');
 }
 
 // Auto-init attempt
 if (typeof SUPABASE_URL !== 'undefined' && typeof createClient !== 'undefined') {
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabase = supabase;
+    if (!window.supabase) {
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
 }
 
 // ==========================================
