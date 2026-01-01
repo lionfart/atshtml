@@ -149,6 +149,7 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
+        if (document.getElementById('edit-deadline')) document.getElementById('edit-deadline').value = currentFile.deadline_date || '';
 
         // Vekil fields
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
@@ -259,7 +260,9 @@ function setupDetailsForm() {
                 // Also update registration number to match if user edited it
                 registration_number: courtCaseNumber,
                 court_decision_number: courtDecisionNumber,
-                subject: document.getElementById('edit-subject').value
+                court_decision_number: courtDecisionNumber,
+                subject: document.getElementById('edit-subject').value,
+                deadline_date: document.getElementById('edit-deadline').value || null
             };
 
             const { error } = await supabase
@@ -289,8 +292,13 @@ function updateStatusCard(file) {
     let html = `
         <div class="form-group">
             <label class="text-muted">Atanan Avukat</label>
-            <div class="font-semibold" style="font-size: var(--font-size-lg);">
-                ${escapeHtml(file.lawyer_name || 'Bilinmiyor')}
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div class="font-semibold" style="font-size: var(--font-size-lg);">
+                    ${escapeHtml(file.lawyer_name || 'Bilinmiyor')}
+                </div>
+                <button class="icon-btn btn-xs" onclick="editAssignedLawyer()" title="Avukatı Değiştir">
+                    <i data-lucide="edit-2" style="width:14px; opacity:0.7;"></i>
+                </button>
             </div>
         </div>
         <div class="form-group">
@@ -379,6 +387,54 @@ window.saveDecisionResult = async function (newResult) {
 
 window.editDecisionResult = editDecisionResult; // Export for onclick
 window.editDecisionResultInDetails = editDecisionResult; // Alias for file details section badge
+
+// [NEW] Edit Assigned Lawyer
+async function editAssignedLawyer() {
+    try {
+        showToast('Avukat listesi yükleniyor...', 'info');
+        const { data: lawyers, error } = await supabase.from('lawyers').select('id, name').order('name');
+
+        if (error) throw error;
+        if (!lawyers || lawyers.length === 0) {
+            showToast('Sistemde kayıtlı avukat bulunamadı.', 'warning');
+            return;
+        }
+
+        const modalId = 'temp-lawyer-modal';
+        const modalHtml = `
+            <div id="${modalId}" class="modal active" style="z-index:9999;">
+                <div class="modal-content" style="max-width:300px;">
+                    <div class="modal-header">
+                        <h3>Avukat Değiştir</h3>
+                        <button class="icon-btn" onclick="document.getElementById('${modalId}').remove()"><i data-lucide="x"></i></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                        ${lawyers.map(l => `<button class="btn btn-secondary w-full" style="margin-bottom:5px; text-align:left;" onclick="saveAssignedLawyer('${l.id}', '${l.name.replace(/'/g, "\\'")}')">${l.name}</button>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        lucide.createIcons();
+
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+}
+
+window.saveAssignedLawyer = async function (id, name) {
+    document.getElementById('temp-lawyer-modal').remove();
+    try {
+        const { error } = await supabase.from('file_cases').update({ lawyer_id: id, lawyer_name: name }).eq('id', fileId);
+        if (error) throw error;
+        showToast('Avukat güncellendi.', 'success');
+        loadFileDetails();
+    } catch (e) {
+        showToast('Hata: ' + e.message, 'error');
+    }
+};
+
+window.editAssignedLawyer = editAssignedLawyer;
 
 function updateDocumentsList(documents) {
     const container = document.getElementById('documents-list');
