@@ -201,6 +201,27 @@ function openReviewModal(itemId) {
     const data = item.analysisData;
     const candidates = item.candidates || [];
 
+    // [FIX] Convert date formats from dd/mm/yyyy or dd-mm-yyyy to yyyy-MM-dd
+    function normalizeDate(dateStr) {
+        if (!dateStr) return '';
+        // If already yyyy-MM-dd, return as is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+        // Handle dd/mm/yyyy or dd-mm-yyyy
+        const match = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (match) {
+            const day = match[1].padStart(2, '0');
+            const month = match[2].padStart(2, '0');
+            const year = match[3];
+            return `${year}-${month}-${day}`;
+        }
+        return dateStr;
+    }
+
+    // Normalize all date fields
+    if (data.decision_date) data.decision_date = normalizeDate(data.decision_date);
+    if (data.next_hearing_date) data.next_hearing_date = normalizeDate(data.next_hearing_date);
+    if (data.deadline_date) data.deadline_date = normalizeDate(data.deadline_date);
+
     // [LOGIC] Enforce "Karar", "İstinaf Kararı", or "Temyiz Kararı" if decision_result exists
     // But don't overwrite if it's already specific (e.g. Temyiz Kararı)
     if (data.decision_result && data.decision_result.length > 2) {
