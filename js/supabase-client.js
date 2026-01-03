@@ -431,7 +431,16 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    - "Onama" = Üst mahkeme alt kararı onadı
    - "Bozma" = Üst mahkeme alt kararı bozdu
    - "Gönderme" = Başka mahkemeye/kuruma gönderildi
+   - "YD Kabul" = Yürütmenin Durdurulması talebi KABUL edildi (SADECE Ara Karar için)
+   - "YD Red" = Yürütmenin Durdurulması talebi REDDEDİLDİ (SADECE Ara Karar için)
    - "Diğer" = Yukarıdakilerden hiçbiri
+
+   ÖNEMLİ - ARA KARAR İÇİN:
+   ========================
+   Eğer belge tipi "Ara Karar" ise ve Yürütmenin Durdurulması (YD) talebi varsa:
+   - YD talebi KABUL edilmişse → decision_result = "YD Kabul" (ASLA "Kabul" kullanma!)
+   - YD talebi REDDEDİLMİŞSE → decision_result = "YD Red" (ASLA "Red" kullanma!)
+   - YD ile ilgili karar yoksa → decision_result = null (boş bırak)
 
    TAM YARGI DAVALARI İÇİN:
    - Tazminat talebi TAMAMEN kabul → "Kabul"
