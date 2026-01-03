@@ -264,6 +264,15 @@ function getCellContent(file, colId) {
             const sText = file.status === 'OPEN' ? 'Açık' : 'Kapalı';
             return `<span class="badge ${sClass}">${sText}</span>`;
         case 'col-decision':
+            let decisionHtml = '';
+
+            // Show YD result if present (for Ara Karar)
+            if (file.yd_result) {
+                const ydColor = file.yd_result.toLowerCase().includes('kabul') ? 'var(--accent-success)' : 'var(--accent-danger)';
+                decisionHtml += `<span style="font-weight:600; color:${ydColor}; background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; font-size:0.8em; margin-right:4px;">${esc(file.yd_result)}</span>`;
+            }
+
+            // Show regular decision result
             if (file.latest_decision_result) {
                 const res = file.latest_decision_result.toLowerCase();
                 let color = 'var(--text-primary)';
@@ -271,18 +280,12 @@ function getCellContent(file, colId) {
                 if (res.includes('red') || res.includes('bozma')) color = 'var(--accent-danger)';
                 else if (res.includes('kabul') || res.includes('onama')) color = 'var(--accent-success)';
                 else if (res.includes('kısmen')) color = 'var(--accent-warning)';
-                else if (res.includes('iptal')) color = 'var(--accent-danger)'; // İptal is usually against the admin authority but implies success for plaintiff lawyer usually? Context dependent. Assuming Red/Iptal same category of 'End'. Let's stick to Red=Danger.
-                // Actually, for a lawyer:
-                // "Kabul" (Win) -> Green
-                // "Red" (Loss) -> Red
-                // "Kısmen" -> Orange
-                // "Bozma" (Sent back) -> Orange/Red? Let's use Danger for 'Red', Success for 'Kabul/Onama', Warning for others.
+                else if (res.includes('iptal')) color = 'var(--accent-success)'; // İptal = Win for plaintiff
 
-                if (res.includes('iptal')) color = 'var(--accent-success)'; // Often 'İptal' means the administrative act is cancelled (Win for plaintiff)
-
-                return `<span style="font-weight:600; color:${color}">${esc(file.latest_decision_result)}</span>`;
+                decisionHtml += `<span style="font-weight:600; color:${color}">${esc(file.latest_decision_result)}</span>`;
             }
-            return '<span style="opacity:0.4">-</span>';
+
+            return decisionHtml || '<span style="opacity:0.4">-</span>';
         case 'col-doc':
             if (!file.latest_activity_type) return '<span style="opacity:0.4">-</span>';
             const tooltip = file.latest_activity_summary ? `data-tooltip="${escapeHtml(file.latest_activity_summary.substring(0, 200)) + (file.latest_activity_summary.length > 200 ? '...' : '')}"` : '';
