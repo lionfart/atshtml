@@ -284,6 +284,14 @@ function openReviewModal(itemId) {
                          <option value="Diğer" ${data.decision_result === 'Diğer' ? 'selected' : ''}>Diğer</option>
                      </select>
                 </div>
+                <div class="review-field" style="background:rgba(255,165,0,0.1); padding:8px; border-radius:6px;">
+                    <label style="color:var(--accent-warning);">YD (Ara Karar)</label>
+                    <select id="review-yd-result" class="form-control">
+                        <option value="">Yok</option>
+                        <option value="YD Kabul" ${data.yd_result === 'YD Kabul' ? 'selected' : ''}>YD Kabul</option>
+                        <option value="YD Red" ${data.yd_result === 'YD Red' ? 'selected' : ''}>YD Red</option>
+                    </select>
+                </div>
                 <div class="review-field"><label>Mahkeme</label><input type="text" id="review-court" value="${data.court_name || ''}" class="form-control"></div>
                 <div class="review-field"><label>Esas No</label><input type="text" id="review-esas" value="${data.court_case_number || ''}" class="form-control"></div>
                 <div class="review-field"><label>Karar No</label><input type="text" id="review-decision" value="${data.court_decision_number || ''}" class="form-control" placeholder="Varsa"></div>
@@ -422,7 +430,7 @@ async function approveNewCase() {
             deadline_date: document.getElementById('review-deadline').value || null, // [FIX] Add explicit deadline field
             case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value || 'N/A'}] [Urgency: ${document.getElementById('review-urgency').value}]`,
             latest_decision_result: document.getElementById('review-decision-result').value || null,
-            yd_result: data.yd_result || null // [NEW] YD result for Ara Karar
+            yd_result: document.getElementById('review-yd-result')?.value || null // [NEW] YD result for Ara Karar
         };
         const newCase = await createFileCase(newData, item.file);
 
