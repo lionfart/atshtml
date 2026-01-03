@@ -608,8 +608,9 @@ function renderDecisionsList(decisions) {
                         <span style="font-weight:600; color:${typeInfo.color};">${typeInfo.label}</span>
                         <span style="font-weight:600; color:${resultColor};">${d.decision_result || '-'}</span>
                     </div>
+                    ${d.court_name ? `<div style="font-size:0.75em; color:var(--accent-secondary); margin-bottom:2px;">${escapeHtml(d.court_name)}</div>` : ''}
                     <div style="font-size:0.8em; color:var(--text-muted);">
-                        ${dateStr}${d.decision_number ? ' | No: ' + d.decision_number : ''}
+                        ${dateStr}${d.decision_number ? ' | Karar: ' + d.decision_number : ''}${d.court_case_number ? ' | Esas: ' + d.court_case_number : ''}
                     </div>
                     ${d.notes ? `<div style="font-size:0.75em; color:var(--text-secondary); margin-top:4px; font-style:italic;">${escapeHtml(d.notes)}</div>` : ''}
                 </div>

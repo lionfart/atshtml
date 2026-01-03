@@ -426,19 +426,35 @@ async function approveNewCase() {
         const newCase = await createFileCase(newData, item.file);
 
 
+
         // [NEW] Create decision record if this is a decision document
         const decisionResult = document.getElementById('review-decision-result')?.value || '';
         const decisionDate = document.getElementById('review-decision-date')?.value || null;
+
+        // Auto-detect decision type from court name
+        function detectDecisionType(courtNameVal) {
+            const court = (courtNameVal || '').toLowerCase();
+            if (court.includes('danıştay') || court.includes('yargıtay')) {
+                return 'TEMYIZ';
+            } else if (court.includes('bölge') || court.includes('istinaf')) {
+                return 'ISTINAF';
+            }
+            return 'ILK_DERECE';
+        }
+
+        const decisionType = detectDecisionType(courtName);
 
         // Create decision if decision result is selected or has karar no
         if ((decisionResult || kararNo) && newCase.id) {
             try {
                 await createDecision({
                     file_case_id: newCase.id,
-                    decision_type: 'ILK_DERECE', // Default to İlk Derece for document analysis
+                    decision_type: decisionType,
                     decision_result: decisionResult || 'Belirsiz',
                     decision_date: decisionDate,
-                    decision_number: kararNo || null
+                    decision_number: kararNo || null,
+                    court_name: courtName || null,
+                    court_case_number: esasNo || null
                 });
                 // Update latest_decision_result
                 await supabase.from('file_cases').update({ latest_decision_result: decisionResult || null }).eq('id', newCase.id);
@@ -470,16 +486,33 @@ async function linkToSpecificCase(cid, cnum) {
         const decisionResult = document.getElementById('review-decision-result')?.value || '';
         const decisionDate = document.getElementById('review-decision-date')?.value || null;
         const kararNo = document.getElementById('review-decision')?.value || '';
+        const courtName = document.getElementById('review-court')?.value || '';
+        const esasNo = document.getElementById('review-esas')?.value || '';
+
+        // Auto-detect decision type from court name
+        function detectDecisionType(courtNameVal) {
+            const court = (courtNameVal || '').toLowerCase();
+            if (court.includes('danıştay') || court.includes('yargıtay')) {
+                return 'TEMYIZ';
+            } else if (court.includes('bölge') || court.includes('istinaf')) {
+                return 'ISTINAF';
+            }
+            return 'ILK_DERECE';
+        }
+
+        const decisionType = detectDecisionType(courtName);
 
         // Create decision if decision result is selected or has karar no
         if (decisionResult || kararNo) {
             try {
                 await createDecision({
                     file_case_id: cid,
-                    decision_type: 'ILK_DERECE',
+                    decision_type: decisionType,
                     decision_result: decisionResult || 'Belirsiz',
                     decision_date: decisionDate,
-                    decision_number: kararNo || null
+                    decision_number: kararNo || null,
+                    court_name: courtName || null,
+                    court_case_number: esasNo || null
                 });
                 // Update latest_decision_result
                 await supabase.from('file_cases').update({ latest_decision_result: decisionResult || null }).eq('id', cid);
