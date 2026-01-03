@@ -112,12 +112,8 @@ async function processQueueItem(item) {
 async function analyzeFileContent(file) {
     let text = '', apiKey = '';
     try {
-        const settings = await getSystemSettings(); apiKey = settings.gemini_api_key;
-        const userModel = document.getElementById('gemini-model-select')?.value || localStorage.getItem('preferredGeminiModel');
-        if (userModel && APP_CONFIG.geminiModels.includes(userModel)) {
-            const idx = APP_CONFIG.geminiModels.indexOf(userModel);
-            if (idx > -1) { let p = APP_CONFIG.geminiModels.splice(idx, 1)[0]; APP_CONFIG.geminiModels.unshift(p); }
-        }
+        const settings = await getSystemSettings();
+        apiKey = settings.openrouter_api_key || localStorage.getItem('openrouter_api_key');
     } catch (e) { }
 
     // Text Extraction
@@ -577,31 +573,27 @@ function closeSettingsModal() {
 async function loadSettingsData() {
     try {
         const s = await getSystemSettings();
-        document.getElementById('gemini-api-key').value = s.gemini_api_key || '';
         document.getElementById('burst-limit').value = s.catchup_burst_limit || 2;
 
-        // Load OpenRouter Key from LocalStorage
-        const orKey = localStorage.getItem('openrouter_api_key');
-        if (orKey) document.getElementById('openrouter-api-key').value = orKey;
-
-        const p = localStorage.getItem('preferredGeminiModel');
-        if (p) document.getElementById('gemini-model-select').value = p;
+        // Load OpenRouter Key from settings or LocalStorage
+        const orKey = s.openrouter_api_key || localStorage.getItem('openrouter_api_key') || '';
+        document.getElementById('openrouter-api-key').value = orKey;
     } catch (e) { }
 }
 async function saveSettings() {
     try {
+        const orKey = document.getElementById('openrouter-api-key').value.trim();
+
         await updateSystemSettings({
-            gemini_api_key: document.getElementById('gemini-api-key').value.trim(),
+            openrouter_api_key: orKey,
             catchup_burst_limit: parseInt(document.getElementById('burst-limit').value)
         });
 
-        // Save OpenRouter Key to LocalStorage
-        const orKey = document.getElementById('openrouter-api-key').value.trim();
+        // Also save to LocalStorage for quick access
         if (orKey) localStorage.setItem('openrouter_api_key', orKey);
         else localStorage.removeItem('openrouter_api_key');
 
-        localStorage.setItem('preferredGeminiModel', document.getElementById('gemini-model-select').value);
-        showToast('Ayarlar ve Anahtarlar Kaydedildi', 'success');
+        showToast('Ayarlar Kaydedildi', 'success');
         closeSettingsModal();
     } catch (e) { showToast('Hata: ' + e.message, 'error'); }
 }

@@ -306,82 +306,75 @@ async function deleteDocument(docId) {
 }
 
 // ==========================================
-// AI Analysis (Prompt Updated for Decision No & Workflow)
+// AI Analysis (OpenRouter Only - Gemini API Removed)
 // ==========================================
-async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, useOpenRouter = false) {
-    const googleModels = APP_CONFIG.geminiModels || ['gemini-2.0-flash-exp', 'gemini-1.5-flash'];
-    const openRouterModels = APP_CONFIG.openRouterModels || ['google/gemini-2.0-flash-exp:free'];
+async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
+    // Use ONLY OpenRouter - Gemini direct API removed
+    const openRouterModels = APP_CONFIG.openRouterModels || ['deepseek/deepseek-r1-0528:free'];
 
-    if (!useOpenRouter && modelIndex >= googleModels.length) {
-        console.log('Google API models exhausted. Switching to OpenRouter...');
-        // Try localStorage first to avoid git exposure issues
-        const routerKey = localStorage.getItem('openrouter_api_key') || APP_CONFIG.OPENROUTER_API_KEY;
-        if (routerKey) return await callGeminiWithFallback(routerKey, contentBody, 0, true);
-        throw new Error('Google API başarısız ve OpenRouter Key bulunamadı (localStorage: openrouter_api_key).');
-    }
-
-    if (useOpenRouter && modelIndex >= openRouterModels.length) {
+    if (modelIndex >= openRouterModels.length) {
         throw new Error('Bütün AI modelleri denendi fakat sonuç alınamadı.');
     }
 
-    const currentModel = useOpenRouter ? openRouterModels[modelIndex] : googleModels[modelIndex];
-    console.log(`AI Model Deneniyor (${useOpenRouter ? 'OpenRouter' : 'Google'} ${modelIndex + 1}): ${currentModel}`);
+    // Get API key from parameter or localStorage
+    const routerKey = apiKey || localStorage.getItem('openrouter_api_key');
+    if (!routerKey) {
+        throw new Error('OpenRouter API Key bulunamadı. Lütfen ayarlardan kaydedin.');
+    }
+
+    const currentModel = openRouterModels[modelIndex];
+    console.log(`AI Model Deneniyor (OpenRouter ${modelIndex + 1}/${openRouterModels.length}): ${currentModel}`);
 
     try {
-        if (useOpenRouter) {
-            const safeKey = apiKey.trim();
-            console.log(`OpenRouter Key Debug: Length=${safeKey.length}, Prefix=${safeKey.substring(0, 10)}...`);
+        const safeKey = routerKey.trim();
+        console.log(`OpenRouter Key Debug: Length=${safeKey.length}, Prefix=${safeKey.substring(0, 10)}...`);
 
-            const promptText = contentBody.contents[0].parts.map(p => p.text).join('\n');
-            const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${safeKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://adalettakip-local.app', // Hardcoded for local dev to satisfy OpenRouter
-                    'X-Title': 'Adalet Takip Sistemi'
-                },
-                body: JSON.stringify({
-                    model: currentModel,
-                    messages: [{ role: 'user', content: promptText }]
-                })
-            });
-            if (!resp.ok) {
-                const errText = await resp.text();
-                console.warn(`OpenRouter Model ${currentModel} failed: ${resp.status} - ${errText}`);
-
-                // If rate limited or model not found, try next one
-                if (resp.status === 429 || resp.status === 404 || resp.status === 400) {
-                    await new Promise(r => setTimeout(r, 1000));
-                    return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
-                }
-                throw new Error(`OpenRouter Error: ${resp.status} - ${errText}`);
-            }
-            const data = await resp.json();
-            return data.choices[0].message.content;
-        } else {
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(contentBody)
-            });
-            if (!resp.ok) {
-                if (resp.status === 429) {
-                    console.warn(`Rate limit (429) for ${currentModel}. Skipping to next model...`);
-                    // Don't retry same model, move to next to reach OpenRouter faster
-                    await new Promise(r => setTimeout(r, 2000));
-                    return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
-                }
-                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
-            }
-            const data = await resp.json();
-            if (!data.candidates || !data.candidates[0].content) return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
-            return data.candidates[0].content.parts[0].text;
+        // Extract prompt text from contentBody (supporting both Gemini and OpenRouter formats)
+        let promptText = '';
+        if (contentBody.contents && contentBody.contents[0] && contentBody.contents[0].parts) {
+            promptText = contentBody.contents[0].parts.map(p => p.text || '').join('\n');
+        } else if (typeof contentBody === 'string') {
+            promptText = contentBody;
         }
+
+        const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${safeKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': 'https://adalettakip.vercel.app',
+                'X-Title': 'Adalet Takip Sistemi'
+            },
+            body: JSON.stringify({
+                model: currentModel,
+                messages: [{ role: 'user', content: promptText }]
+            })
+        });
+
+        if (!resp.ok) {
+            const errText = await resp.text();
+            console.warn(`OpenRouter Model ${currentModel} failed: ${resp.status} - ${errText}`);
+
+            // If rate limited, model not found, or other error, try next model
+            if (resp.status === 429 || resp.status === 404 || resp.status === 400 || resp.status === 503) {
+                await new Promise(r => setTimeout(r, 1000));
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+            }
+            throw new Error(`OpenRouter Error: ${resp.status} - ${errText}`);
+        }
+
+        const data = await resp.json();
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            console.warn(`OpenRouter Model ${currentModel} returned no content, trying next...`);
+            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+        }
+
+        console.log(`✓ AI Analysis successful with model: ${currentModel}`);
+        return data.choices[0].message.content;
     } catch (e) {
         console.error(`${currentModel} error:`, e);
         await new Promise(r => setTimeout(r, 1000));
-        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, useOpenRouter);
+        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
     }
 }
 

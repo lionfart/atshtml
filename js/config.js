@@ -24,52 +24,39 @@ const APP_CONFIG = {
     // Default settings
     defaultBurstLimit: 2,
 
-    // Gemini Models (Fallback Priority List)
-    // Updated based on user request and potential future releases
-    // Gemini Models (Fallback Priority List)
-    // Updated to currently available models
-    // Gemini Models (Fallback Priority List)
-    // using only stable versions to prevent 404s
-    // Gemini Models (Fallback Priority List)
-    // Updated as strictly requested by user (v3.0 first)
-    geminiModels: [
-        'gemini-3.0-pro',
-        'gemini-3.0-flash',
-        'gemini-2.0-pro-exp',
-        'gemini-2.0-flash-exp',
-        'gemini-1.5-pro',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro-002',
-        'gemini-1.5-flash-002',
-        'gemini-1.5-flash-8b',
-        'gemini-1.0-pro',
-        'gemini-pro'
+    // OpenRouter Models (Text-only, Free tier priority)
+    // Primary AI provider - all models use OpenRouter API
+    openRouterModels: [
+        'deepseek/deepseek-r1-0528:free',
+        'meta-llama/llama-3.1-405b-instruct:free',
+        'nousresearch/hermes-3-llama-3.1-405b:free',
+        'meta-llama/llama-3.3-70b-instruct:free',
+        'google/gemini-2.0-flash-exp:free',
+        'mistralai/mistral-small-3.1-24b-instruct:free',
+        'qwen/qwen3-coder:free',
+        'allenai/olmo-3.1-32b-think:free',
+        'tngtech/deepseek-r1t-chimera:free',
+        'tngtech/deepseek-r1t2-chimera:free',
+        'tngtech/tng-r1t-chimera:free',
+        'alibaba/tongyi-deepresearch-30b-a3b:free',
+        'openai/gpt-oss-120b:free',
+        'z-ai/glm-4.5-air:free',
+        'nex-agi/deepseek-v3.1-nex-n1:free',
+        'mistralai/devstral-2512:free',
+        'nvidia/nemotron-3-nano-30b-a3b:free',
+        'xiaomi/mimo-v2-flash:free',
+        'meta-llama/llama-3.2-3b-instruct:free'
+    ],
+
+    // OpenRouter Vision Models (for OCR)
+    openRouterVisionModels: [
+        'google/gemini-2.0-flash-exp:free',
+        'qwen/qwen-2.5-vl-7b-instruct:free',
+        'nvidia/nemotron-nano-12b-v2-vl:free'
     ],
 
     // Storage bucket name
     storageBucket: 'documents',
-
-    // Default API Key (User provided)
-    DEFAULT_GEMINI_KEY: 'AIzaSyASPYTC-HPjDBEAkxUEkr5V94njQIqUqCw',
-
-    // OpenRouter Configuration (DO NOT HARDCODE KEYS HERE - they will be deleted by OpenRouter)
-    OPENROUTER_API_KEY: '',
-    openRouterModels: [
-        'google/gemini-2.0-flash-exp:free',
-        'google/gemma-3-27b-it:free',
-        'google/gemma-3-12b-it:free',
-        'mistralai/mistral-small-3.1-24b-instruct:free',
-        'qwen/qwen-2.5-vl-7b-instruct:free',
-        'nvidia/nemotron-nano-12b-v2-vl:free',
-        'sourceful/riverflow-v2-max-preview',
-        'sourceful/riverflow-v2-standard-preview',
-        'sourceful/riverflow-v2-fast-preview',
-        'allenai/olmo-3.1-32b-think:free',
-        'xiaomi/mimo-v2-flash:free',
-        'nvidia/nemotron-3-nano-30b-a3b:free',
-        'mistralai/devstral-2512:free',
-        'nex-agi/deepseek-v3.1-nex-n1:free'
-    ],
 
     // External Libraries
     libs: {
