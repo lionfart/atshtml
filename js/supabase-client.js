@@ -396,7 +396,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
 1. "type": SADECE bu listeden biri olmalı (En uygununu seç):
    - "Dava Dilekçesi", "Savunma Dilekçesi", "Cevap Dilekçesi", "Savunmaya Cevap Dilekçesi"
    - "Ara Karar", "Bilirkişi Raporu", "Bilirkişi Raporuna İtiraz"
-   - "Red", "İptal", "Tazminat Kabul", "Kısmen Kabul Kısmen Red", "Gönderme", "Onama", "Bozma"
+   - "Karar" (mahkeme kararı için genel tip)
    - "İstinaf Talebi", "İstinafa Cevap", "İstinaf Kararı"
    - "Temyiz Talebi", "Temyize Cevap", "Temyiz Kararı", "Diğer"
 2. "primary_tag": Dosyanın ANA konusunu belirle. BUNLAR BİRBİRİNİ DIŞLAR. Sadece biri seçilebilir:
@@ -407,20 +407,41 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    - "court_case_number" (Esas No) ve "court_decision_number" (Karar No): SADECE "YYYY/SAYI" formatında olmalı. Asla "E.", "K." veya yazı içermemeli. Örn: "2024/1458".
    - "court_name" (Mahkeme): "İL", "DAİRE/MAHKEME SAYISI", "TÜRÜ" formatında olmalı. 
      - Örn: "Ankara 2. İdare Mahkemesi", "Bursa Bölge İdare Mahkemesi 2. İdari Dava Dairesi", "Danıştay 6. Daire".
-5. "action_duration_days": Kararda veya belgede belirtilen yasal süre (GÜN CİNSİNDEN).
-   - Aşağıdaki kalıpları ara ve sayıyı çıkar:
-     * "tebliğinden itibaren X gün" -> X
-     * "tebliğini izleyen günden itibaren X gün" -> X
-     * "X gün içinde istinaf" -> X
-     * "X gün içinde temyiz" -> X
-     * "X günlük süre" -> X
-     * "istinaf yolu açık olmak üzere" -> 30
-   - Eğer süre belirtilmişse MUTLAKA sayı olarak döndür (örn: 30, 15, 7).
-   - NOT: "Kesin olarak karar verilmiştir" gibi ifadeler süresiz olabilir, bu durumda null bırak.
-6. "plaintiff_attorney" ve "defendant_attorney": Varsa tam isimleri (Av. ...). Yoksa null.
-7. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla. Asla kısa özet yazma.
-8. "urgency" (Aciliyet):
-   - "İptal", "Kısmen İptal", "Tazminat Kabul", "Kısmen Kabul" kararları (aleyhe durumlar) için KESİNLİKLE "HIGH" seç.
+
+5. SÜRE VE KESİNLİK KURALLARI (ÇOK ÖNEMLİ):
+   a) "KEŞİN KARAR" TESPİTİ: Belgede şu ifadelerden biri varsa is_final_no_deadline = true ve action_duration_days = null:
+      * "kesin olarak karar verildi"
+      * "kesindir"
+      * "kanun yolu kapalı"
+      * "itiraz yolu kapalı"
+   b) SÜRE TESPİTİ: Şu kalıpları ara:
+      * "tebliğinden itibaren X gün" -> X
+      * "X gün içinde istinaf/temyiz" -> X
+      * "X günlük süre" -> X
+      * "istinaf yolu açık olmak üzere" -> 30
+   c) BELİRSİZ SÜRE: Kesin karar değilse AMA süre net belirtilmemişse:
+      * action_duration_days = 30 (varsayılan)
+      * deadline_warning = "Süre belgede net belirtilmedi, 30 gün olarak varsayıldı."
+
+6. KARAR SONUCU (decision_result) - SADECE BU DEĞERLERDEN BİRİ:
+   - "Red" = Dava tamamen reddedildi
+   - "İptal" = İdari işlem iptal edildi (iptal davası)
+   - "Kabul" = Dava tamamen kabul edildi (özellikle tam yargı/tazminat davaları)
+   - "Kısmen Kabul Kısmen Red" = Talebin bir kısmı kabul, bir kısmı red
+   - "Onama" = Üst mahkeme alt kararı onadı
+   - "Bozma" = Üst mahkeme alt kararı bozdu
+   - "Gönderme" = Başka mahkemeye/kuruma gönderildi
+   - "Diğer" = Yukarıdakilerden hiçbiri
+
+   TAM YARGI DAVALARI İÇİN:
+   - Tazminat talebi TAMAMEN kabul → "Kabul"
+   - Tazminat talebi KISMEN kabul → "Kısmen Kabul Kısmen Red"
+   - Tazminat talebi TAMAMEN red → "Red"
+
+7. "plaintiff_attorney" ve "defendant_attorney": Varsa tam isimleri (Av. ...). Yoksa null.
+8. "summary" (Özet): ÇOK DETAYLI VE KAPSAMLI OLMALI. En az 8-10 cümle ile davanın kök sebebini, tarafların tüm iddialarını, hukuki dayanakları ve (varsa) sonucu ayrıntılı açıkla.
+9. "urgency" (Aciliyet):
+   - "İptal", "Kabul", "Kısmen Kabul Kısmen Red" kararları (aleyhe durumlar) için KESİNLİKLE "HIGH" seç.
    - Kısa süreli (7 gün altı) işlemler için "HIGH" seç. Diğerleri için "Medium" veya "Low".
 
 İSTENEN JSON FORMATI:
@@ -437,13 +458,15 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "subject": "Dava Konusu",
   "summary": "Çok detaylı özet (en az 8-10 cümle).",
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
-  "deadline_date": "YYYY-MM-DD (Cevap süresi veya kesin süre bitişi. Yoksa null)",
-  "action_duration_days": 15, // Varsa gün sayısı (Örn: "tebliğden itibaren 30 gün" -> 30)
-  "decision_result": "Red | İptal | Tazminat Kabul | Kısmen Kabul Kısmen Red | Gönderme | Onama | Bozma | Düzelterek Onama | null",
-  "decision_date": "YYYY-MM-DD (Karar verilme tarihi. Belgede 'Karar Tarihi:' veya 'Tarih:' olarak geçebilir)",
-  "is_final_decision": true, // SADECE dosyanın KAPANMASINI gerektiren nihai kararlar (Onama, Düzelterek Onama, Red, İptal, Tazminat Kabul). "Bozma" veya "Gönderme" durumunda FALSE işaretle (çünkü dosya kapanmaz, devam eder).
+  "deadline_date": "YYYY-MM-DD (Kesin karar değilse hesaplanmış süre bitişi. Kesin kararlarda null)",
+  "action_duration_days": 30, // Gün sayısı. Kesin kararlarda null.
+  "is_final_no_deadline": false, // TRUE = Kesin karar, süre yok. FALSE = Süre var veya varsayılan 30 gün.
+  "deadline_warning": null, // Süre belirsizse uyarı mesajı
+  "decision_result": "Red | İptal | Kabul | Kısmen Kabul Kısmen Red | Onama | Bozma | Gönderme | Diğer | null",
+  "decision_date": "YYYY-MM-DD (Karar verilme tarihi)",
+  "is_final_decision": true, // Onama, Red, İptal, Kabul = TRUE. Bozma, Gönderme = FALSE.
   "urgency": "High | Medium | Low",
-  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Duruşmaya katıl'",
+  "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Süre yok, kesin karar'",
   "primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",
   "secondary_tags": ["Deprem", "Tazminat", "Adli"] (Dizi olarak)
 }

@@ -213,21 +213,30 @@ function openReviewModal(itemId) {
     }
 
     // [FIX] Calculate deadline_date from action_duration_days if not already set
-    // Also enforce default duration for decision types with warning
+    // Handle "kesin karar" - no deadline needed
     const decisionTypes = ['Ara Karar', 'İstinaf Kararı', 'Temyiz Kararı', 'Karar'];
     const isDecisionType = decisionTypes.some(t => (data.type || '').includes(t));
-    let durationWarning = '';
+    let durationWarning = data.deadline_warning || ''; // Use AI-provided warning if any
 
-    // If it's a decision type and no duration was extracted, default to 30 days
-    if (isDecisionType && !data.action_duration_days) {
+    // If is_final_no_deadline is true, this is a "kesin karar" - skip deadline
+    if (data.is_final_no_deadline === true) {
+        data.action_duration_days = null;
+        data.deadline_date = null;
+        durationWarning = '✓ Kesin karar, işlem süresi uygulanmaz.';
+        console.log(`[Review Modal] Kesin karar detected, no deadline needed.`);
+    } else if (isDecisionType && !data.action_duration_days) {
+        // If it's a decision type and no duration was extracted, default to 30 days
         data.action_duration_days = 30;
-        durationWarning = '⚠️ Süre metinden okunamadı, otomatik 30 gün eklendi.';
+        if (!durationWarning) {
+            durationWarning = '⚠️ Süre metinden okunamadı, otomatik 30 gün eklendi.';
+        }
         console.log(`[Review Modal] Applied default duration (30 days) for decision type: ${data.type}`);
     }
 
     // [FIX] Force calculation of deadline_date from action_duration_days relative to TODAY
     // User Requirement: Start date is "Upload Date" (Today), not decision date.
-    if (data.action_duration_days) {
+    // Only calculate if not a kesin karar
+    if (data.action_duration_days && data.is_final_no_deadline !== true) {
         const days = parseInt(data.action_duration_days);
         if (!isNaN(days) && days > 0) {
             const today = new Date();
