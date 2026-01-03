@@ -281,16 +281,10 @@ function openReviewModal(itemId) {
                          <option value="Kısmen Kabul Kısmen Red" ${data.decision_result === 'Kısmen Kabul Kısmen Red' ? 'selected' : ''}>Kısmen Kabul Kısmen Red</option>
                          <option value="Gönderme" ${data.decision_result === 'Gönderme' ? 'selected' : ''}>Gönderme</option>
                          <option value="Kabul" ${data.decision_result === 'Kabul' ? 'selected' : ''}>Kabul</option>
+                         <option value="YD Kabul" ${data.decision_result === 'YD Kabul' || data.yd_result === 'YD Kabul' ? 'selected' : ''}>YD Kabul (Ara Karar)</option>
+                         <option value="YD Red" ${data.decision_result === 'YD Red' || data.yd_result === 'YD Red' ? 'selected' : ''}>YD Red (Ara Karar)</option>
                          <option value="Diğer" ${data.decision_result === 'Diğer' ? 'selected' : ''}>Diğer</option>
                      </select>
-                </div>
-                <div class="review-field" style="background:rgba(255,165,0,0.1); padding:8px; border-radius:6px;">
-                    <label style="color:var(--accent-warning);">YD (Ara Karar)</label>
-                    <select id="review-yd-result" class="form-control">
-                        <option value="">Yok</option>
-                        <option value="YD Kabul" ${data.yd_result === 'YD Kabul' ? 'selected' : ''}>YD Kabul</option>
-                        <option value="YD Red" ${data.yd_result === 'YD Red' ? 'selected' : ''}>YD Red</option>
-                    </select>
                 </div>
                 <div class="review-field"><label>Mahkeme</label><input type="text" id="review-court" value="${data.court_name || ''}" class="form-control"></div>
                 <div class="review-field"><label>Esas No</label><input type="text" id="review-esas" value="${data.court_case_number || ''}" class="form-control"></div>

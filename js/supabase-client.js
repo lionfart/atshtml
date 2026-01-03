@@ -462,10 +462,9 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "action_duration_days": 30, // Gün sayısı. Kesin kararlarda null.
   "is_final_no_deadline": false, // TRUE = Kesin karar, süre yok. FALSE = Süre var veya varsayılan 30 gün.
   "deadline_warning": null, // Süre belirsizse uyarı mesajı
-  "decision_result": "Red | İptal | Kabul | Kısmen Kabul Kısmen Red | Onama | Bozma | Gönderme | Diğer | null",
+  "decision_result": "Red | İptal | Kabul | Kısmen Kabul Kısmen Red | Onama | Bozma | Gönderme | YD Kabul | YD Red | Diğer | null", // Ara Karar için YD Kabul veya YD Red kullan
   "decision_date": "YYYY-MM-DD (Karar verilme tarihi)",
-  "is_final_decision": true, // Onama, Red, İptal, Kabul = TRUE. Bozma, Gönderme = FALSE.
-  "yd_result": "YD Kabul | YD Red | null", // SADECE Ara Karar için: Yürütmenin Durdurulması talebi kabul/red edilmişse
+  "is_final_decision": true, // Onama, Red, İptal, Kabul = TRUE. Bozma, Gönderme, YD = FALSE.
   "urgency": "High | Medium | Low",
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Süre yok, kesin karar'",
   "primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",
