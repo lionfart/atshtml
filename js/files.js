@@ -242,10 +242,23 @@ function applyColumnOrder() {
 }
 
 // Column Visibility Toggle Logic
-function toggleColumnMenu() {
+function toggleColumnMenu(event) {
     const menu = document.getElementById('column-menu');
+
     if (menu.style.display === 'none') {
         renderColumnToggleMenu();
+
+        // Calculate position using fixed to escape stacking contexts
+        if (event) {
+            const btn = event.currentTarget || event.target.closest('button');
+            const rect = btn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.bottom + 5) + 'px';
+            menu.style.left = 'auto'; // Clear any left
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.zIndex = '99999';
+        }
+
         menu.style.display = 'block';
     } else {
         menu.style.display = 'none';
