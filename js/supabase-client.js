@@ -339,6 +339,28 @@ function markModelRateLimited(model) {
     }
 }
 
+// Helper to clean AI JSON responses
+function sanitizeJsonString(str) {
+    if (!str) return '';
+    // Remove markdown fences
+    str = str.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+    // Remove DeepSeek <think> tags
+    str = str.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    // Trim whitespace
+    str = str.trim();
+    // Replace single quotes with double quotes
+    str = str.replace(/'/g, '"');
+    // Remove trailing commas before } or ]
+    str = str.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+    // Extract outermost JSON object
+    const first = str.indexOf('{');
+    const last = str.lastIndexOf('}');
+    if (first !== -1 && last !== -1 && last > first) {
+        str = str.substring(first, last + 1);
+    }
+    return str;
+}
+
 async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
     // Use custom model order with rate-limited models at end
     const effectiveModels = getEffectiveModelOrder();
