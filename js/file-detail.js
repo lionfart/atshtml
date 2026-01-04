@@ -157,6 +157,12 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-plaintiff-attorney')) document.getElementById('edit-plaintiff-attorney').value = currentFile.plaintiff_attorney || '';
         if (document.getElementById('edit-defendant-attorney')) document.getElementById('edit-defendant-attorney').value = currentFile.defendant_attorney || '';
 
+        // [NEW] Populate Favorite button and Urgency dropdown
+        updateFavoriteButton(currentFile.is_favorite);
+        if (document.getElementById('urgency-select')) {
+            document.getElementById('urgency-select').value = currentFile.urgency || 'Orta';
+        }
+
 
         // Note: Decision history is now loaded via loadDecisions() after this function
 
@@ -1498,5 +1504,78 @@ window.toggleFileStatus = toggleFileStatus;
 window.toggleNotesSection = toggleNotesSection;
 window.addNoteInline = addNoteInline;
 window.toggleNotesPanel = toggleNotesPanel;
+
+// ==========================================
+// Favorite and Urgency Functions
+// ==========================================
+
+function updateFavoriteButton(isFavorite) {
+    const btn = document.getElementById('favorite-btn');
+    const icon = document.getElementById('fav-icon');
+    const text = document.getElementById('fav-text');
+    if (!btn) return;
+
+    if (isFavorite) {
+        btn.style.background = 'var(--accent-warning)';
+        btn.style.borderColor = 'var(--accent-warning)';
+        btn.style.color = '#000';
+        if (text) text.textContent = 'Favori ⭐';
+    } else {
+        btn.style.background = 'var(--bg-card)';
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.color = 'var(--text-primary)';
+        if (text) text.textContent = 'Favorile';
+    }
+}
+
+async function toggleFavorite() {
+    if (!currentFile || !fileId) return;
+
+    const newValue = !currentFile.is_favorite;
+    const btn = document.getElementById('favorite-btn');
+    btn.disabled = true;
+
+    try {
+        const { error } = await supabase
+            .from('file_cases')
+            .update({ is_favorite: newValue })
+            .eq('id', fileId);
+
+        if (error) throw error;
+
+        currentFile.is_favorite = newValue;
+        updateFavoriteButton(newValue);
+        showToast(newValue ? 'Favorilere eklendi ⭐' : 'Favorilerden çıkarıldı', 'success');
+    } catch (err) {
+        console.error('Toggle favorite error:', err);
+        showToast('Hata: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function updateUrgency() {
+    if (!currentFile || !fileId) return;
+
+    const newValue = document.getElementById('urgency-select').value;
+
+    try {
+        const { error } = await supabase
+            .from('file_cases')
+            .update({ urgency: newValue })
+            .eq('id', fileId);
+
+        if (error) throw error;
+
+        currentFile.urgency = newValue;
+        showToast('Önem derecesi güncellendi: ' + newValue, 'success');
+    } catch (err) {
+        console.error('Update urgency error:', err);
+        showToast('Hata: ' + err.message, 'error');
+    }
+}
+
+window.toggleFavorite = toggleFavorite;
+window.updateUrgency = updateUrgency;
 
 console.log('file-detail.js loaded successfully');

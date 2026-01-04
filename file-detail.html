@@ -117,7 +117,21 @@
                     </div>
                 </div>
             </div>
-            <div class="header-right">
+            <div class="header-right" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <!-- Favorite Button -->
+                <button id="favorite-btn" class="btn" onclick="toggleFavorite()"
+                    style="display:flex; align-items:center; gap:6px; padding:8px 12px; background:var(--bg-card); border:1px solid var(--border-color);">
+                    <i data-lucide="star" id="fav-icon" style="width:16px;"></i>
+                    <span id="fav-text">Favorile</span>
+                </button>
+                <!-- Urgency Dropdown -->
+                <select id="urgency-select" class="form-control" onchange="updateUrgency()"
+                    style="min-width:100px; padding:8px 12px;">
+                    <option value="Düşük">🟢 Düşük</option>
+                    <option value="Orta">🟠 Orta</option>
+                    <option value="Yüksek">🔴 Yüksek</option>
+                </select>
+                <!-- Delete Button -->
                 <button class="btn btn-danger" onclick="openDeleteModal()">
                     <i data-lucide="trash-2"></i>
                     <span>Dosyayı Sil</span>
