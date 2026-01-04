@@ -227,12 +227,88 @@ function applyColumnOrder() {
 
     // Clear and append in order
     headerRow.innerHTML = '';
+    const hiddenCols = JSON.parse(localStorage.getItem('filesHiddenColumns') || '[]');
+
     columnOrder.forEach(id => {
-        // Only append if the header element actually exists in the DOM
-        const headerEl = headers.find(h => h.getAttribute('data-id') === id);
-        if (headerEl) headerRow.appendChild(headerEl);
+        // Only append if not hidden
+        if (!hiddenCols.includes(id)) {
+            const headerEl = headers.find(h => h.getAttribute('data-id') === id);
+            if (headerEl) headerRow.appendChild(headerEl);
+        }
     });
+
+    // Update table body visibility based on hidden columns
+    loadFiles(); // Re-render table body to respect hidden columns
 }
+
+// Column Visibility Toggle Logic
+function toggleColumnMenu() {
+    const menu = document.getElementById('column-menu');
+    if (menu.style.display === 'none') {
+        renderColumnToggleMenu();
+        menu.style.display = 'block';
+    } else {
+        menu.style.display = 'none';
+        menu.innerHTML = ''; // Clear for fresh render next time
+    }
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('column-menu');
+    const btn = e.target.closest('button[onclick="toggleColumnMenu()"]');
+    if (menu && menu.style.display === 'block' && !menu.contains(e.target) && !btn) {
+        menu.style.display = 'none';
+    }
+});
+
+function renderColumnToggleMenu() {
+    const menu = document.getElementById('column-menu');
+    const allHeaders = Array.from(document.querySelectorAll('#table-headers th'));
+    const hiddenCols = JSON.parse(localStorage.getItem('filesHiddenColumns') || '[]');
+
+    menu.innerHTML = allHeaders.map(th => {
+        const id = th.getAttribute('data-id');
+        const label = th.childNodes[1] ? th.childNodes[1].textContent.trim() : th.textContent.trim();
+        const isChecked = !hiddenCols.includes(id);
+
+        return `
+            <label style="display:flex; align-items:center; gap:8px; padding:4px 8px; cursor:pointer; font-size:0.85rem; color:var(--text-primary);">
+                <input type="checkbox" onchange="toggleColumn('${id}', this.checked)" ${isChecked ? 'checked' : ''}>
+                ${label}
+            </label>
+        `;
+    }).join('');
+}
+
+function toggleColumn(colId, isVisible) {
+    let hiddenCols = JSON.parse(localStorage.getItem('filesHiddenColumns') || '[]');
+
+    if (isVisible) {
+        hiddenCols = hiddenCols.filter(id => id !== colId);
+    } else {
+        if (!hiddenCols.includes(colId)) hiddenCols.push(colId);
+    }
+
+    localStorage.setItem('filesHiddenColumns', JSON.stringify(hiddenCols));
+
+    // Re-apply column order/visibility logic
+    // We reuse reorderColumns() logic but we need to ensure it respects hidden cols
+    // Since reorderColumns logic above is modified to check hiddenCols, we just call it.
+    // However, reorderColumns assumes headers are currently in the row.
+    // If a header is completely removed, reorderColumns needs access to original headers.
+    // Better strategy: Reload page or simpler: 
+    // Just toggle display:none on th and td? No, reorderColumns actually removes valid th from DOM.
+    // To restore, we need to reload or keep a hidden cache of headers.
+    // Simpler approach for now: Reload page to restore columns cleanly, 
+    // OR smarter: modify loadFiles() to hide columns.
+
+    // Let's modify loadFiles render logic to skip hidden columns.
+    // And modify reorderColumns to just re-append everything but toggle display.
+
+    location.reload(); // Simplest way to restore removed elements correctly without complex state management
+}
+
 
 // ==========================================
 // Data Rendering
@@ -243,13 +319,19 @@ function getCellContent(file, colId) {
     const esc = escapeHtml;
     switch (colId) {
         case 'col-onem':
-            const urgency = file.urgency || 'Orta';
+            const uVal = (file.urgency || 'Orta').toLowerCase();
             let onemColor = 'var(--text-muted)';
             let onemBg = 'rgba(255,255,255,0.1)';
-            if (urgency === 'Yüksek' || urgency === 'High') { onemColor = '#fff'; onemBg = 'var(--accent-danger)'; }
-            else if (urgency === 'Orta' || urgency === 'Medium') { onemColor = '#fff'; onemBg = 'var(--accent-warning)'; }
-            else if (urgency === 'Düşük' || urgency === 'Low') { onemColor = '#fff'; onemBg = 'var(--accent-success)'; }
-            return `<span class="badge" style="background:${onemBg}; color:${onemColor}; font-size:0.7em; padding:2px 6px;">${esc(urgency)}</span>`;
+            let displayVal = file.urgency || 'Orta';
+
+            if (uVal.includes('yüksek') || uVal.includes('high')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-danger)'; displayVal = 'Yüksek';
+            } else if (uVal.includes('orta') || uVal.includes('medium')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-warning)'; displayVal = 'Orta';
+            } else if (uVal.includes('düşük') || uVal.includes('low')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-success)'; displayVal = 'Düşük';
+            }
+            return `<span class="badge" style="background:${onemBg}; color:${onemColor}; font-size:0.7em; padding:2px 6px;">${esc(displayVal)}</span>`;
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
         case 'col-parties': return `<div style="font-weight:500;">${esc(file.plaintiff || '-')}</div><div style="font-size:0.8em; opacity:0.7;">vs ${esc(file.defendant || '-')}</div>`;
         case 'col-vekil':
@@ -326,9 +408,12 @@ function renderTableRows() {
         return;
     }
 
+    const hiddenCols = JSON.parse(localStorage.getItem('filesHiddenColumns') || '[]');
+
     const html = loadedFilesData.map(file => {
         // Build TD cells based on columnOrder
         const cells = columnOrder.map(colId => {
+            if (hiddenCols.includes(colId)) return '';
             return `<td class="${colId}">${getCellContent(file, colId)}</td>`;
         }).join('');
 

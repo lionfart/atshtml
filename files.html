@@ -354,6 +354,17 @@
                     <button class="btn btn-outline btn-sm" onclick="loadFiles()" title="Yenile">
                         <i data-lucide="refresh-cw"></i>
                     </button>
+
+                    <!-- Column Visibility Toggle -->
+                    <div style="position:relative; display:inline-block;">
+                        <button class="btn btn-outline btn-sm" onclick="toggleColumnMenu()" title="Sütunlar">
+                            <i data-lucide="columns"></i>
+                        </button>
+                        <div id="column-menu"
+                            style="display:none; position:absolute; right:0; top:100%; background:var(--bg-card); border:1px solid var(--border-color); padding:10px; border-radius:8px; z-index:1000; min-width:180px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
                     <button type="button" onclick="toggleSearchHelp()"
                         style="width:28px; height:28px; min-width:28px; border-radius:50%; background:var(--accent-primary); border:none; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px;"
                         title="Gelişmiş Arama Yardımı">?</button>
