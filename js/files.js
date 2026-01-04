@@ -238,7 +238,7 @@ function applyColumnOrder() {
     });
 
     // Update table body visibility based on hidden columns
-    loadFiles(); // Re-render table body to respect hidden columns
+    renderTableRows(); // Re-render table body to respect hidden columns
 }
 
 // Column Visibility Toggle Logic
