@@ -148,6 +148,7 @@ async function loadFileDetails(retryCount = 0) {
         if (document.getElementById('edit-reg-number')) document.getElementById('edit-reg-number').value = currentFile.court_case_number || currentFile.registration_number || '';
         if (document.getElementById('edit-decision-number')) document.getElementById('edit-decision-number').value = currentFile.court_decision_number || '';
         if (document.getElementById('edit-subject')) document.getElementById('edit-subject').value = currentFile.subject || '';
+        if (document.getElementById('edit-address')) document.getElementById('edit-address').value = currentFile.address || '';
 
         // Populate Date Badges (Hearing + Deadline)
         updateDateBadges(currentFile);
@@ -255,7 +256,8 @@ function setupDetailsForm() {
                 // Also update registration number to match if user edited it
                 registration_number: courtCaseNumber,
                 court_decision_number: courtDecisionNumber,
-                subject: document.getElementById('edit-subject').value
+                subject: document.getElementById('edit-subject').value,
+                address: document.getElementById('edit-address')?.value || null // [NEW] Address field
                 // Note: deadline is now managed separately via badge
             };
 

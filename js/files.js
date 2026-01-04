@@ -396,24 +396,51 @@ async function loadFiles(retryCount = 0) {
         // Populate lawyer dropdown once
         populateLawyerDropdown(data);
 
-        // Client-side filtering for search (simpler than complex OR query)
+        // Client-side filtering for search with ADVANCED PREFIX SUPPORT
         let filteredData = data;
         if (searchTerm) {
-            const normalizedTerm = normalizeTurkish(searchTerm);
-            filteredData = data.filter(item => {
-                const searchableFields = [
-                    item.registration_number,
-                    item.court_case_number,
-                    item.plaintiff,
-                    item.defendant,
-                    item.subject,
-                    item.court_name,
-                    item.primary_tag,
-                    ...(item.tags || []),
-                    item.lawyers?.name
-                ];
-                return searchableFields.some(field => field && normalizeTurkish(field).includes(normalizedTerm));
-            });
+            // Parse for field-specific prefix
+            const prefixMatch = searchTerm.match(/^(adres|davacı|davalı|vekil|konu|esas|mahkeme)\.(.+)$/i);
+
+            if (prefixMatch) {
+                // Field-specific search
+                const prefix = prefixMatch[1].toLowerCase();
+                const term = normalizeTurkish(prefixMatch[2].trim());
+
+                filteredData = data.filter(item => {
+                    let fieldValue = '';
+                    switch (prefix) {
+                        case 'adres': fieldValue = item.address || ''; break;
+                        case 'davacı': fieldValue = item.plaintiff || ''; break;
+                        case 'davalı': fieldValue = item.defendant || ''; break;
+                        case 'vekil': fieldValue = (item.plaintiff_attorney || '') + ' ' + (item.defendant_attorney || ''); break;
+                        case 'konu': fieldValue = item.subject || ''; break;
+                        case 'esas': fieldValue = item.court_case_number || ''; break;
+                        case 'mahkeme': fieldValue = item.court_name || ''; break;
+                    }
+                    return normalizeTurkish(fieldValue).includes(term);
+                });
+            } else {
+                // General search across all fields (including address)
+                const normalizedTerm = normalizeTurkish(searchTerm);
+                filteredData = data.filter(item => {
+                    const searchableFields = [
+                        item.registration_number,
+                        item.court_case_number,
+                        item.plaintiff,
+                        item.defendant,
+                        item.subject,
+                        item.court_name,
+                        item.primary_tag,
+                        item.address, // [NEW] Include address in general search
+                        item.plaintiff_attorney,
+                        item.defendant_attorney,
+                        ...(item.tags || []),
+                        item.lawyers?.name
+                    ];
+                    return searchableFields.some(field => field && normalizeTurkish(field).includes(normalizedTerm));
+                });
+            }
         }
 
         if (statusFilter) {

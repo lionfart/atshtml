@@ -270,6 +270,11 @@
                         <input type="text" id="search-input" placeholder="Ara..." class="form-control"
                             style="padding-left:32px; width:100%;" oninput="handleSearchDebounced()">
                     </div>
+                    <button type="button" onclick="toggleSearchHelp()"
+                        style="width:32px; height:32px; border-radius:50%; background:var(--bg-card); border:1px solid var(--border-color); cursor:pointer; color:var(--text-secondary); display:flex; align-items:center; justify-content:center;"
+                        title="Gelişmiş Arama Yardımı">
+                        <i data-lucide="help-circle" style="width:18px;"></i>
+                    </button>
 
                     <select id="filter-status" class="form-control" onchange="loadFiles()"
                         style="flex:0 0 auto; min-width:130px;">
@@ -391,6 +396,66 @@
         function closeSettingsModal() {
             document.getElementById('settings-modal').classList.remove('active');
         }
+
+        // Search Help Popup
+        function toggleSearchHelp() {
+            // Create or toggle popup
+            let popup = document.getElementById('search-help-popup');
+            if (popup) {
+                popup.remove();
+                return;
+            }
+            popup = document.createElement('div');
+            popup.id = 'search-help-popup';
+            popup.innerHTML = `
+                <div style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:9998;" onclick="toggleSearchHelp()"></div>
+                <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); border-radius:12px; padding:24px; max-width:420px; width:90%; z-index:9999; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+                    <h3 style="margin:0 0 16px; color:var(--accent-primary); display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="search" style="width:20px;"></i> Gelişmiş Arama
+                    </h3>
+                    <p style="margin:0 0 12px; font-size:0.85rem; color:var(--text-secondary);">
+                        Belirli alanlarda arama yapmak için prefix kullanın:
+                    </p>
+                    <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">adres.xxx</td>
+                            <td style="padding:8px 0;">Adres içinde arar</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">davacı.xxx</td>
+                            <td style="padding:8px 0;">Davacı adında arar</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">davalı.xxx</td>
+                            <td style="padding:8px 0;">Davalı adında arar</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">vekil.xxx</td>
+                            <td style="padding:8px 0;">Vekil isimlerinde arar</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">konu.xxx</td>
+                            <td style="padding:8px 0;">Dava konusunda arar</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid var(--border-color);">
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">esas.xxx</td>
+                            <td style="padding:8px 0;">Esas numarasında arar</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 12px; font-weight:600; color:var(--accent-secondary);">mahkeme.xxx</td>
+                            <td style="padding:8px 0;">Mahkeme adında arar</td>
+                        </tr>
+                    </table>
+                    <p style="margin:12px 0 0; font-size:0.8rem; color:var(--text-muted);">
+                        Örnek: <code style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">davacı.mehmet</code>
+                    </p>
+                    <button onclick="toggleSearchHelp()" style="margin-top:16px; width:100%; padding:10px; background:var(--accent-primary); color:white; border:none; border-radius:8px; cursor:pointer;">Anladım</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+            lucide.createIcons();
+        }
+
         // Initialize Lucide icons
         lucide.createIcons();
     </script>
