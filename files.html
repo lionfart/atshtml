@@ -215,11 +215,49 @@
     <!-- SETTINGS MODAL -->
     <div id="settings-modal" class="modal">
         <div class="modal-overlay" onclick="closeSettingsModal()"></div>
-        <div class="modal-content" style="max-width:500px;">
+        <div class="modal-content" style="max-width:550px;">
             <div class="modal-header">
                 <h2>Ayarlar</h2>
                 <button class="icon-btn" onclick="closeSettingsModal()"><i data-lucide="x"></i></button>
             </div>
+
+            <!-- OpenRouter API Key -->
+            <div class="form-group">
+                <label>OpenRouter API Key</label>
+                <input type="password" id="openrouter-api-key" placeholder="sk-or-v1-..." class="form-control">
+                <p style="font-size:0.7em; color:#666; margin-top:2px;">AI analizi için gerekli. <a
+                        href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent-primary);">Key
+                        al</a></p>
+            </div>
+
+            <!-- Model Priority Order -->
+            <div class="form-group">
+                <label>AI Model Öncelik Sırası</label>
+                <p style="font-size:0.7em; color:#666; margin-bottom:8px;">Sürükle-bırak ile sıralayın. Üstteki modeller
+                    önce denenir.</p>
+                <ul id="model-order-list"
+                    style="list-style:none; padding:0; margin:0; max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
+                </ul>
+            </div>
+
+            <!-- Rate Limited Models Info -->
+            <div class="form-group" id="rate-limited-section" style="display:none;">
+                <label style="color:var(--accent-warning);">⚠️ Geçici Devre Dışı Modeller</label>
+                <p style="font-size:0.7em; color:#666;">Rate limit nedeniyle sıranın sonuna alındı. Tarayıcı kapanınca
+                    sıfırlanır.</p>
+                <div id="rate-limited-list" style="font-size:0.8em; color:var(--accent-warning); padding:5px 0;"></div>
+            </div>
+
+            <!-- Burst Limit -->
+            <div class="form-group">
+                <label>Dağıtım Limiti (Catch-up)</label>
+                <input type="number" id="burst-limit" value="2" min="1" max="10" class="form-control"
+                    style="width:80px;">
+            </div>
+
+            <hr style="border-color:var(--border-color); margin:15px 0;">
+
+            <!-- Admin Section -->
             <div class="form-group">
                 <label>Admin Yetkileri</label>
                 <div style="display:flex; gap:10px; align-items:center;">
@@ -228,10 +266,13 @@
                     </button>
                     <span id="admin-status-text" class="text-muted" style="font-size:0.85rem;"></span>
                 </div>
-                <p style="font-size:0.7em; color:#666; margin-top:5px;">Admin yetkileri: Dosya durumu değiştirme</p>
+                <p style="font-size:0.7em; color:#666; margin-top:5px;">Admin yetkileri: Evrak Girişi, Dosya durumu
+                    değiştirme</p>
             </div>
+
             <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeSettingsModal()">Kapat</button>
+                <button class="btn btn-ghost" onclick="resetModelOrder()">Sıralamayı Sıfırla</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Kaydet</button>
             </div>
         </div>
     </div>

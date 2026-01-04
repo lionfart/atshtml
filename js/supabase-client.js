@@ -308,11 +308,42 @@ async function deleteDocument(docId) {
 // ==========================================
 // AI Analysis (OpenRouter Only - Gemini API Removed)
 // ==========================================
-async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
-    // Use ONLY OpenRouter - Gemini direct API removed
-    const openRouterModels = APP_CONFIG.openRouterModels || ['deepseek/deepseek-r1-0528:free'];
 
-    if (modelIndex >= openRouterModels.length) {
+// Get effective model order: user's custom order with rate-limited models at end
+function getEffectiveModelOrder() {
+    // Get user's custom order or default from config
+    let modelOrder;
+    const stored = localStorage.getItem('openrouter_model_order');
+    if (stored) {
+        try { modelOrder = JSON.parse(stored); } catch (e) { modelOrder = null; }
+    }
+    if (!modelOrder || !Array.isArray(modelOrder) || modelOrder.length === 0) {
+        modelOrder = APP_CONFIG.openRouterModels || ['deepseek/deepseek-r1-0528:free'];
+    }
+
+    // Get rate-limited models from session storage
+    const rateLimited = JSON.parse(sessionStorage.getItem('openrouter_rate_limited') || '[]');
+
+    // Filter out rate-limited models and add them to end
+    const available = modelOrder.filter(m => !rateLimited.includes(m));
+    return [...available, ...rateLimited];
+}
+
+// Add model to rate-limited list (session only)
+function markModelRateLimited(model) {
+    const limited = JSON.parse(sessionStorage.getItem('openrouter_rate_limited') || '[]');
+    if (!limited.includes(model)) {
+        limited.push(model);
+        sessionStorage.setItem('openrouter_rate_limited', JSON.stringify(limited));
+        console.warn(`Model ${model} added to rate-limited list (will be tried last)`);
+    }
+}
+
+async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
+    // Use custom model order with rate-limited models at end
+    const effectiveModels = getEffectiveModelOrder();
+
+    if (modelIndex >= effectiveModels.length) {
         throw new Error('Bütün AI modelleri denendi fakat sonuç alınamadı.');
     }
 
@@ -322,8 +353,8 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
         throw new Error('OpenRouter API Key bulunamadı. Lütfen ayarlardan kaydedin.');
     }
 
-    const currentModel = openRouterModels[modelIndex];
-    console.log(`AI Model Deneniyor (OpenRouter ${modelIndex + 1}/${openRouterModels.length}): ${currentModel}`);
+    const currentModel = effectiveModels[modelIndex];
+    console.log(`AI Model Deneniyor (OpenRouter ${modelIndex + 1}/${effectiveModels.length}): ${currentModel}`);
 
     try {
         const safeKey = routerKey.trim();
@@ -355,8 +386,15 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
             const errText = await resp.text();
             console.warn(`OpenRouter Model ${currentModel} failed: ${resp.status} - ${errText}`);
 
-            // If rate limited, model not found, or other error, try next model
-            if (resp.status === 429 || resp.status === 404 || resp.status === 400 || resp.status === 503) {
+            // If rate limited (429), add to rate-limited list and try next model
+            if (resp.status === 429 || errText.toLowerCase().includes('rate')) {
+                markModelRateLimited(currentModel);
+                await new Promise(r => setTimeout(r, 1000));
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+            }
+
+            // For other errors, just try next model
+            if (resp.status === 404 || resp.status === 400 || resp.status === 503) {
                 await new Promise(r => setTimeout(r, 1000));
                 return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
             }
@@ -373,6 +411,10 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
         return data.choices[0].message.content;
     } catch (e) {
         console.error(`${currentModel} error:`, e);
+        // Check if error message indicates rate limiting
+        if (e.message && (e.message.includes('429') || e.message.toLowerCase().includes('rate'))) {
+            markModelRateLimited(currentModel);
+        }
         await new Promise(r => setTimeout(r, 1000));
         return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
     }
