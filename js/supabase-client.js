@@ -470,8 +470,8 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "is_final_decision": true, // Onama, Red, İptal, Kabul = TRUE. Bozma, Gönderme, YD = FALSE.
   "urgency": "Yüksek | Orta | Düşük", // Önem derecesi (Türkçe)
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Süre yok, kesin karar'",
-  "primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",
-  "secondary_tags": ["Deprem", "Tazminat", "Adli"] (Dizi olarak)
+"primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",
+    "secondary_tags": ["Deprem", "Tazminat", "Adli"](Dizi olarak)
 }
 
 BELGE METNİ:
@@ -484,21 +484,7 @@ ${text.slice(0, 30000)}
     try {
         const responseText = await callGeminiWithFallback(apiKey, contentBody);
 
-        // CLEANUP: Multiple strategies for extracting JSON
-        let cleanedText = responseText.trim();
-
-        // Strategy 1: Remove markdown code blocks
-        cleanedText = cleanedText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
-
-        // Strategy 2: Remove DeepSeek reasoning tokens (thinking process wrapped in <think>...</think>)
-        cleanedText = cleanedText.replace(/<think>[\s\S]*?<\/think>/gi, '');
-
-        // Strategy 3: Find JSON object boundaries
-        const firstOpen = cleanedText.indexOf('{');
-        const lastClose = cleanedText.lastIndexOf('}');
-        if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-            cleanedText = cleanedText.substring(firstOpen, lastClose + 1);
-        }
+        let cleanedText = sanitizeJsonString(responseText);
 
         // Try parsing
         try {
@@ -518,13 +504,14 @@ ${text.slice(0, 30000)}
         try {
             const simpleBody = { contents: [{ parts: [{ text: prompt }] }] };
             const responseText = await callGeminiWithFallback(apiKey, simpleBody);
+            let cleanedText = sanitizeJsonString(responseText); // Apply sanitization here too
             // Try multiple JSON extraction patterns
             const patterns = [
                 /\{[\s\S]*\}/,                    // Greedy match
                 /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/ // Nested brackets
             ];
             for (const pattern of patterns) {
-                const match = responseText.match(pattern);
+                const match = cleanedText.match(pattern); // Use cleanedText
                 if (match) {
                     try {
                         return JSON.parse(match[0]);
@@ -618,25 +605,25 @@ async function analyzeOpinionWithGemini(text, apiKey) {
     if (!apiKey) throw new Error('API anahtarı gerekli.');
 
     const prompt = `
-Sen Türk Hukuk Sistemine hakim uzman bir avukat asistanısın. Bu belgeyi analiz et ve YALNIZCA aşağıdaki JSON formatında veri döndür.
-Bu belge bir HUKUKİ MÜTALAA (Görüş) talebidir - bir dava dosyası DEĞİLDİR.
+Sen Türk Hukuk Sistemine hakim uzman bir avukat asistanısın.Bu belgeyi analiz et ve YALNIZCA aşağıdaki JSON formatında veri döndür.
+Bu belge bir HUKUKİ MÜTALAA(Görüş) talebidir - bir dava dosyası DEĞİLDİR.
 
 ÖNEMLİ KURALLAR:
-1. "requesting_institution": Görüş talep eden kurum/kişi adını tespit et.
-2. "subject": Görüş konusunun kısa özeti (1-2 cümle).
-3. "summary": Detaylı açıklama (4-6 cümle).
-4. "urgency": "HIGH" (acil/kısa süre), "MEDIUM" (normal), "LOW" (acil değil)
-5. "deadline_date": Varsa kesin süre tarihi (YYYY-MM-DD formatında), yoksa null.
+1. "requesting_institution": Görüş talep eden kurum / kişi adını tespit et.
+2. "subject": Görüş konusunun kısa özeti(1 - 2 cümle).
+3. "summary": Detaylı açıklama(4 - 6 cümle).
+4. "urgency": "HIGH"(acil / kısa süre), "MEDIUM"(normal), "LOW"(acil değil)
+5. "deadline_date": Varsa kesin süre tarihi(YYYY - MM - DD formatında), yoksa null.
 6. "ai_suggestion": Görüşe nasıl yaklaşılması gerektiğine dair kısa öneri.
 
 İSTENEN JSON FORMATI:
 {
-  "requesting_institution": "Kurum/Kişi Adı",
-  "subject": "Görüş Konusu (kısa)",
-  "summary": "Detaylı açıklama (4-6 cümle)",
-  "urgency": "HIGH | MEDIUM | LOW",
-  "deadline_date": "YYYY-MM-DD | null",
-  "ai_suggestion": "Örn: 'Mevzuat taraması yapılmalı. İlgili Danıştay kararları incelenmeli.'"
+    "requesting_institution": "Kurum/Kişi Adı",
+        "subject": "Görüş Konusu (kısa)",
+            "summary": "Detaylı açıklama (4-6 cümle)",
+                "urgency": "HIGH | MEDIUM | LOW",
+                    "deadline_date": "YYYY-MM-DD | null",
+                        "ai_suggestion": "Örn: 'Mevzuat taraması yapılmalı. İlgili Danıştay kararları incelenmeli.'"
 }
 
 BELGE METNİ:
@@ -650,7 +637,7 @@ ${text.slice(0, 15000)}
     try {
         const responseText = await callGeminiWithFallback(apiKey, contentBody);
         let cleanedText = responseText.trim();
-        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+        cleanedText = cleanedText.replace(/^```json\s * /, '').replace(/ ^ ```\s*/, '').replace(/\s*```$ /, '');
         const firstOpen = cleanedText.indexOf('{');
         const lastClose = cleanedText.lastIndexOf('}');
         if (firstOpen !== -1 && lastClose !== -1) {
