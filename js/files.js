@@ -242,11 +242,6 @@ function applyColumnOrder() {
 function getCellContent(file, colId) {
     const esc = escapeHtml;
     switch (colId) {
-        case 'col-fav':
-            const isFav = file.is_favorite;
-            const starColor = isFav ? 'var(--accent-warning)' : 'var(--text-muted)';
-            const starFill = isFav ? 'fill:currentColor;' : '';
-            return `<span class="fav-toggle" data-id="${file.id}" style="cursor:pointer; color:${starColor}; ${starFill}" title="${isFav ? 'Favoriden Çıkar' : 'Favorile'}"><i data-lucide="star" style="width:16px;"></i></span>`;
         case 'col-onem':
             const urgency = file.urgency || 'Orta';
             let onemColor = 'var(--text-muted)';

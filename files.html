@@ -270,6 +270,9 @@
                         <input type="text" id="search-input" placeholder="Ara..." class="form-control"
                             style="padding-left:32px; width:100%;" oninput="handleSearchDebounced()">
                     </div>
+                    <button type="button" onclick="toggleSearchHelp()"
+                        style="width:28px; height:28px; min-width:28px; border-radius:50%; background:var(--accent-primary); border:none; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px;"
+                        title="Gelişmiş Arama Yardımı">?</button>
 
                     <select id="filter-status" class="form-control" onchange="loadFiles()"
                         style="flex:0 0 auto; min-width:130px;">
@@ -313,9 +316,6 @@
                     <button class="btn btn-outline btn-sm" onclick="loadFiles()" title="Yenile">
                         <i data-lucide="refresh-cw"></i>
                     </button>
-                    <button type="button" onclick="toggleSearchHelp()"
-                        style="width:32px; height:32px; min-width:32px; border-radius:50%; background:var(--accent-primary); border:none; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;"
-                        title="Gelişmiş Arama Yardımı">?</button>
                 </div>
             </div>
         </div>
