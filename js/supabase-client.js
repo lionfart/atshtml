@@ -458,6 +458,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "defendant_attorney": "Av. Adı Soyadı | null",
   "claim_amount": "100.000 TL (Yoksa null)",
   "subject": "Dava Konusu",
+  "address": "Belgedeki adres bilgisi (Taşınmaz adresi, dava konusu yer vb. Yoksa null)",
   "summary": "Çok detaylı özet (en az 8-10 cümle).",
   "next_hearing_date": "YYYY-MM-DD (Gelecek duruşma tarihi varsa)",
   "deadline_date": "YYYY-MM-DD (Kesin karar değilse hesaplanmış süre bitişi. Kesin kararlarda null)",
@@ -467,7 +468,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
   "decision_result": "Red | İptal | Kabul | Kısmen Kabul Kısmen Red | Onama | Bozma | Gönderme | YD Kabul | YD Red | Diğer | null", // Ara Karar için YD Kabul veya YD Red kullan
   "decision_date": "YYYY-MM-DD (Karar verilme tarihi)",
   "is_final_decision": true, // Onama, Red, İptal, Kabul = TRUE. Bozma, Gönderme, YD = FALSE.
-  "urgency": "High | Medium | Low",
+  "urgency": "Yüksek | Orta | Düşük", // Önem derecesi (Türkçe)
   "suggested_action": "Örn: '2 hafta içinde cevap dilekçesi hazırla' veya 'Süre yok, kesin karar'",
   "primary_tag": "Çevre | Şehircilik | Mevzuat | Diğer",
   "secondary_tags": ["Deprem", "Tazminat", "Adli"] (Dizi olarak)

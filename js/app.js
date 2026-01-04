@@ -324,6 +324,7 @@ function openReviewModal(itemId) {
                 <div class="review-field"><label>Davalı</label><input type="text" id="review-defendant" value="${data.defendant || ''}" class="form-control"></div>
                 <div class="review-field"><label>Davalı Vekili</label><input type="text" id="review-defendant-attorney" value="${data.defendant_attorney || ''}" class="form-control" placeholder="Av. ..."></div>
                 <div class="review-field"><label>Değer</label><input type="text" id="review-amount" value="${data.claim_amount || ''}" class="form-control"></div>
+                <div class="review-field"><label>Adres</label><textarea id="review-address" class="form-control" rows="2" placeholder="Taşınmaz/Konu adresi...">${data.address || ''}</textarea></div>
                 <div class="review-field"><label>Ek Etiketler</label><input type="text" id="review-tags" value="${(data.secondary_tags || data.tags || []).join(', ')}" class="form-control" placeholder="Virgülle ayır"></div>
             </div>
             <div class="review-section" style="border-left: 2px solid var(--accent-warning); padding-left: 10px;">
@@ -334,11 +335,11 @@ function openReviewModal(itemId) {
                     <input type="date" id="review-deadline" value="${data.deadline_date || ''}" class="form-control" style="color:var(--accent-danger);">
                     ${durationWarning ? `<div style="color:var(--accent-warning); font-size:0.75rem; margin-top:4px;">${durationWarning}</div>` : ''}
                 </div>
-                <div class="review-field"><label>Aciliyet</label>
+                <div class="review-field"><label>Önem</label>
                     <select id="review-urgency" class="form-control">
-                        <option value="LOW" ${data.urgency === 'LOW' ? 'selected' : ''}>Düşük</option>
-                        <option value="MEDIUM" ${(!data.urgency || data.urgency === 'MEDIUM') ? 'selected' : ''}>Orta</option>
-                        <option value="HIGH" ${data.urgency === 'HIGH' ? 'selected' : ''}>Yüksek (Acil)</option>
+                        <option value="Düşük" ${data.urgency === 'Düşük' || data.urgency === 'Low' ? 'selected' : ''}>Düşük</option>
+                        <option value="Orta" ${(!data.urgency || data.urgency === 'Orta' || data.urgency === 'Medium') ? 'selected' : ''}>Orta</option>
+                        <option value="Yüksek" ${data.urgency === 'Yüksek' || data.urgency === 'High' ? 'selected' : ''}>Yüksek (Acil)</option>
                     </select>
                 </div>
             </div>
@@ -431,15 +432,17 @@ async function approveNewCase() {
             defendant: document.getElementById('review-defendant').value,
             defendant_attorney: document.getElementById('review-defendant-attorney').value,
             claim_amount: document.getElementById('review-amount').value,
+            address: document.getElementById('review-address')?.value || null, // [NEW] Address field
             summary: document.getElementById('review-summary').value,
             subject: document.getElementById('review-summary').value,
+            urgency: document.getElementById('review-urgency').value || 'Orta', // [NEW] Turkish urgency
             // [NEW] Primary and Secondary Tags
             primary_tag: document.getElementById('review-primary-tag').value,
             tags: document.getElementById('review-tags').value.split(',').map(t => t.trim()).filter(t => t.length > 0),
             // Workflow fields (mapped to schema)
             next_hearing_date: document.getElementById('review-hearing').value || null,
             deadline_date: document.getElementById('review-deadline').value || null, // [FIX] Add explicit deadline field
-            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value || 'N/A'}] [Urgency: ${document.getElementById('review-urgency').value}]`,
+            case_status_notes: `[Action: ${document.getElementById('review-action').value}] [Deadline: ${document.getElementById('review-deadline').value || 'N/A'}] [Önem: ${document.getElementById('review-urgency').value}]`,
             latest_decision_result: document.getElementById('review-decision-result').value || null,
             yd_result: document.getElementById('review-yd-result')?.value || null // [NEW] YD result for Ara Karar
         };

@@ -4,7 +4,7 @@
 
 // Global State
 let columnOrder = JSON.parse(localStorage.getItem('filesColumnOrder')) || [
-    'col-no', 'col-parties', 'col-vekil', 'col-tags', 'col-subject', 'col-amount', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
+    'col-fav', 'col-no', 'col-parties', 'col-vekil', 'col-tags', 'col-subject', 'col-amount', 'col-onem', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
 ];
 let loadedFilesData = []; // Store data for re-rendering without refetching
 
@@ -242,6 +242,19 @@ function applyColumnOrder() {
 function getCellContent(file, colId) {
     const esc = escapeHtml;
     switch (colId) {
+        case 'col-fav':
+            const isFav = file.is_favorite;
+            const starColor = isFav ? 'var(--accent-warning)' : 'var(--text-muted)';
+            const starFill = isFav ? 'fill:currentColor;' : '';
+            return `<span class="fav-toggle" data-id="${file.id}" style="cursor:pointer; color:${starColor}; ${starFill}" title="${isFav ? 'Favoriden Çıkar' : 'Favorile'}"><i data-lucide="star" style="width:16px;"></i></span>`;
+        case 'col-onem':
+            const urgency = file.urgency || 'Orta';
+            let onemColor = 'var(--text-muted)';
+            let onemBg = 'rgba(255,255,255,0.1)';
+            if (urgency === 'Yüksek' || urgency === 'High') { onemColor = '#fff'; onemBg = 'var(--accent-danger)'; }
+            else if (urgency === 'Orta' || urgency === 'Medium') { onemColor = '#fff'; onemBg = 'var(--accent-warning)'; }
+            else if (urgency === 'Düşük' || urgency === 'Low') { onemColor = '#fff'; onemBg = 'var(--accent-success)'; }
+            return `<span class="badge" style="background:${onemBg}; color:${onemColor}; font-size:0.7em; padding:2px 6px;">${esc(urgency)}</span>`;
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
         case 'col-parties': return `<div style="font-weight:500;">${esc(file.plaintiff || '-')}</div><div style="font-size:0.8em; opacity:0.7;">vs ${esc(file.defendant || '-')}</div>`;
         case 'col-vekil':
@@ -324,7 +337,9 @@ function renderTableRows() {
             return `<td class="${colId}">${getCellContent(file, colId)}</td>`;
         }).join('');
 
-        return `<tr data-file-id="${file.id}">${cells}</tr>`;
+        // Add special class for favorite rows
+        const rowClass = file.is_favorite ? 'favorite-row' : '';
+        return `<tr data-file-id="${file.id}" class="${rowClass}">${cells}</tr>`;
     }).join('');
 
     tbody.innerHTML = html;
@@ -517,6 +532,36 @@ document.addEventListener('click', async function (e) {
         console.error('Status toggle error:', err);
         showToast('Durum güncellenemedi: ' + err.message, 'error');
         toggle.textContent = currentStatus === 'OPEN' ? 'Açık' : 'Kapalı';
+    }
+});
+
+// Favorite Toggle Handler
+document.addEventListener('click', async function (e) {
+    const favToggle = e.target.closest('.fav-toggle');
+    if (!favToggle) return;
+
+    e.stopPropagation();
+
+    const fileId = favToggle.getAttribute('data-id');
+    const row = favToggle.closest('tr');
+    const isFavorite = row.classList.contains('favorite-row');
+    const newValue = !isFavorite;
+
+    try {
+        favToggle.style.opacity = '0.5';
+        const { error } = await supabase
+            .from('file_cases')
+            .update({ is_favorite: newValue })
+            .eq('id', fileId);
+
+        if (error) throw error;
+
+        showToast(newValue ? 'Favorilere eklendi ⭐' : 'Favorilerden çıkarıldı', 'success');
+        loadFiles(); // Refresh
+    } catch (err) {
+        console.error('Favorite toggle error:', err);
+        showToast('Favori güncellenemedi: ' + err.message, 'error');
+        favToggle.style.opacity = '1';
     }
 });
 

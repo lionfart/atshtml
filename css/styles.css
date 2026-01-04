@@ -708,3 +708,21 @@ select {
     transform: translateX(-50%) translateY(-5px);
     /* Slide up slightly */
 }
+
+/* Favorite Row Highlight */
+.favorite-row {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-left: 3px solid var(--accent-warning) !important;
+}
+
+.favorite-row:hover {
+    background: rgba(245, 158, 11, 0.15) !important;
+}
+
+.fav-toggle {
+    transition: transform 0.2s, color 0.2s;
+}
+
+.fav-toggle:hover {
+    transform: scale(1.2);
+}
