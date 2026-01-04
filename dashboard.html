@@ -131,31 +131,36 @@
                 <h2>Ayarlar</h2>
                 <button class="icon-btn" onclick="closeSettingsModal()"><i data-lucide="x"></i></button>
             </div>
-            
+
             <div class="form-group">
                 <label>OpenRouter API Key</label>
                 <input type="password" id="openrouter-api-key" placeholder="sk-or-v1-..." class="form-control">
-                <p style="font-size:0.7em; color:#666; margin-top:2px;">AI analizi için gerekli. <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent-primary);">Key al</a></p>
+                <p style="font-size:0.7em; color:#666; margin-top:2px;">AI analizi için gerekli. <a
+                        href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent-primary);">Key
+                        al</a></p>
             </div>
-            
+
             <div class="form-group">
                 <label>AI Model Öncelik Sırası</label>
                 <p style="font-size:0.7em; color:#666; margin-bottom:8px;">Sürükle-bırak ile sıralayın.</p>
-                <ul id="model-order-list" style="list-style:none; padding:0; margin:0; max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;"></ul>
+                <ul id="model-order-list"
+                    style="list-style:none; padding:0; margin:0; max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
+                </ul>
             </div>
-            
+
             <div class="form-group" id="rate-limited-section" style="display:none;">
                 <label style="color:var(--accent-warning);">⚠️ Geçici Devre Dışı Modeller</label>
                 <div id="rate-limited-list" style="font-size:0.8em; color:var(--accent-warning); padding:5px 0;"></div>
             </div>
-            
+
             <div class="form-group">
                 <label>Dağıtım Limiti</label>
-                <input type="number" id="burst-limit" value="2" min="1" max="10" class="form-control" style="width:80px;">
+                <input type="number" id="burst-limit" value="2" min="1" max="10" class="form-control"
+                    style="width:80px;">
             </div>
-            
+
             <hr style="border-color:var(--border-color); margin:15px 0;">
-            
+
             <div class="form-group">
                 <label>Admin Yetkileri</label>
                 <div style="display:flex; gap:10px; align-items:center;">
@@ -165,7 +170,7 @@
                     <span id="admin-status-text" class="text-muted" style="font-size:0.85rem;"></span>
                 </div>
             </div>
-            
+
             <div class="modal-footer">
                 <button class="btn btn-ghost" onclick="resetModelOrder()">Sıralamayı Sıfırla</button>
                 <button class="btn btn-primary" onclick="saveSettings()">Kaydet</button>
@@ -292,16 +297,8 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/settings.js"></script>
     <script>
-        // Settings modal functions
-        function openSettingsModal() {
-            document.getElementById('settings-modal').classList.add('active');
-            if (typeof updateAdminUI === 'function') updateAdminUI();
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-        function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.remove('active');
-        }
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
         });
