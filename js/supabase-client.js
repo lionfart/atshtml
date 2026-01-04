@@ -193,6 +193,8 @@ async function createFileCase(fileData, file = null) {
         defendant_attorney: fileData.defendant_attorney,
         latest_decision_result: fileData.latest_decision_result,
         deadline_date: fileData.deadline_date, // [FIX] Add explicit deadline column map
+        urgency: fileData.urgency, // [NEW] Ensure urgency is saved
+        address: fileData.address, // [NEW] Ensure address is saved
         status: 'OPEN'
     }]).select().single();
 
