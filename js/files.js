@@ -245,12 +245,17 @@ function applyColumnOrder() {
 function toggleColumnMenu(event) {
     const menu = document.getElementById('column-menu');
 
+    // Move to body to ensure fixed positioning works as expected (avoiding stacking contexts)
+    if (menu.parentElement !== document.body) {
+        document.body.appendChild(menu);
+    }
+
     if (menu.style.display === 'none') {
         renderColumnToggleMenu();
 
         // Calculate position using fixed to escape stacking contexts
         if (event) {
-            const btn = event.currentTarget || event.target.closest('button');
+            const btn = event.currentTarget || document.getElementById('btn-toggle-columns');
             const rect = btn.getBoundingClientRect();
             menu.style.position = 'fixed';
             menu.style.top = (rect.bottom + 5) + 'px';
@@ -269,7 +274,7 @@ function toggleColumnMenu(event) {
 // Close menu when clicking outside
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('column-menu');
-    const btn = e.target.closest('button[onclick="toggleColumnMenu()"]');
+    const btn = e.target.closest('#btn-toggle-columns');
     if (menu && menu.style.display === 'block' && !menu.contains(e.target) && !btn) {
         menu.style.display = 'none';
     }
