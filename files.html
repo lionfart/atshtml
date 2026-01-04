@@ -439,17 +439,18 @@
     <script src="js/settings.js"></script>
     <script src="js/files.js"></script>
 
-    // Search Help Popup
-    function toggleSearchHelp() {
-    // Create or toggle popup
-    let popup = document.getElementById('search-help-popup');
-    if (popup) {
-    popup.remove();
-    return;
-    }
-    popup = document.createElement('div');
-    popup.id = 'search-help-popup';
-    popup.innerHTML = `
+    <script>
+        // Search Help Popup
+        function toggleSearchHelp() {
+            // Create or toggle popup
+            let popup = document.getElementById('search-help-popup');
+            if (popup) {
+                popup.remove();
+                return;
+            }
+            popup = document.createElement('div');
+            popup.id = 'search-help-popup';
+            popup.innerHTML = `
     <div style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:9998;"
         onclick="toggleSearchHelp()"></div>
     <div
@@ -498,12 +499,12 @@
             style="margin-top:16px; width:100%; padding:10px; background:var(--accent-primary); color:white; border:none; border-radius:8px; cursor:pointer;">Anladım</button>
     </div>
     `;
-    document.body.appendChild(popup);
-    lucide.createIcons();
-    }
+            document.body.appendChild(popup);
+            lucide.createIcons();
+        }
 
-    // Initialize Lucide icons
-    lucide.createIcons();
+        // Initialize Lucide icons
+        lucide.createIcons();
     </script>
     <!-- AI Agent -->
     <script src="js/agent.js"></script>
