@@ -484,25 +484,56 @@ ${text.slice(0, 30000)}
     try {
         const responseText = await callGeminiWithFallback(apiKey, contentBody);
 
-        // CLEANUP: Extract JSON from Markdown code blocks if present
+        // CLEANUP: Multiple strategies for extracting JSON
         let cleanedText = responseText.trim();
-        // Remove ```json and ``` wrapping
-        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
 
-        // Find first '{' and last '}'
+        // Strategy 1: Remove markdown code blocks
+        cleanedText = cleanedText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+
+        // Strategy 2: Remove DeepSeek reasoning tokens (thinking process wrapped in <think>...</think>)
+        cleanedText = cleanedText.replace(/<think>[\s\S]*?<\/think>/gi, '');
+
+        // Strategy 3: Find JSON object boundaries
         const firstOpen = cleanedText.indexOf('{');
         const lastClose = cleanedText.lastIndexOf('}');
-        if (firstOpen !== -1 && lastClose !== -1) {
+        if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
             cleanedText = cleanedText.substring(firstOpen, lastClose + 1);
         }
 
-        return JSON.parse(cleanedText);
+        // Try parsing
+        try {
+            return JSON.parse(cleanedText);
+        } catch (parseErr) {
+            // Strategy 4: Try to fix common JSON issues (trailing commas, single quotes, etc.)
+            let fixedJson = cleanedText
+                .replace(/,\s*}/g, '}')  // Remove trailing commas before }
+                .replace(/,\s*]/g, ']')  // Remove trailing commas before ]
+                .replace(/'/g, '"')       // Replace single quotes with double quotes
+                .replace(/\n/g, ' ')      // Remove newlines
+                .replace(/\r/g, '');      // Remove carriage returns
+            return JSON.parse(fixedJson);
+        }
     } catch (e) {
-        console.warn("JSON parsing failed, retrying with simple prompt...");
-        const simpleBody = { contents: [{ parts: [{ text: prompt }] }] };
-        const responseText = await callGeminiWithFallback(apiKey, simpleBody);
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) return JSON.parse(jsonMatch[0]);
+        console.warn("JSON parsing failed, retrying with simple prompt...", e);
+        try {
+            const simpleBody = { contents: [{ parts: [{ text: prompt }] }] };
+            const responseText = await callGeminiWithFallback(apiKey, simpleBody);
+            // Try multiple JSON extraction patterns
+            const patterns = [
+                /\{[\s\S]*\}/,                    // Greedy match
+                /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/ // Nested brackets
+            ];
+            for (const pattern of patterns) {
+                const match = responseText.match(pattern);
+                if (match) {
+                    try {
+                        return JSON.parse(match[0]);
+                    } catch (parseErr) { continue; }
+                }
+            }
+        } catch (retryErr) {
+            console.error("Retry also failed:", retryErr);
+        }
     }
     throw new Error('AI yanıtı çözümlenemedi.');
 }
