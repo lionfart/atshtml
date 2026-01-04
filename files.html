@@ -264,16 +264,11 @@
             <div class="card-content" style="padding: 15px;">
                 <div class="flex gap-4 responsive-controls"
                     style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <div class="search-input-wrapper" style="width: 180px; position:relative;">
-                            <i data-lucide="search"
-                                style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:16px; z-index:1;"></i>
-                            <input type="text" id="search-input" placeholder="Ara..." class="form-control"
-                                style="padding-left:32px; width:100%;" oninput="handleSearchDebounced()">
-                        </div>
-                        <button type="button" onclick="toggleSearchHelp()"
-                            style="width:28px; height:28px; min-width:28px; border-radius:50%; background:var(--accent-primary); border:none; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; flex-shrink:0;"
-                            title="Gelişmiş Arama Yardımı">?</button>
+                    <div class="search-input-wrapper" style="flex: 0 0 auto; width: 180px; position:relative;">
+                        <i data-lucide="search"
+                            style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:16px; z-index:1;"></i>
+                        <input type="text" id="search-input" placeholder="Ara..." class="form-control"
+                            style="padding-left:32px; width:100%;" oninput="handleSearchDebounced()">
                     </div>
 
                     <select id="filter-status" class="form-control" onchange="loadFiles()"
@@ -318,6 +313,9 @@
                     <button class="btn btn-outline btn-sm" onclick="loadFiles()" title="Yenile">
                         <i data-lucide="refresh-cw"></i>
                     </button>
+                    <button type="button" onclick="toggleSearchHelp()"
+                        style="width:32px; height:32px; min-width:32px; border-radius:50%; background:var(--accent-primary); border:none; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;"
+                        title="Gelişmiş Arama Yardımı">?</button>
                 </div>
             </div>
         </div>
