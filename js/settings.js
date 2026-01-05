@@ -39,9 +39,21 @@ function populateModelOrderList() {
     list.innerHTML = models.map((model, idx) => {
         const isLimited = rateLimited.includes(model);
         const shortName = model.split('/').pop().replace(':free', '');
+
+        // Capabilities Check
+        const caps = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.modelCapabilities && APP_CONFIG.modelCapabilities[model])
+            ? APP_CONFIG.modelCapabilities[model]
+            : ['text'];
+
+        const isVision = caps.includes('vision');
+        const capBadge = isVision
+            ? '<span title="Görsel Analiz Yeteneği (Vision)" style="font-size:0.8em; margin-right:5px; cursor:help;">👁️</span>'
+            : '<span title="Metin Analizi" style="font-size:0.8em; margin-right:5px; opacity:0.3; cursor:help;">📝</span>';
+
         return `<li draggable="true" data-model="${model}" data-idx="${idx}" 
             style="padding:8px 12px; border-bottom:1px solid var(--border-color); cursor:move; display:flex; align-items:center; gap:8px; background:${isLimited ? 'rgba(255,150,0,0.1)' : 'transparent'};">
             <span style="color:var(--text-muted);">☰</span>
+            ${capBadge}
             <span style="flex:1; font-size:0.85em;">${shortName}</span>
             ${isLimited ? '<span style="font-size:0.7em; color:var(--accent-warning);">⏳</span>' : ''}
         </li>`;

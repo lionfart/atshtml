@@ -48,6 +48,14 @@ const APP_CONFIG = {
         'meta-llama/llama-3.2-3b-instruct:free'
     ],
 
+    // Model Capabilities Mapping (Vision vs Text-only)
+    modelCapabilities: {
+        'google/gemini-2.0-flash-exp:free': ['text', 'vision'],
+        'xiaomi/mimo-v2-flash:free': ['text', 'vision'], // Multimodal
+        'meta-llama/llama-3.2-90b-vision-instruct:free': ['text', 'vision'], // If user adds it
+        // Default to text-only for others
+    },
+
     // OpenRouter Vision Models (for OCR)
     openRouterVisionModels: [
         'google/gemini-2.0-flash-exp:free',

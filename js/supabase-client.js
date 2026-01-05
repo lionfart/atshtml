@@ -378,11 +378,24 @@ function sanitizeJsonString(str) {
 }
 
 async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
+    // Check if this is a vision request
+    const isVision = contentBody.isVision === true;
+
     // Use custom model order with rate-limited models at end
-    const effectiveModels = getEffectiveModelOrder();
+    // Filter for vision capabilities if needed
+    const effectiveModels = getEffectiveModelOrder().filter(model => {
+        if (!isVision) return true;
+        // Check vision capability
+        const caps = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.modelCapabilities && APP_CONFIG.modelCapabilities[model])
+            ? APP_CONFIG.modelCapabilities[model]
+            : ['text'];
+        return caps.includes('vision');
+    });
 
     if (modelIndex >= effectiveModels.length) {
-        throw new Error('Bütün AI modelleri denendi fakat sonuç alınamadı.');
+        throw new Error(isVision
+            ? 'Vision (görsel analiz) destekleyen bir model bulunamadı veya tümü hata verdi. Lütfen ayarlardan vision destekli bir model (örn: Gemini 2.0 Flash) ekleyin.'
+            : 'Bütün AI modelleri denendi fakat sonuç alınamadı.');
     }
 
     // Get API key from parameter or localStorage
@@ -392,18 +405,46 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
     }
 
     const currentModel = effectiveModels[modelIndex];
-    console.log(`AI Model Deneniyor (OpenRouter ${modelIndex + 1}/${effectiveModels.length}): ${currentModel}`);
+    console.log(`AI Model Deneniyor (OpenRouter ${modelIndex + 1}/${effectiveModels.length}): ${currentModel} [Vision: ${isVision}]`);
 
     try {
         const safeKey = routerKey.trim();
-        console.log(`OpenRouter Key Debug: Length=${safeKey.length}, Prefix=${safeKey.substring(0, 10)}...`);
 
-        // Extract prompt text from contentBody (supporting both Gemini and OpenRouter formats)
-        let promptText = '';
-        if (contentBody.contents && contentBody.contents[0] && contentBody.contents[0].parts) {
-            promptText = contentBody.contents[0].parts.map(p => p.text || '').join('\n');
-        } else if (typeof contentBody === 'string') {
-            promptText = contentBody;
+        let reqBody = {};
+
+        if (isVision) {
+            // OpenRouter Vision Format
+            // ContentBody should have { prompt: string, image: base64, mimeType: string }
+            reqBody = {
+                model: currentModel,
+                messages: [
+                    {
+                        role: "user",
+                        content: [
+                            { type: "text", text: contentBody.prompt },
+                            {
+                                type: "image_url",
+                                image_url: {
+                                    url: `data:${contentBody.mimeType || 'image/jpeg'};base64,${contentBody.image}`
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+        } else {
+            // Text-only Format
+            let promptText = '';
+            if (contentBody.contents && contentBody.contents[0] && contentBody.contents[0].parts) {
+                promptText = contentBody.contents[0].parts.map(p => p.text || '').join('\n');
+            } else if (typeof contentBody === 'string') {
+                promptText = contentBody;
+            }
+
+            reqBody = {
+                model: currentModel,
+                messages: [{ role: 'user', content: promptText }]
+            };
         }
 
         const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -414,10 +455,7 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
                 'HTTP-Referer': 'https://adalettakip.vercel.app',
                 'X-Title': 'Adalet Takip Sistemi'
             },
-            body: JSON.stringify({
-                model: currentModel,
-                messages: [{ role: 'user', content: promptText }]
-            })
+            body: JSON.stringify(reqBody)
         });
 
         if (!resp.ok) {
@@ -458,8 +496,13 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
     }
 }
 
-async function analyzeWithGemini(text, apiKey) {
+async function analyzeWithGemini(input, apiKey) {
     if (!apiKey) throw new Error('API keysiz analiz yapılamaz.');
+
+    // Determine if vision input
+    const isVision = (typeof input === 'object' && input.isVision === true);
+    const docText = isVision ? "Lütfen ekli görsel belgedeki metni ve içeriği analiz et." : input.slice(0, 30000);
+
     const prompt = `
 Sen Türk Hukuk Sistemine hakim uzman bir avukat asistanısın. Bu belgeyi analiz et ve YALNIZCA aşağıdaki JSON formatında veri döndür.
 AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri değil, avukatın yapması gerekenleri ve takvimi çıkar.
@@ -556,11 +599,26 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
 
 BELGE METNİ:
 """
-${text.slice(0, 30000)}
+${docText}
 """
     `;
-    // Force JSON response
-    const contentBody = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+
+    // Prepare content body
+    let contentBody;
+    if (isVision) {
+        contentBody = {
+            isVision: true,
+            prompt: prompt,
+            image: input.base64,
+            mimeType: input.mimeType
+        };
+    } else {
+        contentBody = {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        };
+    }
+
     try {
         const responseText = await callGeminiWithFallback(apiKey, contentBody);
 

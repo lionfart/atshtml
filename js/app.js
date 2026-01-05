@@ -276,11 +276,12 @@ async function analyzeFileContent(file) {
 
             if ((!text || text.length < 150) && typeof convertPDFPageToImage === 'function' && apiKey) {
                 try {
+                    console.log("PDF scanned or empty, trying Vision Analysis...");
                     const imageBlob = await convertPDFPageToImage(file);
                     const base64 = await readFileAsBase64(imageBlob);
-                    const ocrText = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
-                    if (ocrText && ocrText.length > text.length) text = ocrText;
-                } catch (e) { console.warn("OCR fallback failed:", e); }
+                    // Use Vision Analysis instead of just OCR text extraction
+                    text = { isVision: true, base64: base64, mimeType: 'image/jpeg' };
+                } catch (e) { console.warn("Vision fallback failed:", e); }
             }
         }
     } else if (lowerName.endsWith('.odt')) {
@@ -290,15 +291,19 @@ async function analyzeFileContent(file) {
     } else if (lowerName.endsWith('.tiff') || lowerName.endsWith('.tif')) {
         if (apiKey) {
             const base64 = await convertTiffToBase64(file);
-            text = await performOcrWithGemini(base64, 'image/jpeg', apiKey);
+            // TIFF -> Vision Analysis
+            text = { isVision: true, base64: base64, mimeType: 'image/jpeg' };
         }
     } else if (file.type.startsWith('image/') && apiKey) {
-        text = await performOcrWithGemini(await readFileAsBase64(file), file.type, apiKey);
+        // Image -> Vision Analysis
+        const base64 = await readFileAsBase64(file);
+        text = { isVision: true, base64: base64, mimeType: file.type };
     } else {
         text = await readFileAsText(file);
     }
 
-    if (!text || text.length < 5) throw new Error('Metin okunamadı.');
+    // Validation: If text is string, check length. If object (vision), assume valid.
+    if (typeof text === 'string' && (!text || text.length < 5)) throw new Error('Metin okunamadı veya dosya boş.');
     if (apiKey) return await analyzeWithGemini(text, apiKey);
     else return { plaintiff: 'Belirsiz', subject: 'Anahtar Yok', type: 'Evrak', viz_text: text.slice(0, 200) };
 }
