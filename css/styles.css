@@ -726,3 +726,43 @@ select {
 .fav-toggle:hover {
     transform: scale(1.2);
 }
+
+/* File Sorting & Attachments */
+.file-sort-item {
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.file-sort-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.file-sort-item.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+    background: var(--accent-primary) !important;
+}
+
+.document-item {
+    transition: all 0.2s ease;
+    border-radius: var(--radius-md);
+}
+
+.document-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.document-item[style*="margin-left"] {
+    position: relative;
+}
+
+/* Optional: Add a connector line for attachments */
+.document-item[style*="margin-left"]::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: -10px;
+    bottom: 50%;
+    width: 2px;
+    background: var(--border-color);
+}

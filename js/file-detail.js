@@ -809,29 +809,73 @@ function updateDocumentsList(documents) {
         return;
     }
 
-    container.innerHTML = documents.map(doc => `
-        <div class="document-item" data-doc-id="${doc.id}">
-            <div class="document-icon" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')">
-                <i data-lucide="file-text"></i>
-            </div>
-            <div class="document-info">
-                <div class="document-name" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" ${doc.analysis?.summary ? `data-tooltip="${escapeHtml(doc.analysis.summary.substring(0, 200) + (doc.analysis.summary.length > 200 ? '...' : ''))}"` : ''}>
-                    ${escapeHtml(doc.name)}
-                    ${doc.analysis?.type ? `<span class="badge" style="font-size:0.65em; margin-left:5px; opacity:0.8;">${escapeHtml(doc.analysis.type)}</span>` : ''}
-                </div>
-                <div class="document-date">${formatDate(doc.upload_date)}</div>
-            </div>
-            <div class="document-actions">
-                <button class="icon-btn" onclick="renameDocumentPrompt('${doc.id}', '${escapeHtml(doc.name)}')" title="Yeniden Adlandır">
-                    <i data-lucide="pencil"></i>
-                </button>
-                <button class="icon-btn" onclick="deleteDocumentConfirm('${doc.id}')" title="Sil" style="color: var(--accent-danger);">
-                    <i data-lucide="trash-2"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
+    // Separate main documents and attachments
+    const mainDocs = documents.filter(d => d.is_main === true || d.parent_document_id === null);
+    const attachments = documents.filter(d => d.is_main === false && d.parent_document_id !== null);
 
+    // Group attachments by parent
+    const attachmentsByParent = {};
+    attachments.forEach(att => {
+        if (!attachmentsByParent[att.parent_document_id]) {
+            attachmentsByParent[att.parent_document_id] = [];
+        }
+        attachmentsByParent[att.parent_document_id].push(att);
+    });
+
+    // Sort attachments by sort_order
+    Object.values(attachmentsByParent).forEach(atts => {
+        atts.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    });
+
+    function renderDocument(doc, isAttachment = false) {
+        const indent = isAttachment ? 'margin-left: 24px; border-left: 2px solid var(--border-color); padding-left: 12px;' : '';
+        const prefix = isAttachment ? '<span style="color:var(--text-muted); margin-right:6px;">└─</span>' : '';
+        const iconName = isAttachment ? 'paperclip' : (doc.is_main ? 'file-check' : 'file-text');
+        const iconColor = doc.is_main ? 'var(--accent-success)' : (isAttachment ? 'var(--text-muted)' : 'var(--accent-primary)');
+
+        return `
+            <div class="document-item" data-doc-id="${doc.id}" style="${indent}">
+                <div class="document-icon" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" style="color:${iconColor};">
+                    ${prefix}<i data-lucide="${iconName}"></i>
+                </div>
+                <div class="document-info">
+                    <div class="document-name" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" ${doc.analysis?.summary ? `data-tooltip="${escapeHtml(doc.analysis.summary.substring(0, 200) + (doc.analysis.summary.length > 200 ? '...' : ''))}"` : ''}>
+                        ${escapeHtml(doc.name)}
+                        ${doc.is_main ? '<span class="badge badge-active" style="font-size:0.6em; margin-left:5px;">Ana</span>' : ''}
+                        ${doc.analysis?.type ? `<span class="badge" style="font-size:0.65em; margin-left:5px; opacity:0.8;">${escapeHtml(doc.analysis.type)}</span>` : ''}
+                    </div>
+                    <div class="document-date">${formatDate(doc.upload_date)}</div>
+                </div>
+                <div class="document-actions">
+                    <button class="icon-btn" onclick="renameDocumentPrompt('${doc.id}', '${escapeHtml(doc.name)}')" title="Yeniden Adlandır">
+                        <i data-lucide="pencil"></i>
+                    </button>
+                    <button class="icon-btn" onclick="deleteDocumentConfirm('${doc.id}')" title="Sil" style="color: var(--accent-danger);">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    let html = '';
+    mainDocs.forEach(doc => {
+        html += renderDocument(doc, false);
+
+        // Render attachments for this document
+        const docAttachments = attachmentsByParent[doc.id] || [];
+        docAttachments.forEach(att => {
+            html += renderDocument(att, true);
+        });
+    });
+
+    // Render orphan attachments (attachments without valid parent - rare edge case)
+    const orphanAttachments = attachments.filter(att => !mainDocs.find(m => m.id === att.parent_document_id));
+    orphanAttachments.forEach(att => {
+        html += renderDocument(att, true);
+    });
+
+    container.innerHTML = html;
     lucide.createIcons();
 }
 

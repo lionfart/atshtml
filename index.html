@@ -105,6 +105,31 @@
         </div>
     </div>
 
+    <!-- FILE SORTING MODAL -->
+    <div id="file-sorting-modal" class="modal">
+        <div class="modal-overlay" onclick="closeFileSortingModal()"></div>
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2><i data-lucide="list-ordered"></i> Evrak Sıralaması</h2>
+                <button class="icon-btn" onclick="closeFileSortingModal()"><i data-lucide="x"></i></button>
+            </div>
+            <p class="modal-description" style="margin-bottom: 15px; color: #888;">
+                İlk sıradaki dosya <strong>Ana Evrak</strong> olarak işaretlenecek ve AI analizi yapılacaktır.
+                Diğerleri ek olarak kaydedilecektir. Sürükle-bırak ile sıralayın.
+            </p>
+            <div id="file-sorting-list"
+                style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-footer" style="margin-top:15px;">
+                <button class="btn btn-ghost" onclick="closeFileSortingModal()">İptal</button>
+                <button class="btn btn-primary" onclick="confirmFileSorting()">
+                    <i data-lucide="check"></i> Devam Et
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN APP -->
     <main class="container">
         <header class="header mb-6">

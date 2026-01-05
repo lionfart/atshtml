@@ -59,6 +59,8 @@ function saveQueueToStorage() {
 }
 
 // ... (handleFiles, processQueueItem) ... //
+let pendingFilesForSorting = []; // Temporary storage for files pending sorting
+
 function handleFiles(files) {
     if (!files.length) return;
 
@@ -68,17 +70,166 @@ function handleFiles(files) {
         return;
     }
 
+    // If multiple files, show sorting modal
+    if (files.length > 1) {
+        pendingFilesForSorting = Array.from(files);
+        openFileSortingModal(pendingFilesForSorting);
+        return;
+    }
+
+    // Single file - process directly as main document
+    processSingleFile(files[0], true);
+}
+
+function processSingleFile(file, isMain, parentItemId = null) {
+    if (file.size > APP_CONFIG.maxFileSize) {
+        showToast(`${file.name} çok büyük.`, 'error');
+        return null;
+    }
+
     const manager = document.getElementById('upload-manager');
     manager.classList.remove('hidden');
     manager.classList.remove('minimized');
-    files.forEach(file => {
-        if (file.size > APP_CONFIG.maxFileSize) { showToast(`${file.name} çok büyük.`, 'error'); return; }
-        const item = { id: generateUUID(), file: file, fileName: file.name, status: 'PENDING', progress: 0, log: 'Sıraya alındı...', analysisData: null, timestamp: Date.now() };
-        uploadQueue.unshift(item);
+
+    const item = {
+        id: generateUUID(),
+        file: file,
+        fileName: file.name,
+        status: 'PENDING',
+        progress: 0,
+        log: isMain ? 'Sıraya alındı...' : 'Ek olarak bekliyor...',
+        analysisData: null,
+        timestamp: Date.now(),
+        isMain: isMain,
+        parentItemId: parentItemId,
+        attachments: [] // For main documents, will hold attachment item IDs
+    };
+
+    uploadQueue.unshift(item);
+
+    if (isMain) {
         processQueueItem(item);
-    });
+    }
+    // Attachments will be processed after main document approval
+
     updateQueueUI();
+    return item;
 }
+
+// File Sorting Modal Functions
+function openFileSortingModal(files) {
+    const list = document.getElementById('file-sorting-list');
+
+    list.innerHTML = files.map((file, idx) => `
+        <div class="file-sort-item" draggable="true" data-idx="${idx}" 
+             style="padding:12px; border-bottom:1px solid var(--border-color); cursor:move; display:flex; align-items:center; gap:10px; background:${idx === 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent'};">
+            <span style="color:var(--text-muted);">☰</span>
+            <i data-lucide="${idx === 0 ? 'file-check' : 'paperclip'}" style="width:18px; color:${idx === 0 ? 'var(--accent-success)' : 'var(--text-muted)'};"></i>
+            <span style="flex:1; font-size:0.9rem;">${escapeHtml(file.name)}</span>
+            <span class="badge ${idx === 0 ? 'badge-active' : ''}" style="font-size:0.7rem;">
+                ${idx === 0 ? 'Ana Evrak' : 'Ek ' + idx}
+            </span>
+        </div>
+    `).join('');
+
+    setupFileSortingDragDrop(list);
+
+    document.getElementById('file-sorting-modal').classList.add('active');
+    lucide.createIcons();
+}
+
+function setupFileSortingDragDrop(list) {
+    let draggedItem = null;
+
+    list.addEventListener('dragstart', (e) => {
+        draggedItem = e.target.closest('.file-sort-item');
+        if (draggedItem) draggedItem.style.opacity = '0.5';
+    });
+
+    list.addEventListener('dragend', () => {
+        if (draggedItem) {
+            draggedItem.style.opacity = '1';
+            draggedItem = null;
+            updateFileSortingUI();
+        }
+    });
+
+    list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (draggedItem) {
+            if (afterElement == null) {
+                list.appendChild(draggedItem);
+            } else {
+                list.insertBefore(draggedItem, afterElement);
+            }
+        }
+    });
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.file-sort-item:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function updateFileSortingUI() {
+    const items = document.querySelectorAll('#file-sorting-list .file-sort-item');
+    items.forEach((item, idx) => {
+        const badge = item.querySelector('.badge');
+        const icon = item.querySelector('i[data-lucide]');
+
+        item.style.background = idx === 0 ? 'rgba(76, 175, 80, 0.1)' : 'transparent';
+        badge.textContent = idx === 0 ? 'Ana Evrak' : 'Ek ' + idx;
+        badge.className = 'badge' + (idx === 0 ? ' badge-active' : '');
+
+        if (icon) {
+            icon.setAttribute('data-lucide', idx === 0 ? 'file-check' : 'paperclip');
+            icon.style.color = idx === 0 ? 'var(--accent-success)' : 'var(--text-muted)';
+        }
+    });
+    lucide.createIcons();
+}
+
+function closeFileSortingModal() {
+    document.getElementById('file-sorting-modal').classList.remove('active');
+    pendingFilesForSorting = [];
+}
+
+function confirmFileSorting() {
+    const items = document.querySelectorAll('#file-sorting-list .file-sort-item');
+    const sortedIndices = Array.from(items).map(item => parseInt(item.dataset.idx));
+
+    // Reorder files based on drag result
+    const sortedFiles = sortedIndices.map(idx => pendingFilesForSorting[idx]);
+
+    // First file is main, rest are attachments
+    const mainFile = sortedFiles[0];
+    const attachmentFiles = sortedFiles.slice(1);
+
+    // Process main file
+    const mainItem = processSingleFile(mainFile, true);
+
+    if (mainItem) {
+        // Store attachment files for later processing
+        mainItem.pendingAttachments = attachmentFiles;
+        mainItem.attachmentSortOrder = attachmentFiles.map((f, i) => ({ file: f, order: i + 1 }));
+    }
+
+    closeFileSortingModal();
+    showToast(`Ana evrak + ${attachmentFiles.length} ek sıraya alındı.`, 'info');
+}
+
+window.openFileSortingModal = openFileSortingModal;
+window.closeFileSortingModal = closeFileSortingModal;
+window.confirmFileSorting = confirmFileSorting;
 
 async function processQueueItem(item) {
     if (!item.file) { item.status = 'ERROR'; item.log = 'Dosya verisi kayıp.'; saveQueueToStorage(); updateQueueUI(); return; }
@@ -492,6 +643,33 @@ async function approveNewCase() {
             await uploadDocument(newCase.id, item.file, item.analysisData);
         } */
 
+        // [NEW] Upload attachments if pending
+        if (item.pendingAttachments && item.pendingAttachments.length > 0) {
+            // Get the main document ID
+            const { data: mainDoc } = await supabase
+                .from('documents')
+                .select('id')
+                .eq('file_case_id', newCase.id)
+                .eq('is_main', true)
+                .maybeSingle();
+
+            const mainDocId = mainDoc?.id || null;
+
+            for (let i = 0; i < item.pendingAttachments.length; i++) {
+                const attachFile = item.pendingAttachments[i];
+                try {
+                    await uploadDocument(newCase.id, attachFile, null, {
+                        isMain: false,
+                        parentDocumentId: mainDocId,
+                        sortOrder: i + 1
+                    });
+                } catch (attErr) {
+                    console.warn(`Attachment upload failed: ${attachFile.name}`, attErr);
+                }
+            }
+            showToast(`${item.pendingAttachments.length} ek başarıyla yüklendi.`, 'info');
+        }
+
         item.status = 'SUCCESS'; item.result = newCase; item.log = `Yeni: ${newCase.registration_number}`;
         closeReviewModal(); saveQueueToStorage(); updateQueueItemUI(item); loadLawyers(); showToast('Yeni dosya oluşturuldu.', 'success');
     } catch (e) { showToast('Hata: ' + e.message, 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="check-circle"></i> Onayla'; }
@@ -503,7 +681,25 @@ async function linkToSpecificCase(cid, cnum) {
     if (!item) return;
 
     try {
-        await uploadDocument(cid, item.file, item.analysisData);
+        const mainDoc = await uploadDocument(cid, item.file, item.analysisData, { isMain: true });
+        const mainDocId = mainDoc?.id || null;
+
+        // [NEW] Upload attachments if pending
+        if (item.pendingAttachments && item.pendingAttachments.length > 0) {
+            for (let i = 0; i < item.pendingAttachments.length; i++) {
+                const attachFile = item.pendingAttachments[i];
+                try {
+                    await uploadDocument(cid, attachFile, null, {
+                        isMain: false,
+                        parentDocumentId: mainDocId,
+                        sortOrder: i + 1
+                    });
+                } catch (attErr) {
+                    console.warn(`Attachment upload failed: ${attachFile.name}`, attErr);
+                }
+            }
+            showToast(`${item.pendingAttachments.length} ek başarıyla yüklendi.`, 'info');
+        }
 
         // [NEW] Create decision record if this is a decision document
         const decisionResult = document.getElementById('review-decision-result')?.value || '';
