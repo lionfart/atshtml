@@ -64,19 +64,26 @@ function populateModelOrderList() {
 }
 
 // Setup drag-drop for model reordering
+// Setup drag-drop for model reordering
 function setupDragDrop(list) {
+    // Check if checks are already initialized to prevent duplicate listeners
+    if (list.dataset.dragInitialized) return;
+    list.dataset.dragInitialized = 'true';
+
     let draggedItem = null;
 
     list.addEventListener('dragstart', (e) => {
         draggedItem = e.target.closest('li');
         if (draggedItem) {
             draggedItem.style.opacity = '0.5';
+            draggedItem.classList.add('dragging');
         }
     });
 
     list.addEventListener('dragend', (e) => {
         if (draggedItem) {
             draggedItem.style.opacity = '1';
+            draggedItem.classList.remove('dragging');
             draggedItem = null;
         }
     });
