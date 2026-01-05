@@ -622,7 +622,7 @@ async function createLawyer(name, username, password) {
         .from('lawyers')
         .select('id')
         .eq('username', username)
-        .single();
+        .maybeSingle();
 
     if (existing) {
         throw new Error('Bu kullanıcı adı zaten kullanılıyor.');
@@ -633,7 +633,7 @@ async function createLawyer(name, username, password) {
         .insert({
             name: name,
             username: username,
-            password: password, // Note: In production, this should be hashed
+            password_hash: password, // Note: In production, this should be properly hashed
             status: 'ACTIVE'
         })
         .select()
