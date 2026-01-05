@@ -679,6 +679,14 @@ function openAddDecisionModal(editData = null) {
                         <input type="date" id="decision-date-input" class="form-control" value="${editData?.decision_date || ''}">
                     </div>
                     <div class="form-group">
+                        <label>Mahkeme Adı</label>
+                        <input type="text" id="decision-court-input" class="form-control" placeholder="Örn: Ankara 1. Asliye Hukuk" value="${editData?.court || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Esas Numarası</label>
+                        <input type="text" id="decision-basis-input" class="form-control" placeholder="Örn: 2024/123 E." value="${editData?.basis_number || ''}">
+                    </div>
+                    <div class="form-group">
                         <label>Karar Numarası (Opsiyonel)</label>
                         <input type="text" id="decision-number-input" class="form-control" placeholder="2024/123 K." value="${editData?.decision_number || ''}">
                     </div>
@@ -711,6 +719,8 @@ window.saveDecisionFromModal = async function (editId) {
         decision_result: document.getElementById('decision-result-input').value,
         decision_date: document.getElementById('decision-date-input').value || null,
         decision_number: document.getElementById('decision-number-input').value || null,
+        court: document.getElementById('decision-court-input').value || null,
+        basis_number: document.getElementById('decision-basis-input').value || null,
         notes: document.getElementById('decision-notes-input').value || null
     };
 

@@ -230,10 +230,16 @@ function applyColumnOrder() {
     const hiddenCols = JSON.parse(localStorage.getItem('filesHiddenColumns') || '[]');
 
     columnOrder.forEach(id => {
-        // Only append if not hidden
-        if (!hiddenCols.includes(id)) {
-            const headerEl = headers.find(h => h.getAttribute('data-id') === id);
-            if (headerEl) headerRow.appendChild(headerEl);
+        // Append ALL headers but hide if in hiddenCols
+        // This ensures they are still in DOM for renderColumnToggleMenu to find
+        const headerEl = headers.find(h => h.getAttribute('data-id') === id);
+        if (headerEl) {
+            if (hiddenCols.includes(id)) {
+                headerEl.style.display = 'none';
+            } else {
+                headerEl.style.removeProperty('display');
+            }
+            headerRow.appendChild(headerEl);
         }
     });
 
