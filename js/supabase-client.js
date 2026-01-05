@@ -612,7 +612,36 @@ function initSupabase() {
 }
 function setupRealtimeLawyers(cb) { supabase.channel('public:lawyers').on('postgres_changes', { event: '*', schema: 'public', table: 'lawyers' }, () => cb()).subscribe(); }
 async function getLawyers() { const { data } = await supabase.from('lawyers').select('*').order('name'); return data || []; }
-async function createLawyer(name, username, password) { /*...*/ }
+async function createLawyer(name, username, password) {
+    if (!name || !username || !password) {
+        throw new Error('Ad, kullanıcı adı ve şifre zorunludur.');
+    }
+
+    // Check if username already exists
+    const { data: existing } = await supabase
+        .from('lawyers')
+        .select('id')
+        .eq('username', username)
+        .single();
+
+    if (existing) {
+        throw new Error('Bu kullanıcı adı zaten kullanılıyor.');
+    }
+
+    const { data, error } = await supabase
+        .from('lawyers')
+        .insert({
+            name: name,
+            username: username,
+            password: password, // Note: In production, this should be hashed
+            status: 'ACTIVE'
+        })
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+}
 // Lawyer Status
 // Lawyer Status
 async function updateLawyerStatus(id, newStatus, returnDate = null) {
