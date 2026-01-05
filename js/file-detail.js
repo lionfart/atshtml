@@ -827,16 +827,33 @@ function updateDocumentsList(documents) {
         atts.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     });
 
-    function renderDocument(doc, isAttachment = false) {
+    function renderDocument(doc, isAttachment = false, hasAttachments = false) {
+        // Indentation for attachments
         const indent = isAttachment ? 'margin-left: 24px; border-left: 2px solid var(--border-color); padding-left: 12px;' : '';
         const prefix = isAttachment ? '<span style="color:var(--text-muted); margin-right:6px;">└─</span>' : '';
         const iconName = isAttachment ? 'paperclip' : (doc.is_main ? 'file-check' : 'file-text');
         const iconColor = doc.is_main ? 'var(--accent-success)' : (isAttachment ? 'var(--text-muted)' : 'var(--accent-primary)');
 
+        // Toggle button logic for main documents with attachments
+        let toggleBtn = '';
+        if (!isAttachment && hasAttachments) {
+            toggleBtn = `
+                <button class="icon-btn" onclick="toggleAttachments('${doc.id}', this)" style="margin-right:5px; padding:2px; height:auto; width:auto;" title="Ekleri Göster/Gizle">
+                    <i data-lucide="plus-square" style="width:16px; height:16px;"></i>
+                </button>
+            `;
+        } else if (!isAttachment) {
+            // Spacer for alignment if no attachments
+            toggleBtn = `<span style="width:21px; display:inline-block;"></span>`;
+        }
+
         return `
             <div class="document-item" data-doc-id="${doc.id}" style="${indent}">
-                <div class="document-icon" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" style="color:${iconColor};">
-                    ${prefix}<i data-lucide="${iconName}"></i>
+                <div style="display:flex; align-items:center;">
+                    ${toggleBtn}
+                    <div class="document-icon" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" style="color:${iconColor}; cursor:pointer;">
+                        ${prefix}<i data-lucide="${iconName}"></i>
+                    </div>
                 </div>
                 <div class="document-info">
                     <div class="document-name" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" ${doc.analysis?.summary ? `data-tooltip="${escapeHtml(doc.analysis.summary.substring(0, 200) + (doc.analysis.summary.length > 200 ? '...' : ''))}"` : ''}>
@@ -860,24 +877,50 @@ function updateDocumentsList(documents) {
 
     let html = '';
     mainDocs.forEach(doc => {
-        html += renderDocument(doc, false);
-
-        // Render attachments for this document
         const docAttachments = attachmentsByParent[doc.id] || [];
-        docAttachments.forEach(att => {
+        const hasAttachments = docAttachments.length > 0;
+
+        html += renderDocument(doc, false, hasAttachments);
+
+        if (hasAttachments) {
+            html += `<div id="attachments-${doc.id}" style="display:none;">`;
+            docAttachments.forEach(att => {
+                html += renderDocument(att, true);
+            });
+            html += `</div>`;
+        }
+    });
+
+    // Render orphan attachments
+    const orphanAttachments = attachments.filter(att => !mainDocs.find(m => m.id === att.parent_document_id));
+    if (orphanAttachments.length > 0) {
+        html += `<div class="orphan-attachments">`;
+        orphanAttachments.forEach(att => {
             html += renderDocument(att, true);
         });
-    });
-
-    // Render orphan attachments (attachments without valid parent - rare edge case)
-    const orphanAttachments = attachments.filter(att => !mainDocs.find(m => m.id === att.parent_document_id));
-    orphanAttachments.forEach(att => {
-        html += renderDocument(att, true);
-    });
+        html += `</div>`;
+    }
 
     container.innerHTML = html;
     lucide.createIcons();
 }
+
+// Global function to toggle attachments visibility
+window.toggleAttachments = function (docId, btn) {
+    const el = document.getElementById(`attachments-${docId}`);
+    if (el) {
+        const isHidden = el.style.display === 'none';
+        el.style.display = isHidden ? 'block' : 'none';
+
+        // Update icon
+        const icon = btn.querySelector('i'); // Lucide icon is SVG or i tag replaced by JS
+        // Since Lucide replaces <i> with <svg>, we might need to re-render or just toggle class/attribute
+        // Harder to swap icon name dynamically after lucide run. 
+        // Simpler approach: Re-render button content
+        btn.innerHTML = `<i data-lucide="${isHidden ? 'minus-square' : 'plus-square'}" style="width:16px; height:16px;"></i>`;
+        lucide.createIcons();
+    }
+};
 
 // ==========================================
 // Notes
