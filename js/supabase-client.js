@@ -28,10 +28,11 @@ async function getFileCases(options = {}) {
     let query = supabase.from('file_cases').select(`*, lawyers (id, name, status)`);
 
     // Sort logic
-    if (options.sort === 'date-asc') query = query.order('created_at', { ascending: true });
+    if (options.sort === 'date-asc') query = query.order('latest_activity_date', { ascending: true });
+    else if (options.sort === 'date-desc') query = query.order('latest_activity_date', { ascending: false });
     else if (options.sort === 'reg-desc') query = query.order('registration_number', { ascending: false });
     else if (options.sort === 'reg-asc') query = query.order('registration_number', { ascending: true });
-    else query = query.order('created_at', { ascending: false }); // Default
+    else query = query.order('latest_activity_date', { ascending: false }); // Default
 
     // Search
     if (options.search) {
@@ -236,47 +237,48 @@ async function uploadDocument(fileCaseId, file, aiData = null, options = {}) {
 
     await createNote(fileCaseId, null, noteText);
 
-    // Update File Case Activity
-    const updates = {
-        latest_activity_type: aiData?.type || 'Yeni Evrak',
-        latest_activity_summary: aiData?.summary || null,
-        latest_activity_date: new Date().toISOString()
-    };
+    // Update File Case Activity ONLY if it is a MAIN document
+    if (isMain) {
+        const updates = {
+            latest_activity_type: aiData?.type || 'Yeni Evrak',
+            latest_activity_summary: aiData?.summary || null,
+            latest_activity_date: new Date().toISOString()
+        };
 
-    // Auto-Calculate Deadline (Generic for ALL documents with a duration)
-    // Rule: If document has "action_duration_days", Calculate Deadline = Upload Date (Today) + Duration
-    if (aiData && aiData.action_duration_days) {
-        const days = parseInt(aiData.action_duration_days);
-        if (!isNaN(days) && days > 0) {
-            const today = new Date();
-            const deadline = new Date(today);
-            deadline.setDate(today.getDate() + days);
+        // Auto-Calculate Deadline (Generic for ALL documents with a duration)
+        // Rule: If document has "action_duration_days", Calculate Deadline = Upload Date (Today) + Duration
+        if (aiData && aiData.action_duration_days) {
+            const days = parseInt(aiData.action_duration_days);
+            if (!isNaN(days) && days > 0) {
+                const today = new Date();
+                const deadline = new Date(today);
+                deadline.setDate(today.getDate() + days);
 
-            // Update logic: Always prefer the calculated deadline if duration exists
-            updates.deadline_date = deadline.toISOString().split('T')[0];
-            console.log(`[Auto-Deadline] Enforced: ${updates.deadline_date} (Upload + ${days} days).`);
+                // Update logic: Always prefer the calculated deadline if duration exists
+                updates.deadline_date = deadline.toISOString().split('T')[0];
+                console.log(`[Auto-Deadline] Enforced: ${updates.deadline_date} (Upload + ${days} days).`);
+            }
         }
+
+        // Update decision result if present
+        if (aiData && aiData.decision_result) {
+            updates.latest_decision_result = aiData.decision_result;
+        }
+
+        // Update tags if present (append to existing or set new)
+        if (aiData && aiData.tags && Array.isArray(aiData.tags) && aiData.tags.length > 0) {
+            // Fetch current tags first to merge
+            const { data: currentFile } = await supabase.from('file_cases').select('tags').eq('id', fileCaseId).single();
+            const existingTags = currentFile?.tags || [];
+
+            // Merge arrays and remove duplicates
+            const newTags = [...new Set([...existingTags, ...aiData.tags])];
+
+            updates.tags = newTags;
+        }
+
+        await supabase.from('file_cases').update(updates).eq('id', fileCaseId);
     }
-
-    // Update decision result if present
-    if (aiData && aiData.decision_result) {
-        updates.latest_decision_result = aiData.decision_result;
-    }
-
-    // Update tags if present (append to existing or set new)
-    // Update tags if present (append to existing)
-    if (aiData && aiData.tags && Array.isArray(aiData.tags) && aiData.tags.length > 0) {
-        // Fetch current tags first to merge
-        const { data: currentFile } = await supabase.from('file_cases').select('tags').eq('id', fileCaseId).single();
-        const existingTags = currentFile?.tags || [];
-
-        // Merge arrays and remove duplicates
-        const newTags = [...new Set([...existingTags, ...aiData.tags])];
-
-        updates.tags = newTags;
-    }
-
-    await supabase.from('file_cases').update(updates).eq('id', fileCaseId);
 
     return doc;
 }
