@@ -848,7 +848,16 @@ function updateDocumentsList(documents) {
         }
 
         return `
-            <div class="document-item" data-doc-id="${doc.id}" style="${indent}">
+            <div class="document-item" 
+                 data-doc-id="${doc.id}" 
+                 style="${indent}"
+                 draggable="true"
+                 ondragstart="handleDragStart(event, '${doc.id}')"
+                 ondragover="handleDragOver(event)"
+                 ondragleave="handleDragLeave(event)"
+                 ondrop="handleDrop(event, '${doc.id}')"
+                 ondragend="handleDragEnd(event)">
+                 
                 <div style="display:flex; align-items:center;">
                     ${toggleBtn}
                     <div class="document-icon" onclick="viewDocument('${doc.id}', '${doc.public_url || ''}')" style="color:${iconColor}; cursor:pointer;">
@@ -901,6 +910,17 @@ function updateDocumentsList(documents) {
         html += `</div>`;
     }
 
+    // Add Root Drop Zone (to convert Attachments back to Main Documents)
+    html += `
+        <div class="root-drop-zone" 
+             ondragover="handleDragOver(event)" 
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event, null)">
+            <i data-lucide="corner-up-left" style="width:16px; margin-right:5px; vertical-align:middle;"></i>
+            Ana Evrak Yapmak İçin Buraya Bırakın
+        </div>
+    `;
+
     container.innerHTML = html;
     lucide.createIcons();
 }
@@ -913,13 +933,101 @@ window.toggleAttachments = function (docId, btn) {
         el.style.display = isHidden ? 'block' : 'none';
 
         // Update icon
-        const icon = btn.querySelector('i'); // Lucide icon is SVG or i tag replaced by JS
-        // Since Lucide replaces <i> with <svg>, we might need to re-render or just toggle class/attribute
-        // Harder to swap icon name dynamically after lucide run. 
-        // Simpler approach: Re-render button content
+        const icon = btn.querySelector('i');
         btn.innerHTML = `<i data-lucide="${isHidden ? 'minus-square' : 'plus-square'}" style="width:16px; height:16px;"></i>`;
         lucide.createIcons();
     }
+};
+
+// ==========================================
+// Document Hierarchy Drag & Drop
+// ==========================================
+
+window.handleDragStart = function (e, docId) {
+    e.dataTransfer.setData("text/plain", docId);
+    e.dataTransfer.effectAllowed = "move";
+    e.target.classList.add('dragging');
+};
+
+window.handleDragOver = function (e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+
+    // Highlight drop target visually
+    const targetItem = e.target.closest('.document-item') || e.target.closest('.root-drop-zone');
+    if (targetItem) {
+        targetItem.classList.add('drag-over');
+    }
+};
+
+window.handleDragLeave = function (e) {
+    const targetItem = e.target.closest('.document-item') || e.target.closest('.root-drop-zone');
+    if (targetItem) {
+        targetItem.classList.remove('drag-over');
+    }
+};
+
+window.handleDrop = async function (e, targetDocId = null, targetIsMain = false) {
+    e.preventDefault();
+
+    // Remove highlights
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+
+    const draggedDocId = e.dataTransfer.getData("text/plain");
+
+    // Self-drop check
+    if (!draggedDocId || draggedDocId === targetDocId) return;
+
+    try {
+        let updates = {};
+
+        if (targetDocId) {
+            // Drop on another document -> Become attachment
+            // If target is Main -> Become attachment of Target
+            // If target is Attachment -> Become attachment of Target's Parent (sibling)
+
+            // We need to know if target is main or attachment to decide parent
+            // Passed as argument or needs fetch? 
+            // Better to fetch current state of target to be safe, or used cached data.
+            // Since we don't have easy access to cached data here, let's assume the passed targetIsMain is correct 
+            // OR fetch from DB for robustness.
+
+            const { data: targetDoc } = await supabase.from('documents').select('id, is_main, parent_document_id').eq('id', targetDocId).single();
+
+            if (!targetDoc) throw new Error("Hedef dosya bulunamadı.");
+
+            // Infinite loop check (parent cannot be child of its own child) - simple version: just allow 1 level deep
+
+            if (targetDoc.is_main) {
+                // Attach to this main doc
+                updates = { is_main: false, parent_document_id: targetDoc.id };
+            } else {
+                // Attach to same parent as target
+                updates = { is_main: false, parent_document_id: targetDoc.parent_document_id };
+            }
+        } else {
+            // Dropped on Root Zone -> Make Main Document
+            updates = { is_main: true, parent_document_id: null };
+        }
+
+        // Update DB
+        const { error } = await supabase.from('documents').update(updates).eq('id', draggedDocId);
+
+        if (error) throw error;
+
+        showToast('Evrak hiyerarşisi güncellendi.', 'success');
+        loadFileDetails(); // Reload to refresh list
+
+    } catch (err) {
+        console.error('Drop error:', err);
+        showToast('Hata: ' + err.message, 'error');
+    }
+};
+
+window.handleDragEnd = function (e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
 };
 
 // ==========================================

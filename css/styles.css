@@ -766,3 +766,31 @@ select {
     width: 2px;
     background: var(--border-color);
 }
+
+/* Drag & Drop Visuals */
+.document-item.drag-over {
+    border: 1px dashed var(--accent-primary) !important;
+    background: rgba(139, 92, 246, 0.1) !important;
+}
+
+.root-drop-zone {
+    border: 2px dashed var(--border-color);
+    padding: 10px;
+    text-align: center;
+    color: var(--text-muted);
+    margin-top: 15px;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    font-size: 0.9em;
+    cursor: default;
+}
+
+.root-drop-zone:hover {
+    border-color: var(--text-secondary);
+}
+
+.root-drop-zone.drag-over {
+    border-color: var(--accent-success) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: var(--accent-success);
+}
