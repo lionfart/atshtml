@@ -476,8 +476,8 @@ async function approveNewCase() {
                     decision_result: decisionResult || 'Belirsiz',
                     decision_date: decisionDate,
                     decision_number: kararNo || null,
-                    court_name: courtName || null,
-                    court_case_number: esasNo || null
+                    court: courtName || null,
+                    basis_number: esasNo || null
                 });
                 // Update latest_decision_result
                 await supabase.from('file_cases').update({ latest_decision_result: decisionResult || null }).eq('id', newCase.id);
@@ -534,8 +534,8 @@ async function linkToSpecificCase(cid, cnum) {
                     decision_result: decisionResult || 'Belirsiz',
                     decision_date: decisionDate,
                     decision_number: kararNo || null,
-                    court_name: courtName || null,
-                    court_case_number: esasNo || null
+                    court: courtName || null,
+                    basis_number: esasNo || null
                 });
                 // Update latest_decision_result
                 await supabase.from('file_cases').update({ latest_decision_result: decisionResult || null }).eq('id', cid);
