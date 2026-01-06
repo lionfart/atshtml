@@ -104,7 +104,7 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             if (file.next_hearing_date) {
                 events.push({
                     id: file.id,
-                    title: `Duruşma: ${file.plaintiff}`,
+                    title: `${file.court_case_number || 'Dosya No Yok'} - ${file.lawyers?.name || 'Avukat Yok'} (Duruşma)`,
                     start: file.next_hearing_date,
                     backgroundColor: '#4f46e5', // Indigo
                     borderColor: '#4338ca',
@@ -117,7 +117,7 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             if (file.deadline_date) {
                 events.push({
                     id: file.id,
-                    title: `Süre: ${file.subject ? file.subject.substring(0, 15) : 'Dosya'}...`,
+                    title: `${file.court_case_number || 'Dosya No Yok'} - ${file.lawyers?.name || 'Avukat Yok'} (Süre)`,
                     start: file.deadline_date,
                     backgroundColor: '#e11d48', // Rose
                     borderColor: '#be123c',

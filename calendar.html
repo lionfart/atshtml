@@ -33,8 +33,7 @@
         .fc-toolbar-title {
             font-size: 1.5em !important;
             font-weight: 600;
-            color: #111827;
-            /* Dark title */
+            color: var(--text-primary) !important;
         }
 
         .fc-button-primary {
@@ -46,16 +45,33 @@
             background-color: var(--accent-primary-hover) !important;
         }
 
-        /* Calendar grid text - light colors for dark theme */
+        /* Calendar grid text */
         .fc-col-header-cell-cushion,
         .fc-daygrid-day-number {
-            color: var(--text-secondary);
+            color: var(--text-primary) !important;
+            /* Brighter for dark mode */
             text-decoration: none !important;
         }
 
         .fc-col-header-cell-cushion:hover,
         .fc-daygrid-day-number:hover {
-            color: var(--accent-primary);
+            color: var(--accent-primary) !important;
+        }
+
+        /* List View Improvements */
+        .fc-list-event:hover td {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            /* Soft gray hover */
+        }
+
+        .fc-theme-standard .fc-list-day-cushion {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .fc-list-event-title,
+        .fc-list-event-time {
+            color: var(--text-primary) !important;
         }
 
         .fc-daygrid-day {
