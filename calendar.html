@@ -173,6 +173,38 @@
             </div>
         </div>
 
+        <!-- Filter Toolbar -->
+        <div class="calendar-filter-toolbar"
+            style="margin-bottom: 20px; background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1; max-width: 300px;">
+                <label for="calendar-filter-lawyer"
+                    style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Avukat
+                    Filtreleme</label>
+                <div style="position: relative;">
+                    <select id="calendar-filter-lawyer" class="form-control" style="width: 100%; padding-left: 35px;"
+                        onchange="window.refetchCalendarEvents()">
+                        <option value="">Tüm Dosyalar</option>
+                        <!-- Populated by JS -->
+                    </select>
+                    <i data-lucide="filter"
+                        style="width: 16px; position: absolute; left: 10px; top: 12px; color: var(--text-muted);"></i>
+                </div>
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; gap: 10px; padding-top: 22px;">
+                <div style="display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-muted);">
+                    <span
+                        style="display: inline-block; width: 10px; height: 10px; background-color: #4f46e5; border-radius: 50%;"></span>
+                    Duruşma
+                    <span
+                        style="display: inline-block; width: 10px; height: 10px; background-color: #e11d48; border-radius: 50%; margin-left: 10px;"></span>
+                    Süre
+                    <span
+                        style="display: inline-block; width: 10px; height: 10px; background-color: #059669; border-radius: 50%; margin-left: 10px;"></span>
+                    İşlem
+                </div>
+            </div>
+        </div>
+
         <div class="calendar-container" id="calendar"></div>
     </main>
 

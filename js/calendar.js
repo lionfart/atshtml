@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     calendarInstance = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'tr',
+        dayMaxEvents: 3, // Shows "+X more" if more than 3
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -37,20 +38,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     calendarInstance.render();
+
+    // Global Helper for Filter
+    window.refetchCalendarEvents = () => {
+        if (calendarInstance) calendarInstance.refetchEvents();
+    };
 });
 
 async function loadLawyersForDropdown() {
     try {
         const { data: lawyers } = await supabase.from('lawyers').select('id, name');
-        const dropdown = document.getElementById('event-lawyer');
-        if (!dropdown || !lawyers) return;
 
-        lawyers.forEach(l => {
-            const option = document.createElement('option');
-            option.value = l.id;
-            option.textContent = l.name;
-            dropdown.appendChild(option);
-        });
+        // Populate New Event Modal Dropdown
+        const modalDropdown = document.getElementById('event-lawyer');
+        if (modalDropdown && lawyers) {
+            modalDropdown.innerHTML = '<option value="">-- Seçiniz --</option>'; // Reset
+            lawyers.forEach(l => {
+                const option = document.createElement('option');
+                option.value = l.id;
+                option.textContent = l.name;
+                modalDropdown.appendChild(option);
+            });
+        }
+
+        // Populate Filter Dropdown
+        const filterDropdown = document.getElementById('calendar-filter-lawyer');
+        if (filterDropdown && lawyers) {
+            filterDropdown.innerHTML = '<option value="">Tüm Dosyalar</option>'; // Reset
+            lawyers.forEach(l => {
+                const fOption = document.createElement('option');
+                fOption.value = l.id;
+                fOption.textContent = l.name;
+                filterDropdown.appendChild(fOption);
+            });
+        }
     } catch (e) {
         console.error('Error loading lawyers:', e);
     }
@@ -58,10 +79,18 @@ async function loadLawyersForDropdown() {
 
 async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) {
     try {
+        const filterLawyerId = document.getElementById('calendar-filter-lawyer')?.value;
+
         // Fetch file-based events
-        const { data: files, error } = await supabase
+        let fileQuery = supabase
             .from('file_cases')
-            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject');
+            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject, assigned_lawyer_id');
+
+        if (filterLawyerId) {
+            fileQuery = fileQuery.eq('assigned_lawyer_id', filterLawyerId);
+        }
+
+        const { data: files, error } = await fileQuery;
 
         if (error) throw error;
 
@@ -74,8 +103,9 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
                     id: file.id,
                     title: `Duruşma: ${file.plaintiff}`,
                     start: file.next_hearing_date,
-                    backgroundColor: '#3b82f6', // Blue
-                    borderColor: '#2563eb',
+                    backgroundColor: '#4f46e5', // Modern Indigo
+                    borderColor: '#4338ca',
+                    textColor: '#ffffff',
                     extendedProps: { type: 'hearing', caseNumber: file.court_case_number }
                 });
             }
@@ -84,19 +114,26 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             if (file.deadline_date) {
                 events.push({
                     id: file.id,
-                    title: `Süre Bitişi: ${file.subject ? file.subject.substring(0, 20) + '...' : 'Dosya'}`,
+                    title: `Süre: ${file.subject ? file.subject.substring(0, 15) : 'Dosya'}...`,
                     start: file.deadline_date,
-                    backgroundColor: '#ef4444', // Red
-                    borderColor: '#dc2626',
+                    backgroundColor: '#e11d48', // Modern Rose
+                    borderColor: '#be123c',
+                    textColor: '#ffffff',
                     extendedProps: { type: 'deadline', caseNumber: file.court_case_number }
                 });
             }
         });
 
         // Fetch manual events with lawyer info
-        const { data: manualEvents } = await supabase
+        let manualQuery = supabase
             .from('calendar_events')
             .select('*, lawyers(name)');
+
+        if (filterLawyerId) {
+            manualQuery = manualQuery.eq('lawyer_id', filterLawyerId);
+        }
+
+        const { data: manualEvents } = await manualQuery;
 
         manualEvents?.forEach(evt => {
             const lawyerName = evt.lawyers?.name ? ` (${evt.lawyers.name})` : '';
@@ -104,8 +141,9 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
                 id: 'manual-' + evt.id,
                 title: evt.title + lawyerName,
                 start: evt.event_date + (evt.event_time ? 'T' + evt.event_time : ''),
-                backgroundColor: '#10b981', // Green for manual
-                borderColor: '#059669',
+                backgroundColor: '#059669', // Modern Emerald
+                borderColor: '#047857',
+                textColor: '#ffffff',
                 extendedProps: { type: 'manual', notes: evt.notes, lawyer: evt.lawyers?.name }
             });
         });
