@@ -391,6 +391,17 @@ function openReviewModal(itemId) {
     const isDecisionType = decisionTypes.some(t => (data.type || '').includes(t));
     let durationWarning = data.deadline_warning || ''; // Use AI-provided warning if any
 
+    // [FIX] Kesin Karar Safety Check
+    // Only 'Karar', 'İstinaf Kararı', 'Temyiz Kararı' can be truly 'final' (no deadline).
+    // Expert Reports, Interlocutory rulings (Ara Karar), Petitions MUST have deadlines.
+    const trulyFinalTypes = ['Karar', 'İstinaf Kararı', 'Temyiz Kararı'];
+    const isTrulyFinalDoc = trulyFinalTypes.some(t => (data.type || '').includes(t));
+
+    if (!isTrulyFinalDoc && data.is_final_no_deadline === true) {
+        console.warn(`[Review] 'is_final_no_deadline' overridden for non-final doc type: ${data.type}`);
+        data.is_final_no_deadline = false;
+    }
+
     // If is_final_no_deadline is true, this is a "kesin karar" - skip deadline
     if (data.is_final_no_deadline === true) {
         data.action_duration_days = null;
