@@ -80,14 +80,23 @@ async function loadLawyersForDropdown() {
 async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) {
     try {
         const filterLawyerId = document.getElementById('calendar-filter-lawyer')?.value;
+        let filterLawyerName = null;
+
+        // If filter is active, get the lawyer name first (Workaround for missing foreign key)
+        if (filterLawyerId) {
+            const { data: l } = await supabase.from('lawyers').select('name').eq('id', filterLawyerId).single();
+            if (l) filterLawyerName = l.name;
+        }
 
         // Fetch file-based events
+        // REMOVED 'assigned_lawyer_id' from select to avoid error
         let fileQuery = supabase
             .from('file_cases')
-            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject, assigned_lawyer_id');
+            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject, lawyer_name');
 
-        if (filterLawyerId) {
-            fileQuery = fileQuery.eq('assigned_lawyer_id', filterLawyerId);
+        // Filter by Name if ID-column is missing
+        if (filterLawyerName) {
+            fileQuery = fileQuery.eq('lawyer_name', filterLawyerName);
         }
 
         const { data: files, error } = await fileQuery;
