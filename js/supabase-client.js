@@ -525,7 +525,7 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
      - Örn: "Ankara 2. İdare Mahkemesi", "Bursa Bölge İdare Mahkemesi 2. İdari Dava Dairesi", "Danıştay 6. Daire".
 
 5. SÜRE VE KESİNLİK KURALLARI (ÇOK ÖNEMLİ):
-   a) "KEŞİN KARAR" TESPİTİ: Belgede şu ifadelerden biri varsa is_final_no_deadline = true ve action_duration_days = null:
+   a) "KESİN KARAR" TESPİTİ: Belgede şu ifadelerden biri varsa is_final_no_deadline = true ve action_duration_days = null:
       * "kesin olarak karar verildi"
       * "kesindir"
       * "kanun yolu kapalı"
@@ -538,6 +538,17 @@ AMAÇ: Hukuk bürosu iş akışını otomatize etmek. Sadece temel bilgileri de�
    c) BELİRSİZ SÜRE: Kesin karar değilse AMA süre net belirtilmemişse:
       * action_duration_days = 30 (varsayılan)
       * deadline_warning = "Süre belgede net belirtilmedi, 30 gün olarak varsayıldı."
+   d) YASAL SÜRE REFERANSLARI VE ADLİ TATİL (ÖNEMLİ):
+      * ADLİ TATİL: 20 Temmuz - 31 Ağustos tarihleri arasındadır. 
+      * SÜRELERİN UZAMASI (HMK 104): Eğer sürenin son günü adli tatile denk gelirse, bu süreler adli tatilin bitiminden itibaren 1 hafta uzamış sayılır (7 Eylül'e kadar).
+      * İSTİSNALAR (Adli Tatil İşlemez):
+        - İhtiyati tedbir, İhtiyati haciz
+        - Nafaka, Velayet, Vesayet
+        - Nüfus kayıt düzeltim davaları
+        - HİZMET AKDİ veya İŞ SÖZLEŞMESİ kaynaklı İŞÇİ davaları
+        - Çekişmesiz yargı işleri
+        - Kanunlarda ivedi olduğu belirtilen işler (Örn: İhale süreçleri, acele kamulaştırma vb.)
+      * SÜRE HESABI: Süreler tebliğ/tefhim tarihinden sonraki gün işlemeye başlar. Resmi tatiller süreye dahildir. Son gün tatile gelirse, ilk iş günü mesai bitiminde sona erer.
 
 6. KARAR SONUCU (decision_result) - SADECE BU DEĞERLERDEN BİRİ:
    - "Red" = Dava tamamen reddedildi
