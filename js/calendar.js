@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initialView: 'dayGridMonth',
         locale: 'tr',
         dayMaxEvents: 3, // Shows "+X more" if more than 3
+        moreLinkContent: function (args) { return '+' + args.num; }, // Custom format: "+7"
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
@@ -80,39 +81,32 @@ async function loadLawyersForDropdown() {
 async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) {
     try {
         const filterLawyerId = document.getElementById('calendar-filter-lawyer')?.value;
-        let filterLawyerName = null;
 
-        // If filter is active, get the lawyer name first (Workaround for missing foreign key)
-        if (filterLawyerId) {
-            const { data: l } = await supabase.from('lawyers').select('name').eq('id', filterLawyerId).single();
-            if (l) filterLawyerName = l.name;
-        }
-
-        // Fetch file-based events
-        // REMOVED 'assigned_lawyer_id' from select to avoid error
-        let fileQuery = supabase
+        // FETCH FILES with Relation
+        // Using strict select to avoid 'column does not exist' for explicit columns
+        // Relying on mapped relationship for lawyers.
+        const { data: files, error } = await supabase
             .from('file_cases')
-            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject, lawyer_name');
-
-        // Filter by Name if ID-column is missing
-        if (filterLawyerName) {
-            fileQuery = fileQuery.eq('lawyer_name', filterLawyerName);
-        }
-
-        const { data: files, error } = await fileQuery;
+            .select('id, plaintiff, court_case_number, next_hearing_date, deadline_date, subject, lawyers(id, name)');
 
         if (error) throw error;
 
         const events = [];
 
         files?.forEach(file => {
+            // CLIENT-SIDE FILTERING
+            if (filterLawyerId) {
+                // If file has no lawyer or ID doesn't match, skip it
+                if (!file.lawyers || file.lawyers.id !== filterLawyerId) return;
+            }
+
             // Hearing Event
             if (file.next_hearing_date) {
                 events.push({
                     id: file.id,
                     title: `Duruşma: ${file.plaintiff}`,
                     start: file.next_hearing_date,
-                    backgroundColor: '#4f46e5', // Modern Indigo
+                    backgroundColor: '#4f46e5', // Indigo
                     borderColor: '#4338ca',
                     textColor: '#ffffff',
                     extendedProps: { type: 'hearing', caseNumber: file.court_case_number }
@@ -125,7 +119,7 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
                     id: file.id,
                     title: `Süre: ${file.subject ? file.subject.substring(0, 15) : 'Dosya'}...`,
                     start: file.deadline_date,
-                    backgroundColor: '#e11d48', // Modern Rose
+                    backgroundColor: '#e11d48', // Rose
                     borderColor: '#be123c',
                     textColor: '#ffffff',
                     extendedProps: { type: 'deadline', caseNumber: file.court_case_number }
@@ -133,24 +127,27 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             }
         });
 
-        // Fetch manual events with lawyer info
-        let manualQuery = supabase
+        // FETCH MANUAL EVENTS
+        // Manual events table has explicit 'lawyer_id' column usuallly? 
+        // Or relationships. Let's assume standard 'lawyers(id, name)' works.
+        const { data: manualEvents } = await supabase
             .from('calendar_events')
-            .select('*, lawyers(name)');
-
-        if (filterLawyerId) {
-            manualQuery = manualQuery.eq('lawyer_id', filterLawyerId);
-        }
-
-        const { data: manualEvents } = await manualQuery;
+            .select('*, lawyers(name, id)');
 
         manualEvents?.forEach(evt => {
+            // Filter
+            if (filterLawyerId) {
+                // Check relationship OR direct column if available
+                const lId = evt.lawyers?.id || evt.lawyer_id;
+                if (!lId || lId !== filterLawyerId) return;
+            }
+
             const lawyerName = evt.lawyers?.name ? ` (${evt.lawyers.name})` : '';
             events.push({
                 id: 'manual-' + evt.id,
                 title: evt.title + lawyerName,
                 start: evt.event_date + (evt.event_time ? 'T' + evt.event_time : ''),
-                backgroundColor: '#059669', // Modern Emerald
+                backgroundColor: '#059669', // Emerald
                 borderColor: '#047857',
                 textColor: '#ffffff',
                 extendedProps: { type: 'manual', notes: evt.notes, lawyer: evt.lawyers?.name }
@@ -160,10 +157,11 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
         successCallback(events);
     } catch (error) {
         console.error('Error fetching events:', error);
-        showToast('Takvim verileri yüklenirken hata oluştu.', 'error');
+        // showToast('Takvim verileri yüklenirken hata oluştu.', 'error'); // Silent fail better for UX sometimes
         failureCallback(error);
     }
 }
+
 
 // Modal Functions
 function openNewEventModal() {
