@@ -312,4 +312,66 @@ async function convertTiffToBase64(file) {
     return canvas.toDataURL("image/jpeg", 0.9).split(',')[1]; // Return base64 part
 }
 
+// Calculate legal deadline based on doc type (Logic Injection)
+function calculateLegalDeadline(docType, baseDate = new Date()) {
+    if (!docType) return null;
+
+    let days = 30; // Default for Administrative Procedures (İYUK)
+    let rule = 'Genel Süre (30 Gün)';
+    let isWeeks = false;
+
+    // RULE SET
+    if (docType.includes('Bilirkişi') || docType === 'Bilirkişi Raporu') {
+        days = 14;
+        rule = 'HMK 281 - Bilirkişi Raporuna İtiraz (2 Hafta)';
+        isWeeks = true;
+    } else if (docType === 'Dava Dilekçesi') {
+        days = 30;
+        rule = 'İYUK 16 - Cevap Süresi (30 Gün)';
+    } else if (docType === 'Savunma Dilekçesi' || docType === 'Cevap Dilekçesi') {
+        days = 30;
+        rule = 'Cevap/Savunma Süresi (30 Gün)';
+    } else if (docType.includes('İstinaf') || docType.includes('Karar')) {
+        days = 30;
+        rule = 'Kanun Yolu Başvuru Süresi (30 Gün)';
+    } else if (docType === 'Ara Karar') {
+        days = 30;
+        rule = 'Ara Karar Gereği (Varsayılan 30 Gün)';
+    }
+
+    // Calculate Date
+    let deadline = new Date(baseDate);
+    deadline.setDate(deadline.getDate() + days);
+
+    // ADLI TATIL CHECK (Judicial Recess: July 20 - August 31)
+    // HMK 104: If deadline falls within recess, it extends to September 7 (1 week after recess ends)
+    // EXCEPTION: "İvedi İşler" do not stop. For now, we apply the general rule but warn the user.
+
+    const year = deadline.getFullYear();
+    const recessStart = new Date(year, 6, 20); // July 20
+    const recessEnd = new Date(year, 7, 31);   // August 31
+    const september7 = new Date(year, 8, 7);   // September 7
+
+    if (deadline >= recessStart && deadline <= recessEnd) {
+        deadline = september7;
+        rule += ' + Adli Tatil Uzatması (7 Eylül)';
+    }
+
+    // Weekend Check (If lands on Sat/Sun -> Next Monday)
+    const day = deadline.getDay();
+    if (day === 0) { // Sunday
+        deadline.setDate(deadline.getDate() + 1);
+        rule += ' (Haftasonu -> Pzt)';
+    } else if (day === 6) { // Saturday
+        deadline.setDate(deadline.getDate() + 2);
+        rule += ' (Haftasonu -> Pzt)';
+    }
+
+    return {
+        date: deadline.toISOString().split('T')[0],
+        days: days,
+        rule: rule,
+        isWeeks: isWeeks
+    };
+}
 // End of utils.js

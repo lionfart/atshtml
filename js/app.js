@@ -406,17 +406,27 @@ function openReviewModal(itemId) {
         console.log(`[Review Modal] Applied default duration (30 days) for decision type: ${data.type}`);
     }
 
-    // [FIX] Force calculation of deadline_date from action_duration_days relative to TODAY
-    // User Requirement: Start date is "Upload Date" (Today), not decision date.
-    // Only calculate if not a kesin karar
-    if (data.action_duration_days && data.is_final_no_deadline !== true) {
-        const days = parseInt(data.action_duration_days);
-        if (!isNaN(days) && days > 0) {
-            const today = new Date();
-            const deadline = new Date(today);
-            deadline.setDate(today.getDate() + days);
-            data.deadline_date = deadline.toISOString().split('T')[0];
-            console.log(`[Review Modal] Recalculated deadline: ${data.deadline_date} (Today + ${days} days).`);
+    // [LOGIC] Automated Legal Deadline Calculation (Overrides AI if needed or missing)
+    // Uses calculateLegalDeadline() from utils.js
+    if (data.is_final_no_deadline !== true) {
+        // Use upload timestamp if available, otherwise today
+        const baseDate = item.timestamp ? new Date(item.timestamp) : new Date();
+        const calcResult = (typeof calculateLegalDeadline === 'function') ? calculateLegalDeadline(data.type, baseDate) : null;
+
+        if (calcResult) {
+            data.deadline_date = calcResult.date;
+            data.action_duration_days = calcResult.days;
+            durationWarning = `ℹ️ Otomatik Hesaplama: ${calcResult.rule}`;
+            console.log(`[Review] Legal Deadline Applied: ${calcResult.rule} -> ${calcResult.date}`);
+        } else if (data.action_duration_days) {
+            // Fallback to simple calculation if util not found or type unknown
+            const days = parseInt(data.action_duration_days);
+            if (!isNaN(days) && days > 0) {
+                const today = new Date();
+                const deadline = new Date(today);
+                deadline.setDate(today.getDate() + days);
+                data.deadline_date = deadline.toISOString().split('T')[0];
+            }
         }
     }
 
