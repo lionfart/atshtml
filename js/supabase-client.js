@@ -377,7 +377,7 @@ function sanitizeJsonString(str) {
     return str;
 }
 
-async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
+async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0, validatorFn = null) {
     // Check if this is a vision request
     const isVision = contentBody.isVision === true;
 
@@ -395,7 +395,7 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
     if (modelIndex >= effectiveModels.length) {
         throw new Error(isVision
             ? 'Vision (görsel analiz) destekleyen bir model bulunamadı veya tümü hata verdi. Lütfen ayarlardan vision destekli bir model (örn: Gemini 2.0 Flash) ekleyin.'
-            : 'Bütün AI modelleri denendi fakat sonuç alınamadı.');
+            : 'Bütün AI modelleri denendi fakat sonuç alınamadı. Yanıtlar JSON formatında değildi.');
     }
 
     // Get API key from parameter or localStorage
@@ -447,6 +447,11 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
             };
         }
 
+        // Add directive for JSON if validator is present (Reinforcement)
+        if (validatorFn && !isVision) {
+            reqBody.messages[0].content += "\n\nIMPORTANT: RETURN ONLY RAW JSON. NO MARKDOWN, NO EXPLANATIONS.";
+        }
+
         const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -466,13 +471,13 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
             if (resp.status === 429 || errText.toLowerCase().includes('rate')) {
                 markModelRateLimited(currentModel);
                 await new Promise(r => setTimeout(r, 1000));
-                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, validatorFn);
             }
 
             // For other errors, just try next model
             if (resp.status === 404 || resp.status === 400 || resp.status === 503) {
                 await new Promise(r => setTimeout(r, 1000));
-                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, validatorFn);
             }
             throw new Error(`OpenRouter Error: ${resp.status} - ${errText}`);
         }
@@ -480,11 +485,23 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
         const data = await resp.json();
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
             console.warn(`OpenRouter Model ${currentModel} returned no content, trying next...`);
-            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+            return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, validatorFn);
+        }
+
+        const content = data.choices[0].message.content;
+
+        // [VALIDATION STEP]
+        if (validatorFn) {
+            try {
+                validatorFn(content);
+            } catch (valError) {
+                console.warn(`Model ${currentModel} response validation failed (Invalid JSON):`, valError);
+                return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, validatorFn);
+            }
         }
 
         console.log(`✓ AI Analysis successful with model: ${currentModel}`);
-        return data.choices[0].message.content;
+        return content;
     } catch (e) {
         console.error(`${currentModel} error:`, e);
         // Check if error message indicates rate limiting
@@ -492,7 +509,7 @@ async function callGeminiWithFallback(apiKey, contentBody, modelIndex = 0) {
             markModelRateLimited(currentModel);
         }
         await new Promise(r => setTimeout(r, 1000));
-        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1);
+        return await callGeminiWithFallback(apiKey, contentBody, modelIndex + 1, validatorFn);
     }
 }
 
@@ -630,48 +647,31 @@ ${docText}
         };
     }
 
+    // Validator to be passed to callGeminiWithFallback
+    const jsonValidator = (text) => {
+        if (!text) throw new Error("Empty response");
+        const cleaned = sanitizeJsonString(text);
+        // Basic parse check
+        JSON.parse(cleaned);
+    };
+
     try {
-        const responseText = await callGeminiWithFallback(apiKey, contentBody);
-
-        let cleanedText = sanitizeJsonString(responseText);
-
-        // Try parsing
-        try {
-            return JSON.parse(cleanedText);
-        } catch (parseErr) {
-            // Strategy 4: Try to fix common JSON issues (trailing commas, single quotes, etc.)
-            let fixedJson = cleanedText
-                .replace(/,\s*}/g, '}')  // Remove trailing commas before }
-                .replace(/,\s*]/g, ']')  // Remove trailing commas before ]
-                .replace(/'/g, '"')       // Replace single quotes with double quotes
-                .replace(/\n/g, ' ')      // Remove newlines
-                .replace(/\r/g, '');      // Remove carriage returns
-            return JSON.parse(fixedJson);
-        }
+        // First attempt: Full complex prompt with recursive model fallback
+        const responseText = await callGeminiWithFallback(apiKey, contentBody, 0, jsonValidator);
+        return JSON.parse(sanitizeJsonString(responseText));
     } catch (e) {
-        console.warn("JSON parsing failed, retrying with simple prompt...", e);
+        console.warn("First attempt failed, retrying with simple prompt...", e);
         try {
+            // Second attempt: Simple prompt
             const simpleBody = { contents: [{ parts: [{ text: prompt }] }] };
-            const responseText = await callGeminiWithFallback(apiKey, simpleBody);
-            let cleanedText = sanitizeJsonString(responseText); // Apply sanitization here too
-            // Try multiple JSON extraction patterns
-            const patterns = [
-                /\{[\s\S]*\}/,                    // Greedy match
-                /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/ // Nested brackets
-            ];
-            for (const pattern of patterns) {
-                const match = cleanedText.match(pattern); // Use cleanedText
-                if (match) {
-                    try {
-                        return JSON.parse(match[0]);
-                    } catch (parseErr) { continue; }
-                }
-            }
+            // Also use recursive fallback here
+            const responseText = await callGeminiWithFallback(apiKey, simpleBody, 0, jsonValidator);
+            return JSON.parse(sanitizeJsonString(responseText));
         } catch (retryErr) {
             console.error("Retry also failed:", retryErr);
         }
     }
-    throw new Error('AI yanıtı çözümlenemedi.');
+    throw new Error('AI yanıtı çözümlenemedi. (JSON Hatası)');
 }
 
 // ... (Other helpers setupRealtimeLawyers, etc. SAME) ... //
