@@ -7,6 +7,7 @@ let columnOrder = JSON.parse(localStorage.getItem('filesColumnOrder')) || [
     'col-no', 'col-parties', 'col-vekil', 'col-tags', 'col-subject', 'col-amount', 'col-onem', 'col-status', 'col-decision', 'col-doc', 'col-lawyer', 'col-date'
 ];
 let loadedFilesData = []; // Store data for re-rendering without refetching
+let docSearchIds = null; // Global state for document content search
 
 // Debounced search handler
 const handleSearchDebounced = debounce(() => {
@@ -470,6 +471,57 @@ function populateLawyerDropdown(data) {
     });
 }
 
+window.searchDocuments = async (term) => {
+    const input = document.getElementById('doc-search-input');
+    // Allow clearing if empty
+    if (!term) {
+        docSearchIds = null;
+        input.style.borderColor = '';
+        input.style.borderWidth = '';
+        loadFiles();
+        return;
+    }
+
+    if (term.trim().length < 3) {
+        showToast('En az 3 karakter giriniz.', 'warning');
+        return;
+    }
+
+    showToast('Evrak özetlerinde aranıyor...', 'info');
+    input.disabled = true;
+
+    try {
+        // Search in JSONB (Postgres)
+        // Uses Supabase filter for JSONB text search
+        const { data: docs, error } = await supabase
+            .from('documents')
+            .select('file_case_id')
+            .filter('analysis->>summary', 'ilike', `%${term}%`);
+
+        if (error) throw error;
+
+        if (!docs || docs.length === 0) {
+            showToast('Bu içeriğe sahip evrak bulunamadı.', 'warning');
+            docSearchIds = []; // Force empty table
+        } else {
+            // Extract Unique IDs
+            docSearchIds = [...new Set(docs.map(d => d.file_case_id))];
+            showToast(`${docSearchIds.length} dosyada eşleşen evrak bulundu.`, 'success');
+        }
+
+        input.style.borderColor = 'var(--accent-primary)';
+        input.style.borderWidth = '2px';
+        loadFiles(); // Reload table
+
+    } catch (e) {
+        console.error('Search error:', e);
+        showToast('Arama hatası: ' + e.message, 'error');
+    } finally {
+        input.disabled = false;
+        input.focus();
+    }
+};
+
 async function loadFiles(retryCount = 0) {
     const tbody = document.getElementById('files-table-body');
     if (!tbody) return;
@@ -493,6 +545,16 @@ async function loadFiles(retryCount = 0) {
                 lawyers (id, name, status)
             `)
             .order('created_at', { ascending: false });
+
+        // Apply Document Search Filter (if active)
+        if (docSearchIds !== null) {
+            if (docSearchIds.length > 0) {
+                query = query.in('id', docSearchIds);
+            } else {
+                // Search was performed but no results found
+                query = query.in('id', ['00000000-0000-0000-0000-000000000000']); // Force empty
+            }
+        }
 
         const { data, error } = await query;
         if (error) throw error;

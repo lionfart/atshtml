@@ -312,6 +312,16 @@
                             style="padding-left:32px; width:100%;" oninput="handleSearchDebounced()">
                     </div>
 
+                    <div class="search-input-wrapper" style="flex: 0 0 auto; width: 220px; position:relative;">
+                        <i data-lucide="file-text"
+                            style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text-muted); width:16px; z-index:1;"></i>
+                        <input type="text" id="doc-search-input" placeholder="Evrak Özeti Ara (Enter)"
+                            class="form-control"
+                            style="padding-left:32px; width:100%; border: 1px solid var(--accent-primary); border-opacity: 0.3;"
+                            onkeydown="if(event.key === 'Enter') window.searchDocuments(this.value)"
+                            title="AI Analizlerinde ara">
+                    </div>
+
                     <select id="filter-status" class="form-control" onchange="loadFiles()"
                         style="flex:0 0 auto; min-width:130px;">
                         <option value="">Tüm Durumlar</option>

@@ -46,6 +46,12 @@ async function getFileCases(options = {}) {
     // Filter by Lawyer
     if (options.lawyerId) query = query.eq('lawyer_id', options.lawyerId);
 
+    // Filter by Specific IDs (e.g. from Doc Search)
+    if (options.ids) {
+        if (options.ids.length > 0) query = query.in('id', options.ids);
+        else return []; // Empty filter -> No results
+    }
+
     const { data, error } = await query;
     if (error) throw error;
 
