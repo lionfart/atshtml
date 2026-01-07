@@ -358,22 +358,25 @@ function markModelRateLimited(model) {
 // Helper to clean AI JSON responses
 function sanitizeJsonString(str) {
     if (!str) return '';
-    // Remove markdown fences
-    str = str.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
-    // Remove DeepSeek <think> tags
-    str = str.replace(/<think>[\s\S]*?<\/think>/gi, '');
-    // Trim whitespace
-    str = str.trim();
-    // Replace single quotes with double quotes
-    str = str.replace(/'/g, '"');
-    // Remove trailing commas before } or ]
-    str = str.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-    // Extract outermost JSON object
+    // Extract everything between the first { and last }
+    // This is the most reliable way to ignore intro/outro text and markdown fences simultaneously.
     const first = str.indexOf('{');
     const last = str.lastIndexOf('}');
+
     if (first !== -1 && last !== -1 && last > first) {
         str = str.substring(first, last + 1);
+    } else {
+        // Fallback cleanup if braces logic fails (unlikely for valid JSON)
+        str = str.replace(/^[\s\S]*?```json/i, '').replace(/```[\s\S]*?$/i, '');
+        str = str.trim();
     }
+
+    // Remove DeepSeek <think> tags (if they remained inside JSON structure, though unlikely)
+    str = str.replace(/<think>[\s\S]*?<\/think>/gi, '');
+
+    // Remove trailing commas before } or ] (Common AI error)
+    str = str.replace(/,(\s*[}\]])/g, '$1');
+
     return str;
 }
 
