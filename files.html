@@ -277,6 +277,25 @@
         </div>
     </div>
 
+    <!-- Document Search Results Modal -->
+    <div id="doc-search-results-modal" class="modal">
+        <div class="modal-overlay" onclick="window.closeDocSearchModal()"></div>
+        <div class="modal-content" style="max-width:800px;">
+            <div class="modal-header">
+                <h2>🔎 Evrak Arama Sonuçları</h2>
+                <button class="icon-btn" onclick="window.closeDocSearchModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 10px 0;">
+                <p id="doc-search-info"
+                    style="margin-bottom:15px; color:var(--text-secondary); padding: 0 15px; font-size: 0.9rem;"></p>
+                <div id="doc-search-list"
+                    style="display:flex; flex-direction:column; gap:8px; max-height:600px; overflow-y:auto; padding: 0 5px;">
+                    <!-- Results populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main App -->
     <main class="container">
         <!-- Header -->
@@ -318,7 +337,7 @@
                         <input type="text" id="doc-search-input" placeholder="Evrak Özeti Ara (Enter)"
                             class="form-control"
                             style="padding-left:32px; width:100%; border: 1px solid var(--accent-primary); border-opacity: 0.3;"
-                            onkeydown="if(event.key === 'Enter') window.searchDocuments(this.value)"
+                            onkeydown="if(event.key === 'Enter') window.searchDocumentsNew(this.value)"
                             title="AI Analizlerinde ara">
                     </div>
 
