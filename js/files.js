@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // Files Page - Adalet Takip Sistemi (v2.1)
 // ==========================================
 
@@ -19,7 +19,7 @@ const handleSearchDebounced = debounce(() => {
 // ==========================================
 
 const initPage = async () => {
-    console.log('[Files] Sayfa başlatılıyor v2.1...');
+    console.log('[Files] Sayfa baÅŸlatÄ±lÄ±yor v2.1...');
 
     // Initialize Column Features (Drag & Resize)
     initTableFeatures();
@@ -35,7 +35,7 @@ const initPage = async () => {
             else {
                 document.getElementById('files-table-body').innerHTML = `
                     <tr><td colspan="9" class="text-center" style="padding:40px; color:var(--accent-danger);">
-                        <i data-lucide="wifi-off"></i> Veritabanı hatası.
+                        <i data-lucide="wifi-off"></i> VeritabanÄ± hatasÄ±.
                     </td></tr>`;
                 lucide.createIcons();
             }
@@ -105,7 +105,7 @@ function initColumnDragging() {
         animation: 150,
         ghostClass: 'sortable-ghost',
         dragClass: 'sortable-drag',
-        handle: '.drag-handle', // ONLY drag by the ⋮ handle, not the whole th
+        handle: '.drag-handle', // ONLY drag by the â‹® handle, not the whole th
         onEnd: function (evt) {
             // Update column order array based on DOM
             const newOrder = [];
@@ -349,12 +349,12 @@ function getCellContent(file, colId) {
             let onemBg = 'rgba(255,255,255,0.1)';
             let displayVal = file.urgency || 'Orta';
 
-            if (uVal.includes('yüksek') || uVal.includes('high')) {
-                onemColor = '#fff'; onemBg = 'var(--accent-danger)'; displayVal = 'Yüksek';
+            if (uVal.includes('yÃ¼ksek') || uVal.includes('high')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-danger)'; displayVal = 'YÃ¼ksek';
             } else if (uVal.includes('orta') || uVal.includes('medium')) {
                 onemColor = '#fff'; onemBg = 'var(--accent-warning)'; displayVal = 'Orta';
-            } else if (uVal.includes('düşük') || uVal.includes('low')) {
-                onemColor = '#fff'; onemBg = 'var(--accent-success)'; displayVal = 'Düşük';
+            } else if (uVal.includes('dÃ¼ÅŸÃ¼k') || uVal.includes('low')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-success)'; displayVal = 'DÃ¼ÅŸÃ¼k';
             }
             return `<span class="badge" style="background:${onemBg}; color:${onemColor}; font-size:0.7em; padding:2px 6px;">${esc(displayVal)}</span>`;
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
@@ -376,7 +376,7 @@ function getCellContent(file, colId) {
         case 'col-amount': return `<span style="font-family:monospace;">${esc(file.claim_amount || '-')}</span>`;
         case 'col-status':
             const sClass = file.status === 'OPEN' ? 'badge-active' : 'badge-inactive';
-            const sText = file.status === 'OPEN' ? 'Açık' : 'Kapalı';
+            const sText = file.status === 'OPEN' ? 'AÃ§Ä±k' : 'KapalÄ±';
             return `<span class="badge ${sClass}">${sText}</span>`;
         case 'col-decision':
             if (file.latest_decision_result) {
@@ -388,7 +388,7 @@ function getCellContent(file, colId) {
                 else if (res.includes('yd kabul')) color = 'var(--accent-success)';
                 else if (res.includes('red') || res.includes('bozma')) color = 'var(--accent-danger)';
                 else if (res.includes('kabul') || res.includes('onama')) color = 'var(--accent-success)';
-                else if (res.includes('kısmen')) color = 'var(--accent-warning)';
+                else if (res.includes('kÄ±smen')) color = 'var(--accent-warning)';
                 else if (res.includes('iptal')) color = 'var(--accent-success)';
 
                 return `<span style="font-weight:600; color:${color}">${esc(file.latest_decision_result)}</span>`;
@@ -399,7 +399,7 @@ function getCellContent(file, colId) {
             const tooltip = file.latest_activity_summary ? `data-tooltip="${escapeHtml(file.latest_activity_summary.substring(0, 200)) + (file.latest_activity_summary.length > 200 ? '...' : '')}"` : '';
             return `<span style="font-size:0.85em;" ${tooltip}>${esc(file.latest_activity_type)}</span>`;
         case 'col-lawyer':
-            const lName = file.lawyers?.name || 'Atanmamış';
+            const lName = file.lawyers?.name || 'AtanmamÄ±ÅŸ';
             const lStatus = file.lawyers?.status;
             let lStyle = 'color:var(--text-primary);';
             if (lStatus === 'ON_LEAVE') lStyle = 'color:var(--text-muted); opacity:0.7;'; // Pale gray
@@ -407,13 +407,13 @@ function getCellContent(file, colId) {
             return `<span style="${lStyle}">${esc(lName)}</span>`;
         case 'col-date':
             let dateIcons = '';
-            // Duruşma/Keşif (Yellow calendar)
+            // DuruÅŸma/KeÅŸif (Yellow calendar)
             if (file.next_hearing_date) {
-                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-warning); margin-right:6px;" onclick="editHearingDateFromList('${file.id}', event)" title="Duruşma/Keşif: ${formatDate(file.next_hearing_date)}"><i data-lucide="calendar" style="width:16px; height:16px;"></i></span>`;
+                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-warning); margin-right:6px;" onclick="editHearingDateFromList('${file.id}', event)" title="DuruÅŸma/KeÅŸif: ${formatDate(file.next_hearing_date)}"><i data-lucide="calendar" style="width:16px; height:16px;"></i></span>`;
             }
-            // İşlem Süresi (Red alarm-clock)
+            // Ä°ÅŸlem SÃ¼resi (Red alarm-clock)
             if (file.deadline_date) {
-                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-danger);" onclick="editDeadlineFromList('${file.id}', event)" title="İşlem Süresi: ${formatDate(file.deadline_date)}"><i data-lucide="alarm-clock" style="width:16px; height:16px;"></i></span>`;
+                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-danger);" onclick="editDeadlineFromList('${file.id}', event)" title="Ä°ÅŸlem SÃ¼resi: ${formatDate(file.deadline_date)}"><i data-lucide="alarm-clock" style="width:16px; height:16px;"></i></span>`;
             }
             // Show icons if any, else show creation date
             if (dateIcons) {
@@ -487,7 +487,7 @@ window.searchDocuments = async (term) => {
         return;
     }
 
-    showToast('Evrak özetlerinde aranıyor...', 'info');
+    showToast('Evrak Ã¶zetlerinde aranÄ±yor...', 'info');
     input.disabled = true;
 
     try {
@@ -501,12 +501,12 @@ window.searchDocuments = async (term) => {
         if (error) throw error;
 
         if (!docs || docs.length === 0) {
-            showToast('Bu içeriğe sahip evrak bulunamadı.', 'warning');
+            showToast('Bu iÃ§eriÄŸe sahip evrak bulunamadÄ±.', 'warning');
             docSearchIds = []; // Force empty table
         } else {
             // Extract Unique IDs
             docSearchIds = [...new Set(docs.map(d => d.file_case_id))];
-            showToast(`${docSearchIds.length} dosyada eşleşen evrak bulundu.`, 'success');
+            showToast(`${docSearchIds.length} dosyada eÅŸleÅŸen evrak bulundu.`, 'success');
         }
 
         input.style.borderColor = 'var(--accent-primary)';
@@ -515,7 +515,7 @@ window.searchDocuments = async (term) => {
 
     } catch (e) {
         console.error('Search error:', e);
-        showToast('Arama hatası: ' + e.message, 'error');
+        showToast('Arama hatasÄ±: ' + e.message, 'error');
     } finally {
         input.disabled = false;
         input.focus();
@@ -527,7 +527,7 @@ async function loadFiles(retryCount = 0) {
     if (!tbody) return;
 
     if (retryCount === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding:40px;"><div class="loading-placeholder"><i data-lucide="loader" class="spin"></i> <span>Yükleniyor...</span></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding:40px;"><div class="loading-placeholder"><i data-lucide="loader" class="spin"></i> <span>YÃ¼kleniyor...</span></div></td></tr>`;
         lucide.createIcons();
     }
 
@@ -566,7 +566,7 @@ async function loadFiles(retryCount = 0) {
         let filteredData = data;
         if (searchTerm) {
             // Parse for field-specific prefix
-            const prefixMatch = searchTerm.match(/^(adres|davacı|davalı|vekil|konu|esas|mahkeme)\.(.+)$/i);
+            const prefixMatch = searchTerm.match(/^(adres|davacÄ±|davalÄ±|vekil|konu|esas|mahkeme)\.(.+)$/i);
 
             if (prefixMatch) {
                 // Field-specific search
@@ -577,8 +577,8 @@ async function loadFiles(retryCount = 0) {
                     let fieldValue = '';
                     switch (prefix) {
                         case 'adres': fieldValue = item.address || ''; break;
-                        case 'davacı': fieldValue = item.plaintiff || ''; break;
-                        case 'davalı': fieldValue = item.defendant || ''; break;
+                        case 'davacÄ±': fieldValue = item.plaintiff || ''; break;
+                        case 'davalÄ±': fieldValue = item.defendant || ''; break;
                         case 'vekil': fieldValue = (item.plaintiff_attorney || '') + ' ' + (item.defendant_attorney || ''); break;
                         case 'konu': fieldValue = item.subject || ''; break;
                         case 'esas': fieldValue = item.court_case_number || ''; break;
@@ -659,7 +659,7 @@ async function loadFiles(retryCount = 0) {
             document.getElementById('file-count-info').textContent = `Toplam: ${filteredData.length} dosya`;
 
         if (filteredData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding: 40px;"><p style="opacity:0.7;">Dosya bulunamadı.</p></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding: 40px;"><p style="opacity:0.7;">Dosya bulunamadÄ±.</p></td></tr>`;
             return;
         }
 
@@ -689,7 +689,7 @@ function initRowClicks() {
                 sessionStorage.setItem('currentFileId', id);
                 window.location.href = `file-detail.html?id=${id}`;
             } else {
-                alert('HATA: Geçersiz Dosya ID! Lütfen sayfayı yenileyin.');
+                alert('HATA: GeÃ§ersiz Dosya ID! LÃ¼tfen sayfayÄ± yenileyin.');
                 console.error('[Files] Invalid ID clicked:', id);
             }
         }
@@ -719,12 +719,12 @@ document.addEventListener('click', async function (e) {
 
         if (error) throw error;
 
-        showToast(`Dosya durumu ${newStatus === 'OPEN' ? 'Açık' : 'Kapalı'} olarak güncellendi`, 'success');
+        showToast(`Dosya durumu ${newStatus === 'OPEN' ? 'AÃ§Ä±k' : 'KapalÄ±'} olarak gÃ¼ncellendi`, 'success');
         loadFiles(); // Refresh list
     } catch (err) {
         console.error('Status toggle error:', err);
-        showToast('Durum güncellenemedi: ' + err.message, 'error');
-        toggle.textContent = currentStatus === 'OPEN' ? 'Açık' : 'Kapalı';
+        showToast('Durum gÃ¼ncellenemedi: ' + err.message, 'error');
+        toggle.textContent = currentStatus === 'OPEN' ? 'AÃ§Ä±k' : 'KapalÄ±';
     }
 });
 
@@ -749,16 +749,16 @@ document.addEventListener('click', async function (e) {
 
         if (error) throw error;
 
-        showToast(newValue ? 'Favorilere eklendi ⭐' : 'Favorilerden çıkarıldı', 'success');
+        showToast(newValue ? 'Favorilere eklendi â­' : 'Favorilerden Ã§Ä±karÄ±ldÄ±', 'success');
         loadFiles(); // Refresh
     } catch (err) {
         console.error('Favorite toggle error:', err);
-        showToast('Favori güncellenemedi: ' + err.message, 'error');
+        showToast('Favori gÃ¼ncellenemedi: ' + err.message, 'error');
         favToggle.style.opacity = '1';
     }
 });
 
-// İşlem Süresi (deadline_date) Edit Modal
+// Ä°ÅŸlem SÃ¼resi (deadline_date) Edit Modal
 window.editDeadlineFromList = async function (fileId, event) {
     event.stopPropagation();
 
@@ -774,7 +774,7 @@ window.editDeadlineFromList = async function (fileId, event) {
         <div id="date-edit-modal" class="modal active" style="z-index:9999;">
             <div class="modal-content" style="max-width:320px;">
                 <div class="modal-header" style="border-left:3px solid var(--accent-danger);">
-                    <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="alarm-clock" style="color:var(--accent-danger);"></i> İşlem Süresi</h3>
+                    <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="alarm-clock" style="color:var(--accent-danger);"></i> Ä°ÅŸlem SÃ¼resi</h3>
                     <button class="icon-btn" onclick="closeDateEditModal()"><i data-lucide="x"></i></button>
                 </div>
                 <div class="modal-body">
@@ -794,7 +794,7 @@ window.editDeadlineFromList = async function (fileId, event) {
     lucide.createIcons();
 };
 
-// Duruşma/Keşif (next_hearing_date) Edit Modal
+// DuruÅŸma/KeÅŸif (next_hearing_date) Edit Modal
 window.editHearingDateFromList = async function (fileId, event) {
     event.stopPropagation();
 
@@ -810,7 +810,7 @@ window.editHearingDateFromList = async function (fileId, event) {
         <div id="date-edit-modal" class="modal active" style="z-index:9999;">
             <div class="modal-content" style="max-width:320px;">
                 <div class="modal-header" style="border-left:3px solid var(--accent-warning);">
-                    <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="calendar" style="color:var(--accent-warning);"></i> Duruşma/Keşif</h3>
+                    <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="calendar" style="color:var(--accent-warning);"></i> DuruÅŸma/KeÅŸif</h3>
                     <button class="icon-btn" onclick="closeDateEditModal()"><i data-lucide="x"></i></button>
                 </div>
                 <div class="modal-body">
@@ -845,7 +845,7 @@ window.saveDateField = async function (fileId, fieldName) {
         const { error } = await supabase.from('file_cases').update(updates).eq('id', fileId);
         if (error) throw error;
 
-        showToast('Tarih güncellendi.', 'success');
+        showToast('Tarih gÃ¼ncellendi.', 'success');
         closeDateEditModal();
         loadFiles();
     } catch (e) {
@@ -889,94 +889,119 @@ window.searchDocumentsNew = async (term) => {
         return;
     }
 
-    showToast('Evraklar taranıyor...', 'info');
+    showToast('Evraklar taranÄ±yor...', 'info');
     input.disabled = true;
 
     try {
-        const { data: docs, error } = await supabase
+        // Step 1: Search Documents (Separate query to avoid Join errors)
+        const { data: docs, error: docError } = await supabase
             .from('documents')
-            .select(`
-                id, name, analysis, created_at,
-                file_cases (id, court_case_number, plaintiff)
-            `)
+            .select('id, name, analysis, created_at, file_case_id')
             .filter('analysis->>summary', 'ilike', `%${term}%`)
             .order('created_at', { ascending: false })
             .limit(20);
 
-        if (error) throw error;
+        if (docError) throw docError;
 
         if (!docs || docs.length === 0) {
-            showToast('Sonuç bulunamadı.', 'warning');
-        } else if (docs.length === 1) {
-            // Single result -> Redirect
-            const doc = docs[0];
-            const fileId = doc.file_cases?.id;
-            if (fileId) {
-                showToast('Evrak açılıyor...', 'success');
-                window.location.href = `file-detail.html?id=${fileId}&openDoc=${doc.id}`;
-            }
+            showToast('SonuÃ§ bulunamadÄ±.', 'warning');
         } else {
-            // Multiple results -> Modal
-            const modal = document.getElementById('doc-search-results-modal');
-            const list = document.getElementById('doc-search-list');
-            const info = document.getElementById('doc-search-info');
+            // Step 2: Fetch related File Cases manually
+            const fileIds = [...new Set(docs.map(d => d.file_case_id))];
 
-            if (list && info && modal) {
-                list.innerHTML = '';
-                info.textContent = `"${term}" araması için ${docs.length} evrak bulundu:`;
+            let fileMap = {};
+            if (fileIds.length > 0) {
+                const { data: files, error: fileError } = await supabase
+                    .from('file_cases')
+                    .select('id, court_case_number, plaintiff')
+                    .in('id', fileIds);
 
-                docs.forEach(doc => {
-                    const summary = doc.analysis?.summary || '';
-                    const termIdx = summary.toLowerCase().indexOf(term.toLowerCase());
-                    let snippet = summary;
-                    if (termIdx !== -1) {
-                        const start = Math.max(0, termIdx - 40);
-                        const end = Math.min(summary.length, termIdx + 120);
-                        snippet = '...' + summary.substring(start, end) + '...';
-                    } else if (summary.length > 150) {
-                        snippet = summary.substring(0, 150) + '...';
-                    }
+                if (fileError) throw fileError;
 
-                    // Highlight
-                    const regex = new RegExp(`(${term})`, 'gi');
-                    const highlitSnippet = snippet.replace(regex, '<span style="background:rgba(59, 130, 246, 0.4); color:#fff; padding:0 2px; border-radius:2px;">$1</span>');
+                files.forEach(f => fileMap[f.id] = f);
+            }
 
-                    const item = document.createElement('div');
-                    item.style.cssText = 'padding:14px; background:var(--bg-card); cursor:pointer; border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column; gap:6px; transition:background 0.2s; margin-bottom: 8px;';
-                    item.onmouseover = () => item.style.background = 'var(--bg-hover)';
-                    item.onmouseout = () => item.style.background = 'var(--bg-card)';
+            // Attach file info
+            const enrichedDocs = docs.map(doc => ({
+                ...doc,
+                file_cases: fileMap[doc.file_case_id] || { court_case_number: '?', plaintiff: '?' }
+            }));
 
-                    item.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <span style="font-weight:600; color:var(--accent-primary); display:flex; align-items:center; gap:6px;">
-                                <i data-lucide="file-text" style="width:16px;"></i> ${doc.name}
-                            </span>
-                            <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">${new Date(doc.created_at).toLocaleDateString('tr-TR')}</span>
-                        </div>
-                        <div style="font-size:0.85rem; color:var(--text-primary);">
-                            <span style="color:var(--text-secondary);">Dosya:</span> <strong>${doc.file_cases?.court_case_number || 'No'}</strong> - ${doc.file_cases?.plaintiff || '?'}
-                        </div>
-                        <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
-                            ${highlitSnippet}
-                        </div>
-                    `;
-                    item.onclick = () => {
-                        window.location.href = `file-detail.html?id=${doc.file_cases.id}&openDoc=${doc.id}`;
-                    };
-                    list.appendChild(item);
-                });
+            if (enrichedDocs.length === 1) {
+                // Single result -> Redirect
+                const doc = enrichedDocs[0];
+                const fileId = doc.file_case_id;
+                // Only redirect if file info exists
+                if (fileId && fileMap[fileId]) {
+                    showToast('Evrak aÃ§Ä±lÄ±yor...', 'success');
+                    window.location.href = `file-detail.html?id=${fileId}&openDoc=${doc.id}`;
+                } else {
+                    showToast('Dosya bilgisi bulunamadÄ± (SilinmiÅŸ olabilir).', 'error');
+                }
+            } else {
+                // Multiple Results -> Modal
+                const modal = document.getElementById('doc-search-results-modal');
+                const list = document.getElementById('doc-search-list');
+                const info = document.getElementById('doc-search-info');
 
-                lucide.createIcons();
-                modal.classList.add('active');
+                if (list && info && modal) {
+                    list.innerHTML = '';
+                    info.textContent = `"${term}" aramasÄ± iÃ§in ${enrichedDocs.length} evrak bulundu:`;
+
+                    enrichedDocs.forEach(doc => {
+                        const summary = doc.analysis?.summary || '';
+                        const termIdx = summary.toLowerCase().indexOf(term.toLowerCase());
+                        let snippet = summary;
+                        if (termIdx !== -1) {
+                            const start = Math.max(0, termIdx - 40);
+                            const end = Math.min(summary.length, termIdx + 120);
+                            snippet = '...' + summary.substring(start, end) + '...';
+                        } else if (summary.length > 150) {
+                            snippet = summary.substring(0, 150) + '...';
+                        }
+
+                        const regex = new RegExp(`(${term})`, 'gi');
+                        const highlitSnippet = snippet.replace(regex, '<span style="background:rgba(59, 130, 246, 0.4); color:#fff; padding:0 2px; border-radius:2px;">$1</span>');
+
+                        const item = document.createElement('div');
+                        item.style.cssText = 'padding:14px; background:var(--bg-card); cursor:pointer; border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column; gap:6px; transition:background 0.2s; margin-bottom: 8px;';
+                        item.onmouseover = () => item.style.background = 'var(--bg-hover)';
+                        item.onmouseout = () => item.style.background = 'var(--bg-card)';
+
+                        item.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <span style="font-weight:600; color:var(--accent-primary); display:flex; align-items:center; gap:6px;">
+                                    <i data-lucide="file-text" style="width:16px;"></i> ${doc.name}
+                                </span>
+                                <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">${new Date(doc.created_at).toLocaleDateString('tr-TR')}</span>
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-primary);">
+                                <span style="color:var(--text-secondary);">Dosya:</span> <strong>${doc.file_cases?.court_case_number || 'No'}</strong> - ${doc.file_cases?.plaintiff || '?'}
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
+                                ${highlitSnippet}
+                            </div>
+                        `;
+                        item.onclick = () => {
+                            window.location.href = `file-detail.html?id=${doc.file_case_id}&openDoc=${doc.id}`;
+                        };
+                        list.appendChild(item);
+                    });
+
+                    lucide.createIcons();
+                    modal.classList.add('active');
+                }
             }
         }
 
     } catch (e) {
         console.error('Search error:', e);
-        showToast('Arama hatası: ' + e.message, 'error');
+        showToast('Arama hatasÄ±: ' + (e.message || 'Bilinmeyen hata'), 'error');
     } finally {
         input.disabled = false;
         input.focus();
         input.value = ''; // Clear input
     }
+
+
 };
