@@ -956,6 +956,8 @@ window.searchDocumentsNew = async (term) => {
                     item.onmouseover = () => item.style.background = 'var(--bg-hover)';
                     item.onmouseout = () => item.style.background = 'var(--bg-card)';
 
+                    let isExpanded = false;
+
                     item.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <span style="font-weight:600; color:var(--accent-primary); display:flex; align-items:center; gap:6px;">
@@ -966,18 +968,37 @@ window.searchDocumentsNew = async (term) => {
                         <div style="font-size:0.85rem; color:var(--text-primary);">
                             <span style="color:var(--text-secondary);">Dosya:</span> <strong>${doc.file_cases?.court_case_number || 'No'}</strong> - ${doc.file_cases?.plaintiff || '?'}
                         </div>
-                        <div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
-                            ${highlitSnippet}
+                        <div id="summary-${doc.id}" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; border-top:1px solid var(--border-color); padding-top:8px; margin-top:4px;">
+                            ${highlitSnippet} <span style="font-size:0.7em; opacity:0.6;">(Devamı...)</span>
+                        </div>
+                        
+                        <div style="display:flex; gap:10px; margin-top:12px; justify-content:flex-end; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                             <button class="icon-btn" style="border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;" 
+                                onclick="event.stopPropagation(); if('${doc.public_url}') window.open('${doc.public_url}', '_blank'); else showToast('Evrak linki yok', 'warning');">
+                                <i data-lucide="eye" style="width:14px;"></i> Evrakı Göster
+                            </button>
+                            <button class="icon-btn" style="border: 1px solid var(--accent-primary); background: rgba(59, 130, 246, 0.1); padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; color: var(--accent-primary);"
+                                onclick="event.stopPropagation(); window.open('file-detail.html?id=${doc.file_case_id}&openDoc=${doc.id}', '_blank');">
+                                <i data-lucide="folder-open" style="width:14px;"></i> Dosyaya Git
+                            </button>
                         </div>
                     `;
-                    item.onclick = () => {
-                        // Open document in new tab if public URL exists
-                        if (doc.public_url) {
-                            window.open(doc.public_url, '_blank');
+
+                    item.onclick = (e) => {
+                        const summaryDiv = item.querySelector(`#summary-${doc.id}`);
+                        if (!summaryDiv) return;
+
+                        isExpanded = !isExpanded;
+                        if (isExpanded) {
+                            const fullText = (doc.analysis?.summary || '').replace(/\\n/g, '<br>');
+                            summaryDiv.innerHTML = fullText + ' <span style="font-size:0.7em; opacity:0.6;">(Gizle)</span>';
+                            summaryDiv.style.color = 'var(--text-primary)';
+                        } else {
+                            summaryDiv.innerHTML = `${highlitSnippet} <span style="font-size:0.7em; opacity:0.6;">(Devamı...)</span>`;
+                            summaryDiv.style.color = 'var(--text-secondary)';
                         }
-                        // Navigate to folder detail in current tab
-                        window.location.href = `file-detail.html?id=${doc.file_case_id}&openDoc=${doc.id}`;
                     };
+
                     list.appendChild(item);
                 });
 
