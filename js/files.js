@@ -349,12 +349,12 @@ function getCellContent(file, colId) {
             let onemBg = 'rgba(255,255,255,0.1)';
             let displayVal = file.urgency || 'Orta';
 
-            if (uVal.includes('yÃ¼ksek') || uVal.includes('high')) {
-                onemColor = '#fff'; onemBg = 'var(--accent-danger)'; displayVal = 'YÃ¼ksek';
+            if (uVal.includes('yüksek') || uVal.includes('high')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-danger)'; displayVal = 'Yüksek';
             } else if (uVal.includes('orta') || uVal.includes('medium')) {
                 onemColor = '#fff'; onemBg = 'var(--accent-warning)'; displayVal = 'Orta';
-            } else if (uVal.includes('dÃ¼ÅŸÃ¼k') || uVal.includes('low')) {
-                onemColor = '#fff'; onemBg = 'var(--accent-success)'; displayVal = 'DÃ¼ÅŸÃ¼k';
+            } else if (uVal.includes('düşük') || uVal.includes('low')) {
+                onemColor = '#fff'; onemBg = 'var(--accent-success)'; displayVal = 'Düşük';
             }
             return `<span class="badge" style="background:${onemBg}; color:${onemColor}; font-size:0.7em; padding:2px 6px;">${esc(displayVal)}</span>`;
         case 'col-no': return `<span style="font-weight:600; color:var(--accent-primary);">${esc(file.registration_number || file.court_case_number || '-')}</span>`;
@@ -376,7 +376,7 @@ function getCellContent(file, colId) {
         case 'col-amount': return `<span style="font-family:monospace;">${esc(file.claim_amount || '-')}</span>`;
         case 'col-status':
             const sClass = file.status === 'OPEN' ? 'badge-active' : 'badge-inactive';
-            const sText = file.status === 'OPEN' ? 'AÃ§Ä±k' : 'KapalÄ±';
+            const sText = file.status === 'OPEN' ? 'Açık' : 'Kapalı';
             return `<span class="badge ${sClass}">${sText}</span>`;
         case 'col-decision':
             if (file.latest_decision_result) {
@@ -388,7 +388,7 @@ function getCellContent(file, colId) {
                 else if (res.includes('yd kabul')) color = 'var(--accent-success)';
                 else if (res.includes('red') || res.includes('bozma')) color = 'var(--accent-danger)';
                 else if (res.includes('kabul') || res.includes('onama')) color = 'var(--accent-success)';
-                else if (res.includes('kÄ±smen')) color = 'var(--accent-warning)';
+                else if (res.includes('kısmen')) color = 'var(--accent-warning)';
                 else if (res.includes('iptal')) color = 'var(--accent-success)';
 
                 return `<span style="font-weight:600; color:${color}">${esc(file.latest_decision_result)}</span>`;
@@ -399,7 +399,7 @@ function getCellContent(file, colId) {
             const tooltip = file.latest_activity_summary ? `data-tooltip="${escapeHtml(file.latest_activity_summary.substring(0, 200)) + (file.latest_activity_summary.length > 200 ? '...' : '')}"` : '';
             return `<span style="font-size:0.85em;" ${tooltip}>${esc(file.latest_activity_type)}</span>`;
         case 'col-lawyer':
-            const lName = file.lawyers?.name || 'AtanmamÄ±ÅŸ';
+            const lName = file.lawyers?.name || 'Atanmamış';
             const lStatus = file.lawyers?.status;
             let lStyle = 'color:var(--text-primary);';
             if (lStatus === 'ON_LEAVE') lStyle = 'color:var(--text-muted); opacity:0.7;'; // Pale gray
@@ -409,11 +409,11 @@ function getCellContent(file, colId) {
             let dateIcons = '';
             // DuruÅŸma/KeÅŸif (Yellow calendar)
             if (file.next_hearing_date) {
-                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-warning); margin-right:6px;" onclick="editHearingDateFromList('${file.id}', event)" title="DuruÅŸma/KeÅŸif: ${formatDate(file.next_hearing_date)}"><i data-lucide="calendar" style="width:16px; height:16px;"></i></span>`;
+                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-warning); margin-right:6px;" onclick="editHearingDateFromList('${file.id}', event)" title="Duruşma/Keşif: ${formatDate(file.next_hearing_date)}"><i data-lucide="calendar" style="width:16px; height:16px;"></i></span>`;
             }
-            // Ä°ÅŸlem SÃ¼resi (Red alarm-clock)
+            // İşlem Süresi (Red alarm-clock)
             if (file.deadline_date) {
-                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-danger);" onclick="editDeadlineFromList('${file.id}', event)" title="Ä°ÅŸlem SÃ¼resi: ${formatDate(file.deadline_date)}"><i data-lucide="alarm-clock" style="width:16px; height:16px;"></i></span>`;
+                dateIcons += `<span class="date-icon" style="cursor:pointer; color:var(--accent-danger);" onclick="editDeadlineFromList('${file.id}', event)" title="İşlem Süresi: ${formatDate(file.deadline_date)}"><i data-lucide="alarm-clock" style="width:16px; height:16px;"></i></span>`;
             }
             // Show icons if any, else show creation date
             if (dateIcons) {
@@ -896,9 +896,9 @@ window.searchDocumentsNew = async (term) => {
         // Step 1: Search Documents (Separate query to avoid Join errors)
         const { data: docs, error: docError } = await supabase
             .from('documents')
-            .select('id, name, analysis, created_at, file_case_id')
+            .select('id, name, analysis, upload_date, file_case_id')
             .filter('analysis->>summary', 'ilike', `%${term}%`)
-            .order('created_at', { ascending: false })
+            .order('upload_date', { ascending: false })
             .limit(20);
 
         if (docError) throw docError;
@@ -973,7 +973,7 @@ window.searchDocumentsNew = async (term) => {
                                 <span style="font-weight:600; color:var(--accent-primary); display:flex; align-items:center; gap:6px;">
                                     <i data-lucide="file-text" style="width:16px;"></i> ${doc.name}
                                 </span>
-                                <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">${new Date(doc.created_at).toLocaleDateString('tr-TR')}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">${new Date(doc.upload_date).toLocaleDateString('tr-TR')}</span>
                             </div>
                             <div style="font-size:0.85rem; color:var(--text-primary);">
                                 <span style="color:var(--text-secondary);">Dosya:</span> <strong>${doc.file_cases?.court_case_number || 'No'}</strong> - ${doc.file_cases?.plaintiff || '?'}
