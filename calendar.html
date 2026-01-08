@@ -233,16 +233,31 @@
                 </div>
             </div>
             <div style="flex: 1; display: flex; align-items: center; gap: 10px; padding-top: 22px;">
-                <div style="display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-muted);">
-                    <span
-                        style="display: inline-block; width: 10px; height: 10px; background-color: #4f46e5; border-radius: 50%;"></span>
-                    Duruşma
-                    <span
-                        style="display: inline-block; width: 10px; height: 10px; background-color: #e11d48; border-radius: 50%; margin-left: 10px;"></span>
-                    Süre
-                    <span
-                        style="display: inline-block; width: 10px; height: 10px; background-color: #059669; border-radius: 50%; margin-left: 10px;"></span>
-                    İşlem
+                <div
+                    style="display: flex; align-items: center; gap: 15px; font-size: 0.9rem; color: var(--text-muted);">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="filter-show-hearing" checked
+                            onchange="window.refetchCalendarEvents()"
+                            style="accent-color: #4f46e5; width: 16px; height: 16px;">
+                        <span
+                            style="display: inline-block; width: 10px; height: 10px; background-color: #4f46e5; border-radius: 50%;"></span>
+                        Duruşma
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="filter-show-deadline" checked
+                            onchange="window.refetchCalendarEvents()"
+                            style="accent-color: #e11d48; width: 16px; height: 16px;">
+                        <span
+                            style="display: inline-block; width: 10px; height: 10px; background-color: #e11d48; border-radius: 50%;"></span>
+                        Süre
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="filter-show-manual" checked onchange="window.refetchCalendarEvents()"
+                            style="accent-color: #059669; width: 16px; height: 16px;">
+                        <span
+                            style="display: inline-block; width: 10px; height: 10px; background-color: #059669; border-radius: 50%;"></span>
+                        İşlem/Manuel
+                    </label>
                 </div>
             </div>
         </div>

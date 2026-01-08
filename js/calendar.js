@@ -93,6 +93,11 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
 
         const events = [];
 
+        // Checkbox States
+        const showHearing = document.getElementById('filter-show-hearing')?.checked ?? true;
+        const showDeadline = document.getElementById('filter-show-deadline')?.checked ?? true;
+        const showManual = document.getElementById('filter-show-manual')?.checked ?? true;
+
         files?.forEach(file => {
             // CLIENT-SIDE FILTERING
             if (filterLawyerId) {
@@ -101,7 +106,7 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             }
 
             // Hearing Event
-            if (file.next_hearing_date) {
+            if (showHearing && file.next_hearing_date) {
                 events.push({
                     id: file.id,
                     title: `${file.court_case_number || 'Dosya No Yok'} - ${file.lawyers?.name || 'Avukat Yok'} (Duruşma)`,
@@ -114,7 +119,7 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             }
 
             // Deadline Event
-            if (file.deadline_date) {
+            if (showDeadline && file.deadline_date) {
                 events.push({
                     id: file.id,
                     title: `${file.court_case_number || 'Dosya No Yok'} - ${file.lawyers?.name || 'Avukat Yok'} (Süre)`,
@@ -127,32 +132,34 @@ async function fetchCalendarEvents(fetchInfo, successCallback, failureCallback) 
             }
         });
 
-        // FETCH MANUAL EVENTS
-        // Manual events table has explicit 'lawyer_id' column usuallly? 
-        // Or relationships. Let's assume standard 'lawyers(id, name)' works.
-        const { data: manualEvents } = await supabase
-            .from('calendar_events')
-            .select('*, lawyers(name, id)');
+        if (showManual) {
+            // FETCH MANUAL EVENTS
+            // Manual events table has explicit 'lawyer_id' column usuallly? 
+            // Or relationships. Let's assume standard 'lawyers(id, name)' works.
+            const { data: manualEvents } = await supabase
+                .from('calendar_events')
+                .select('*, lawyers(name, id)');
 
-        manualEvents?.forEach(evt => {
-            // Filter
-            if (filterLawyerId) {
-                // Check relationship OR direct column if available
-                const lId = evt.lawyers?.id || evt.lawyer_id;
-                if (!lId || lId !== filterLawyerId) return;
-            }
+            manualEvents?.forEach(evt => {
+                // Filter
+                if (filterLawyerId) {
+                    // Check relationship OR direct column if available
+                    const lId = evt.lawyers?.id || evt.lawyer_id;
+                    if (!lId || lId !== filterLawyerId) return;
+                }
 
-            const lawyerName = evt.lawyers?.name ? ` (${evt.lawyers.name})` : '';
-            events.push({
-                id: 'manual-' + evt.id,
-                title: evt.title + lawyerName,
-                start: evt.event_date + (evt.event_time ? 'T' + evt.event_time : ''),
-                backgroundColor: '#059669', // Emerald
-                borderColor: '#047857',
-                textColor: '#ffffff',
-                extendedProps: { type: 'manual', notes: evt.notes, lawyer: evt.lawyers?.name }
+                const lawyerName = evt.lawyers?.name ? ` (${evt.lawyers.name})` : '';
+                events.push({
+                    id: 'manual-' + evt.id,
+                    title: evt.title + lawyerName,
+                    start: evt.event_date + (evt.event_time ? 'T' + evt.event_time : ''),
+                    backgroundColor: '#059669', // Emerald
+                    borderColor: '#047857',
+                    textColor: '#ffffff',
+                    extendedProps: { type: 'manual', notes: evt.notes, lawyer: evt.lawyers?.name }
+                });
             });
-        });
+        }
 
         successCallback(events);
     } catch (error) {

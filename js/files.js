@@ -562,53 +562,81 @@ async function loadFiles(retryCount = 0) {
         // Populate lawyer dropdown once
         populateLawyerDropdown(data);
 
-        // Client-side filtering for search with ADVANCED PREFIX SUPPORT
+        // Client-side filtering
         let filteredData = data;
+
+        // 1. ADVANCED SCOPE SEARCH
+        const searchScopeCheckboxes = document.querySelectorAll('.filter-scope');
+        const activeScopes = Array.from(searchScopeCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        // If nothing checked, assume ALL checked (or none? User expectation usually ALL if none selected, or strict none. Let's do ALL)
+        const useAllScopes = activeScopes.length === 0 || activeScopes.length === searchScopeCheckboxes.length;
+
         if (searchTerm) {
-            // Parse for field-specific prefix
-            const prefixMatch = searchTerm.match(/^(adres|davacÄ±|davalÄ±|vekil|konu|esas|mahkeme)\.(.+)$/i);
+            const term = normalizeTurkish(searchTerm);
 
-            if (prefixMatch) {
-                // Field-specific search
-                const prefix = prefixMatch[1].toLowerCase();
-                const term = normalizeTurkish(prefixMatch[2].trim());
+            filteredData = filteredData.filter(item => {
+                // Helper to check a specific field value
+                const matchesScope = (field) => {
+                    if (!field) return false;
+                    return normalizeTurkish(String(field)).includes(term);
+                };
 
-                filteredData = data.filter(item => {
-                    let fieldValue = '';
-                    switch (prefix) {
-                        case 'adres': fieldValue = item.address || ''; break;
-                        case 'davacÄ±': fieldValue = item.plaintiff || ''; break;
-                        case 'davalÄ±': fieldValue = item.defendant || ''; break;
-                        case 'vekil': fieldValue = (item.plaintiff_attorney || '') + ' ' + (item.defendant_attorney || ''); break;
-                        case 'konu': fieldValue = item.subject || ''; break;
-                        case 'esas': fieldValue = item.court_case_number || ''; break;
-                        case 'mahkeme': fieldValue = item.court_name || ''; break;
-                    }
-                    return normalizeTurkish(fieldValue).includes(term);
-                });
-            } else {
-                // General search across all fields (including address)
-                const normalizedTerm = normalizeTurkish(searchTerm);
-                filteredData = data.filter(item => {
-                    const searchableFields = [
-                        item.registration_number,
-                        item.court_case_number,
-                        item.plaintiff,
-                        item.defendant,
-                        item.subject,
-                        item.court_name,
-                        item.primary_tag,
-                        item.address, // [NEW] Include address in general search
-                        item.plaintiff_attorney,
-                        item.defendant_attorney,
-                        ...(item.tags || []),
-                        item.lawyers?.name
-                    ];
-                    return searchableFields.some(field => field && normalizeTurkish(field).includes(normalizedTerm));
-                });
-            }
+                // Check "Standard" fields if All Scopes active
+                if (useAllScopes) {
+                    return (
+                        matchesScope(item.registration_number) ||
+                        matchesScope(item.court_case_number) ||
+                        matchesScope(item.plaintiff) ||
+                        matchesScope(item.defendant) ||
+                        matchesScope(item.subject) ||
+                        matchesScope(item.court_name) ||
+                        matchesScope(item.primary_tag) ||
+                        (item.lawyers && matchesScope(item.lawyers.name)) ||
+                        matchesScope(item.address) // Include address in general search
+                    );
+                }
+
+                // Detailed Scope Check based on checkboxes
+                let matchFound = false;
+                if (activeScopes.includes('plaintiff') && matchesScope(item.plaintiff)) matchFound = true;
+                if (activeScopes.includes('defendant') && matchesScope(item.defendant)) matchFound = true;
+                if (activeScopes.includes('lawyers') && (
+                    (item.lawyers && matchesScope(item.lawyers.name)) ||
+                    matchesScope(item.plaintiff_attorney) ||
+                    matchesScope(item.defendant_attorney)
+                )) matchFound = true;
+                if (activeScopes.includes('court_case_number') && (
+                    matchesScope(item.court_case_number) || matchesScope(item.registration_number)
+                )) matchFound = true;
+                if (activeScopes.includes('subject') && (
+                    matchesScope(item.subject) || matchesScope(item.primary_tag)
+                )) matchFound = true;
+                if (activeScopes.includes('court_name') && matchesScope(item.court_name)) matchFound = true;
+                if (activeScopes.includes('address') && matchesScope(item.address)) matchFound = true;
+
+                return matchFound;
+            });
         }
 
+        // 2. PROPERTY FILTERS (Checkboxes)
+        const filterHearing = document.getElementById('filter-prop-hearing')?.checked;
+        const filterDeadline = document.getElementById('filter-prop-deadline')?.checked;
+        const filterDecision = document.getElementById('filter-prop-decision')?.checked;
+
+        if (filterHearing) {
+            filteredData = filteredData.filter(item => item.next_hearing_date);
+        }
+        if (filterDeadline) {
+            filteredData = filteredData.filter(item => item.deadline_date);
+        }
+        if (filterDecision) {
+            filteredData = filteredData.filter(item => item.decision_result);
+        }
+
+        // 3. STANDARD DROPDOWN FILTERS
         if (statusFilter) {
             filteredData = filteredData.filter(item => item.status === statusFilter);
         }
@@ -1016,3 +1044,31 @@ window.searchDocumentsNew = async (term) => {
         input.value = ''; // Clear input
     }
 };
+
+// Global function to toggle detailed filter menu
+window.toggleDetailedFilter = (event) => {
+    if (event) event.preventDefault();
+    const menu = document.getElementById('detailed-filter-menu');
+    const btn = document.getElementById('btn-detailed-filter');
+
+    if (menu.style.display === 'none') {
+        menu.style.display = 'block';
+        if (btn) btn.classList.add('active');
+    } else {
+        menu.style.display = 'none';
+        if (btn) btn.classList.remove('active');
+    }
+};
+
+// Close Detailed Filter when clicking outside
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('detailed-filter-menu');
+    const btn = document.getElementById('btn-detailed-filter');
+
+    if (menu && menu.style.display === 'block') {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.style.display = 'none';
+            if (btn) btn.classList.remove('active');
+        }
+    }
+});

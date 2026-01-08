@@ -395,69 +395,145 @@
                             <!-- Populated by JS -->
                         </div>
                     </div>
-                    <button type="button" onclick="toggleSearchHelp()"
-                        style="width:28px; height:28px; min-width:28px; border-radius:50%; background:var(--accent-primary); border:none; cursor:pointer; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px;"
-                        title="Gelişmiş Arama Yardımı">?</button>
+                    <!-- NEW: Detailed Filter Button -->
+                    <div style="position:relative; display:inline-block;">
+                        <button id="btn-detailed-filter" class="btn btn-outline btn-sm"
+                            onclick="toggleDetailedFilter(event)" title="Detaylı Filtrele">
+                            <i data-lucide="filter"></i>
+                        </button>
+                        <!-- Filter Popover -->
+                        <div id="detailed-filter-menu"
+                            style="display:none; position:absolute; right:0; top:100%; margin-top:8px; background:var(--bg-card); border:1px solid var(--border-color); padding:16px; border-radius:12px; z-index:9999; min-width:280px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+
+                            <h4
+                                style="margin:0 0 10px; font-size:0.9rem; color:var(--text-secondary); border-bottom:1px solid var(--border-color); padding-bottom:6px;">
+                                Arama Kapsamı</h4>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:16px;">
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="plaintiff" onchange="loadFiles()"
+                                        checked> Davacı
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="defendant" onchange="loadFiles()"
+                                        checked> Davalı
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="lawyers" onchange="loadFiles()"
+                                        checked> Vekil
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="court_case_number"
+                                        onchange="loadFiles()" checked> Esas No
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="subject" onchange="loadFiles()"
+                                        checked> Konu
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="court_name"
+                                        onchange="loadFiles()" checked> Mahkeme
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" class="filter-scope" value="address" onchange="loadFiles()"
+                                        checked> Adres
+                                </label>
+                            </div>
+
+                            <h4
+                                style="margin:0 0 10px; font-size:0.9rem; color:var(--text-secondary); border-bottom:1px solid var(--border-color); padding-bottom:6px;">
+                                Dosya Özellikleri</h4>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" id="filter-prop-hearing" onchange="loadFiles()">
+                                    <span
+                                        style="display:inline-block; width:8px; height:8px; background:#4f46e5; border-radius:50%;"></span>
+                                    Duruşması Var
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" id="filter-prop-deadline" onchange="loadFiles()">
+                                    <span
+                                        style="display:inline-block; width:8px; height:8px; background:#e11d48; border-radius:50%;"></span>
+                                    Süresi Var
+                                </label>
+                                <label
+                                    style="font-size:0.85rem; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <input type="checkbox" id="filter-prop-decision" onchange="loadFiles()">
+                                    <span
+                                        style="display:inline-block; width:8px; height:8px; background:var(--text-primary); border-radius:50%;"></span>
+                                    Karar Çıkmış
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Files Table Card -->
-        <div class="card">
-            <div class="table-container" style="padding: 0;">
-                <table class="advanced-table" id="files-table" style="table-layout: fixed; width: 100%;">
-                    <thead>
-                        <tr id="table-headers">
-                            <th class="col-no" data-id="col-no"><span class="drag-handle">⋮</span> Dosya No <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-parties" data-id="col-parties"><span class="drag-handle">⋮</span> Taraflar
-                                <span class="resize-handle"></span>
-                            </th>
-                            <th class="col-vekil" data-id="col-vekil"><span class="drag-handle">⋮</span> Vekiller <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-subject" data-id="col-subject"><span class="drag-handle">⋮</span> Konu <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-tags" data-id="col-tags"><span class="drag-handle">⋮</span> Etiketler <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-amount" data-id="col-amount"><span class="drag-handle">⋮</span> Miktar <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-onem" data-id="col-onem" style="width:70px;"><span
-                                    class="drag-handle">⋮</span> Önem <span class="resize-handle"></span></th>
-                            <th class="col-status" data-id="col-status"><span class="drag-handle">⋮</span> Durum <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-decision" data-id="col-decision"><span class="drag-handle">⋮</span> Karar
-                                <span class="resize-handle"></span>
-                            </th>
-                            <th class="col-doc" data-id="col-doc"><span class="drag-handle">⋮</span> Son Evrak <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-lawyer" data-id="col-lawyer"><span class="drag-handle">⋮</span> Avukat <span
-                                    class="resize-handle"></span></th>
-                            <th class="col-date" data-id="col-date"><span class="drag-handle">⋮</span> Tarih <span
-                                    class="resize-handle"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="files-table-body">
-                        <tr>
-                            <td colspan="13" class="text-center" style="padding: 40px;">
-                                <div class="loading-placeholder"
-                                    style="display:flex; flex-direction:column; align-items:center; gap:10px;">
-                                    <i data-lucide="loader" class="spin"
-                                        style="width:32px; height:32px; color:var(--accent-primary);"></i>
-                                    <span style="color:var(--text-muted);">Dosyalar Yükleniyor...</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Files Table Card -->
+            <div class="card">
+                <div class="table-container" style="padding: 0;">
+                    <table class="advanced-table" id="files-table" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr id="table-headers">
+                                <th class="col-no" data-id="col-no"><span class="drag-handle">⋮</span> Dosya No <span
+                                        class="resize-handle"></span></th>
+                                <th class="col-parties" data-id="col-parties"><span class="drag-handle">⋮</span>
+                                    Taraflar
+                                    <span class="resize-handle"></span>
+                                </th>
+                                <th class="col-vekil" data-id="col-vekil"><span class="drag-handle">⋮</span> Vekiller
+                                    <span class="resize-handle"></span></th>
+                                <th class="col-subject" data-id="col-subject"><span class="drag-handle">⋮</span> Konu
+                                    <span class="resize-handle"></span></th>
+                                <th class="col-tags" data-id="col-tags"><span class="drag-handle">⋮</span> Etiketler
+                                    <span class="resize-handle"></span></th>
+                                <th class="col-amount" data-id="col-amount"><span class="drag-handle">⋮</span> Miktar
+                                    <span class="resize-handle"></span></th>
+                                <th class="col-onem" data-id="col-onem" style="width:70px;"><span
+                                        class="drag-handle">⋮</span> Önem <span class="resize-handle"></span></th>
+                                <th class="col-status" data-id="col-status"><span class="drag-handle">⋮</span> Durum
+                                    <span class="resize-handle"></span></th>
+                                <th class="col-decision" data-id="col-decision"><span class="drag-handle">⋮</span> Karar
+                                    <span class="resize-handle"></span>
+                                </th>
+                                <th class="col-doc" data-id="col-doc"><span class="drag-handle">⋮</span> Son Evrak <span
+                                        class="resize-handle"></span></th>
+                                <th class="col-lawyer" data-id="col-lawyer"><span class="drag-handle">⋮</span> Avukat
+                                    <span class="resize-handle"></span></th>
+                                <th class="col-date" data-id="col-date"><span class="drag-handle">⋮</span> Tarih <span
+                                        class="resize-handle"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="files-table-body">
+                            <tr>
+                                <td colspan="13" class="text-center" style="padding: 40px;">
+                                    <div class="loading-placeholder"
+                                        style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                                        <i data-lucide="loader" class="spin"
+                                            style="width:32px; height:32px; color:var(--accent-primary);"></i>
+                                        <span style="color:var(--text-muted);">Dosyalar Yükleniyor...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- Stats Footer -->
-        <div
-            style="margin-top: 15px; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-muted);">
-            <span id="file-count-info">Toplam: 0 dosya</span>
-            <span>Adalet Takip Sistemi © 2024</span>
-        </div>
+            <!-- Stats Footer -->
+            <div
+                style="margin-top: 15px; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-muted);">
+                <span id="file-count-info">Toplam: 0 dosya</span>
+                <span>Adalet Takip Sistemi © 2024</span>
+            </div>
     </main>
 
     <!-- Scripts -->
